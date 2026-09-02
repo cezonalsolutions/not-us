@@ -947,6 +947,13 @@ body{
   display:grid;place-items:center;font-size:16px;cursor:pointer;
 }
 .workspace-icon-btn:active{background:#f1f4f3}
+.workspace-profile-btn{
+  width:38px;height:38px;border:0;border-radius:50%;
+  background:#f1f5f4;color:#26302d;
+  display:grid;place-items:center;font-size:16px;cursor:pointer;
+  transition:background .18s ease,transform .18s ease;
+}
+.workspace-profile-btn:active{background:#e8eeec;transform:scale(.96)}
 .workspace-main{
   min-height:calc(100svh - 103px);
   margin-top:0;
@@ -1313,9 +1320,8 @@ body{
           <button class="workspace-status-option" type="button" data-status="offline" data-label="Offline">Offline</button>
         </div>
       </div>
-
-      <button class="workspace-icon-btn" type="button" aria-label="Search">
-        <i class="fa-solid fa-magnifying-glass"></i>
+<button class="workspace-profile-btn" type="button" aria-label="Profile">
+        <i class="fa-solid fa-circle-user"></i>
       </button>
     </div>
   </header>
@@ -1726,3 +1732,13 @@ function hideStatus(){
 
 </body>
 </html>
+<style>
+/* Profile icon: plain FA icon only */
+.workspace-profile-btn{
+  width:auto !important;height:auto !important;padding:8px !important;
+  border:0 !important;border-radius:0 !important;background:transparent !important;
+  box-shadow:none !important;color:#444b51 !important;
+  font-size:21px !important;
+}
+.workspace-profile-btn:active,.workspace-profile-btn:hover{background:transparent !important;}
+</style>
