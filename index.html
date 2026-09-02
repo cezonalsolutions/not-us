@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+/>
+
+<title>NOT US WORKSPACE</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+/>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html,
+body{
+  width:100%;
+  min-height:100%;
+}
+
+body{
+  background:#ffffff;
+  font-family:"Inter",sans-serif;
+  color:#171717;
+}
+
+
+/* =========================
+   MAIN PAGE
+========================= */
+
+.page{
+  width:100%;
+  min-height:100svh;
+
+  display:flex;
+  flex-direction:column;
+
+  background:#fff;
+}
+
+
+/* =========================
+   TOP HERO
+========================= */
+
+.hero{
+  position:relative;
+
+  width:100%;
+
+  height:42svh;
+  min-height:310px;
+  max-height:410px;
+
+  overflow:hidden;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:
+    linear-gradient(
+      180deg,
+      #f7fbfa 0%,
+      #f2f8f6 100%
+    );
+
+  border-bottom-left-radius:34px;
+  border-bottom-right-radius:34px;
+}
+
+
+/* subtle texture */
+
+.hero::after{
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(15,118,110,.04),
+      transparent 55%
+    );
+
+  pointer-events:none;
+}
+
+
+/* =========================
+   MULTIPLE FAFA ICONS
+========================= */
+
+.icon{
+  position:absolute;
+
+  color:#0f766e;
+
+  opacity:.075;
+
+  pointer-events:none;
+  user-select:none;
+
+  z-index:1;
+}
+
+
+/* ROW 1 */
+
+.i1{
+  top:24px;
+  left:20px;
+  font-size:26px;
+  transform:rotate(-12deg);
+}
+
+.i2{
+  top:28px;
+  left:88px;
+  font-size:18px;
+}
+
+.i3{
+  top:22px;
+  right:92px;
+  font-size:22px;
+}
+
+.i4{
+  top:27px;
+  right:20px;
+  font-size:28px;
+  transform:rotate(10deg);
+}
+
+
+/* ROW 2 */
+
+.i5{
+  top:78px;
+  left:42px;
+  font-size:21px;
+}
+
+.i6{
+  top:86px;
+  left:122px;
+  font-size:17px;
+  transform:rotate(-8deg);
+}
+
+.i7{
+  top:76px;
+  right:122px;
+  font-size:18px;
+}
+
+.i8{
+  top:86px;
+  right:40px;
+  font-size:23px;
+  transform:rotate(10deg);
+}
+
+
+/* ROW 3 */
+
+.i9{
+  top:137px;
+  left:15px;
+  font-size:24px;
+}
+
+.i10{
+  top:147px;
+  left:80px;
+  font-size:17px;
+}
+
+.i11{
+  top:138px;
+  right:81px;
+  font-size:18px;
+}
+
+.i12{
+  top:143px;
+  right:15px;
+  font-size:24px;
+}
+
+
+/* ROW 4 */
+
+.i13{
+  top:207px;
+  left:32px;
+  font-size:19px;
+  transform:rotate(-10deg);
+}
+
+.i14{
+  top:220px;
+  left:105px;
+  font-size:18px;
+}
+
+.i15{
+  top:207px;
+  right:105px;
+  font-size:18px;
+}
+
+.i16{
+  top:218px;
+  right:28px;
+  font-size:21px;
+  transform:rotate(8deg);
+}
+
+
+/* BOTTOM ROW */
+
+.i17{
+  bottom:28px;
+  left:18px;
+  font-size:25px;
+}
+
+.i18{
+  bottom:38px;
+  left:78px;
+  font-size:17px;
+}
+
+.i19{
+  bottom:25px;
+  left:145px;
+  font-size:20px;
+}
+
+.i20{
+  bottom:31px;
+  right:145px;
+  font-size:20px;
+}
+
+.i21{
+  bottom:40px;
+  right:78px;
+  font-size:18px;
+}
+
+.i22{
+  bottom:26px;
+  right:18px;
+  font-size:25px;
+}
+
+
+/* EXTRA FAINT ICONS */
+
+.i23{
+  top:48%;
+  left:8px;
+
+  font-size:15px;
+}
+
+.i24{
+  top:48%;
+  right:8px;
+
+  font-size:15px;
+}
+
+.i25{
+  bottom:85px;
+  left:48px;
+
+  font-size:15px;
+}
+
+.i26{
+  bottom:87px;
+  right:48px;
+
+  font-size:15px;
+}
+
+.i27{
+  top:112px;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  font-size:16px;
+}
+
+.i28{
+  bottom:58px;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  font-size:17px;
+}
+
+
+/* =========================
+   BRAND
+========================= */
+
+.brand-wrap{
+  position:relative;
+
+  z-index:5;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  padding:22px 28px;
+}
+
+
+/* optional soft background behind brand */
+
+.brand-wrap::before{
+  content:"";
+
+  position:absolute;
+
+  width:180px;
+  height:110px;
+
+  border-radius:50%;
+
+  background:rgba(255,255,255,.58);
+
+  filter:blur(12px);
+
+  z-index:-1;
+}
+
+
+.brand{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  gap:9px;
+}
+
+
+.not-text{
+  font-family:"Manrope",sans-serif;
+
+  font-size:43px;
+
+  line-height:1;
+
+  font-weight:800;
+
+  letter-spacing:-3.5px;
+
+  color:#171717;
+}
+
+
+.us-text{
+  height:40px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:0 11px;
+
+  border:1.5px solid #0f766e;
+  border-radius:9px;
+
+  background:rgba(255,255,255,.78);
+
+  font-family:"Manrope",sans-serif;
+
+  font-size:22px;
+  font-weight:800;
+
+  letter-spacing:-1px;
+
+  color:#0f766e;
+
+  backdrop-filter:blur(8px);
+}
+
+
+.workspace{
+  margin-top:10px;
+
+  padding-left:5px;
+
+  font-size:8px;
+  font-weight:700;
+
+  letter-spacing:5px;
+
+  color:#84938f;
+}
+
+
+/* =========================
+   LOGIN SECTION
+========================= */
+
+.login-section{
+  width:100%;
+
+  flex:1;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+
+  padding:
+    30px
+    24px
+    calc(20px + env(safe-area-inset-bottom));
+}
+
+
+/* LOGIN TITLE CENTER */
+
+.login-title{
+  width:100%;
+  max-width:350px;
+
+  margin-bottom:22px;
+
+  text-align:center;
+
+  font-family:"Manrope",sans-serif;
+
+  font-size:18px;
+  font-weight:700;
+
+  letter-spacing:-.4px;
+
+  color:#1b1b1b;
+}
+
+
+/* FORM */
+
+.login-form{
+  width:100%;
+  max-width:350px;
+}
+
+
+/* =========================
+   INPUT
+========================= */
+
+.field{
+  width:100%;
+  margin-bottom:13px;
+}
+
+.input-box{
+  position:relative;
+}
+
+
+.input-box input{
+  width:100%;
+  height:52px;
+
+  border:1px solid #e4e4e4;
+  border-radius:12px;
+
+  outline:none;
+
+  background:#fafafa;
+
+  padding:0 15px;
+
+  font-family:"Inter",sans-serif;
+
+  font-size:13px;
+  font-weight:500;
+
+  color:#171717;
+
+  transition:.2s ease;
+}
+
+
+.input-box input::placeholder{
+  color:#aaa;
+
+  font-weight:400;
+}
+
+
+.input-box input:focus{
+  background:#fff;
+
+  border-color:#0f766e;
+
+  box-shadow:
+    0 0 0 3px rgba(15,118,110,.06);
+}
+
+
+/* PASSWORD */
+
+.password-input{
+  padding-right:58px !important;
+}
+
+
+.show-btn{
+  position:absolute;
+
+  top:50%;
+  right:8px;
+
+  transform:translateY(-50%);
+
+  border:0;
+
+  background:transparent;
+
+  padding:9px 7px;
+
+  color:#0f766e;
+
+  font-family:"Inter",sans-serif;
+
+  font-size:11px;
+  font-weight:600;
+
+  cursor:pointer;
+}
+
+
+/* =========================
+   ERROR
+========================= */
+
+.field.error input{
+  border-color:#ef4444;
+
+  background:#fffafa;
+
+  box-shadow:
+    0 0 0 3px rgba(239,68,68,.05);
+}
+
+
+.field-error{
+  display:none;
+
+  margin-top:6px;
+  margin-left:3px;
+
+  color:#dc2626;
+
+  font-size:10px;
+  font-weight:500;
+}
+
+
+.field.error .field-error{
+  display:block;
+}
+
+
+/* =========================
+   FORGOT PASSWORD
+========================= */
+
+.forgot-row{
+  width:100%;
+
+  display:flex;
+  justify-content:flex-end;
+
+  margin-top:2px;
+  margin-bottom:21px;
+}
+
+
+.forgot-btn{
+  border:0;
+
+  background:transparent;
+
+  color:#0f766e;
+
+  font-family:"Inter",sans-serif;
+
+  font-size:11px;
+  font-weight:600;
+
+  cursor:pointer;
+}
+
+
+/* =========================
+   LOGIN BUTTON
+========================= */
+
+.login-btn{
+  width:100%;
+  height:52px;
+
+  border:0;
+  border-radius:12px;
+
+  background:#171717;
+
+  color:#fff;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-family:"Inter",sans-serif;
+
+  font-size:13px;
+  font-weight:600;
+
+  cursor:pointer;
+
+  transition:.15s ease;
+}
+
+
+.login-btn:active{
+  transform:scale(.985);
+}
+
+
+.login-btn:disabled{
+  opacity:.65;
+}
+
+
+/* LOADER */
+
+.loader{
+  display:none;
+
+  width:17px;
+  height:17px;
+
+  border:2px solid rgba(255,255,255,.3);
+
+  border-top-color:#fff;
+
+  border-radius:50%;
+
+  animation:spin .7s linear infinite;
+}
+
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+
+/* =========================
+   DIVIDER
+========================= */
+
+.divider{
+  width:100%;
+
+  display:flex;
+  align-items:center;
+
+  gap:13px;
+
+  margin:23px 0 17px;
+
+  color:#b4b4b4;
+
+  font-size:9px;
+  font-weight:600;
+
+  letter-spacing:1px;
+}
+
+
+.divider::before,
+.divider::after{
+  content:"";
+
+  flex:1;
+
+  height:1px;
+
+  background:#ececec;
+}
+
+
+/* =========================
+   OTP
+========================= */
+
+.otp-btn{
+  width:100%;
+  height:50px;
+
+  border:1px solid #dedede;
+  border-radius:12px;
+
+  background:#fff;
+
+  color:#171717;
+
+  font-family:"Inter",sans-serif;
+
+  font-size:12px;
+  font-weight:600;
+
+  cursor:pointer;
+
+  transition:.15s ease;
+}
+
+
+.otp-btn:active{
+  transform:scale(.985);
+
+  background:#fafafa;
+}
+
+
+/* =========================
+   TERMS
+========================= */
+
+.terms{
+  width:100%;
+  max-width:340px;
+
+  margin-top:25px;
+
+  text-align:center;
+
+  color:#a5a5a5;
+
+  font-size:9.5px;
+  line-height:1.7;
+}
+
+
+.terms a{
+  color:#555;
+
+  font-weight:600;
+
+  text-decoration:none;
+}
+
+
+/* =========================
+   POWERED BY
+========================= */
+
+.powered{
+  margin-top:auto;
+
+  padding-top:26px;
+
+  text-align:center;
+
+  color:#b4b4b4;
+
+  font-size:9px;
+}
+
+
+.powered strong{
+  color:#707070;
+
+  font-weight:600;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:380px){
+
+  .hero{
+    min-height:285px;
+  }
+
+  .not-text{
+    font-size:39px;
+  }
+
+  .us-text{
+    height:37px;
+
+    font-size:20px;
+  }
+
+  .login-section{
+    padding-left:20px;
+    padding-right:20px;
+  }
+
+}
+
+
+/* SHORT SCREEN */
+
+@media(max-height:720px){
+
+  .hero{
+    height:36svh;
+    min-height:245px;
+  }
+
+  .login-section{
+    padding-top:24px;
+  }
+
+  .login-title{
+    margin-bottom:17px;
+  }
+
+  .terms{
+    margin-top:18px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+
+  <!-- TOP -->
+
+  <section class="hero">
+
+
+    <!-- MULTIPLE FAFA ICONS -->
+
+    <i class="fa-solid fa-comments icon i1"></i>
+    <i class="fa-solid fa-user-group icon i2"></i>
+    <i class="fa-solid fa-calendar-days icon i3"></i>
+    <i class="fa-solid fa-envelope icon i4"></i>
+
+    <i class="fa-solid fa-briefcase icon i5"></i>
+    <i class="fa-solid fa-chart-line icon i6"></i>
+    <i class="fa-solid fa-folder-open icon i7"></i>
+    <i class="fa-solid fa-bell icon i8"></i>
+
+    <i class="fa-solid fa-video icon i9"></i>
+    <i class="fa-solid fa-microphone icon i10"></i>
+    <i class="fa-solid fa-cloud icon i11"></i>
+    <i class="fa-solid fa-location-dot icon i12"></i>
+
+    <i class="fa-solid fa-check-double icon i13"></i>
+    <i class="fa-solid fa-clock icon i14"></i>
+    <i class="fa-solid fa-paperclip icon i15"></i>
+    <i class="fa-solid fa-message icon i16"></i>
+
+    <i class="fa-solid fa-shield-halved icon i17"></i>
+    <i class="fa-solid fa-file-lines icon i18"></i>
+    <i class="fa-solid fa-list-check icon i19"></i>
+    <i class="fa-solid fa-headset icon i20"></i>
+    <i class="fa-solid fa-lock icon i21"></i>
+    <i class="fa-solid fa-users icon i22"></i>
+
+    <i class="fa-solid fa-phone icon i23"></i>
+    <i class="fa-solid fa-camera icon i24"></i>
+    <i class="fa-solid fa-database icon i25"></i>
+    <i class="fa-solid fa-laptop icon i26"></i>
+    <i class="fa-solid fa-share-nodes icon i27"></i>
+    <i class="fa-solid fa-circle-check icon i28"></i>
+
+
+
+    <!-- BRAND -->
+
+    <div class="brand-wrap">
+
+      <div class="brand">
+
+        <span class="not-text">
+          NOT
+        </span>
+
+        <span class="us-text">
+          US
+        </span>
+
+      </div>
+
+      <span class="workspace">
+        WORKSPACE
+      </span>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- LOGIN -->
+
+  <section class="login-section">
+
+
+    <div class="login-title">
+      Login
+    </div>
+
+
+    <form
+      class="login-form"
+      id="loginForm"
+      novalidate>
+
+
+      <!-- EMAIL -->
+
+      <div
+        class="field"
+        id="emailField">
+
+        <div class="input-box">
+
+          <input
+            type="email"
+            id="email"
+            placeholder="Gmail"
+            autocomplete="email"
+          >
+
+        </div>
+
+        <div
+          class="field-error"
+          id="emailError">
+          Please enter your Gmail
+        </div>
+
+      </div>
+
+
+
+      <!-- PASSWORD -->
+
+      <div
+        class="field"
+        id="passwordField">
+
+        <div class="input-box">
+
+          <input
+            type="password"
+            id="password"
+            class="password-input"
+            placeholder="Password"
+            autocomplete="current-password"
+          >
+
+          <button
+            type="button"
+            class="show-btn"
+            id="showBtn">
+            Show
+          </button>
+
+        </div>
+
+        <div
+          class="field-error"
+          id="passwordError">
+          Please enter your password
+        </div>
+
+      </div>
+
+
+
+      <!-- FORGOT -->
+
+      <div class="forgot-row">
+
+        <button
+          type="button"
+          class="forgot-btn"
+          id="forgotBtn">
+          Forgot password?
+        </button>
+
+      </div>
+
+
+
+      <!-- LOGIN BUTTON -->
+
+      <button
+        type="submit"
+        class="login-btn"
+        id="loginBtn">
+
+        <span id="loginText">
+          Log in
+        </span>
+
+        <span
+          class="loader"
+          id="loader">
+        </span>
+
+      </button>
+
+
+
+      <!-- OR -->
+
+      <div class="divider">
+        OR
+      </div>
+
+
+
+      <!-- OTP -->
+
+      <button
+        type="button"
+        class="otp-btn"
+        id="otpBtn">
+        Login with OTP
+      </button>
+
+    </form>
+
+
+
+    <!-- TERMS -->
+
+    <div class="terms">
+
+      By continuing, I accept the
+
+      <a href="#">
+        Terms & Conditions
+      </a>
+
+      and
+
+      <a href="#">
+        Privacy Policy
+      </a>.
+
+    </div>
+
+
+
+    <!-- POWERED -->
+
+    <div class="powered">
+
+      Powered by
+
+      <strong>
+        Cezonal Solutions Pvt Ltd
+      </strong>
+
+    </div>
+
+
+  </section>
+
+</div>
+
+
+<script>
+
+const form =
+document.getElementById("loginForm");
+
+const email =
+document.getElementById("email");
+
+const password =
+document.getElementById("password");
+
+const emailField =
+document.getElementById("emailField");
+
+const passwordField =
+document.getElementById("passwordField");
+
+const emailError =
+document.getElementById("emailError");
+
+const passwordError =
+document.getElementById("passwordError");
+
+const showBtn =
+document.getElementById("showBtn");
+
+const forgotBtn =
+document.getElementById("forgotBtn");
+
+const otpBtn =
+document.getElementById("otpBtn");
+
+const loginBtn =
+document.getElementById("loginBtn");
+
+const loginText =
+document.getElementById("loginText");
+
+const loader =
+document.getElementById("loader");
+
+
+
+/* SHOW PASSWORD */
+
+showBtn.addEventListener(
+  "click",
+  function(){
+
+    const hidden =
+    password.type === "password";
+
+    password.type =
+    hidden
+    ? "text"
+    : "password";
+
+    showBtn.textContent =
+    hidden
+    ? "Hide"
+    : "Show";
+
+  }
+);
+
+
+
+/* REMOVE EMAIL ERROR */
+
+email.addEventListener(
+  "input",
+  function(){
+
+    if(email.value.trim()){
+
+      emailField.classList.remove(
+        "error"
+      );
+
+    }
+
+  }
+);
+
+
+
+/* REMOVE PASSWORD ERROR */
+
+password.addEventListener(
+  "input",
+  function(){
+
+    if(password.value.trim()){
+
+      passwordField.classList.remove(
+        "error"
+      );
+
+    }
+
+  }
+);
+
+
+
+/* LOGIN */
+
+form.addEventListener(
+  "submit",
+  function(e){
+
+    e.preventDefault();
+
+
+    emailField.classList.remove(
+      "error"
+    );
+
+    passwordField.classList.remove(
+      "error"
+    );
+
+
+    const gmail =
+    email.value.trim();
+
+    const pass =
+    password.value.trim();
+
+
+    let valid = true;
+
+
+
+    if(!gmail){
+
+      setError(
+        emailField,
+        emailError,
+        "Please enter your Gmail"
+      );
+
+      valid = false;
+
+    }
+
+    else if(!validEmail(gmail)){
+
+      setError(
+        emailField,
+        emailError,
+        "Please enter a valid Gmail address"
+      );
+
+      valid = false;
+
+    }
+
+
+
+    if(!pass){
+
+      setError(
+        passwordField,
+        passwordError,
+        "Please enter your password"
+      );
+
+      valid = false;
+
+    }
+
+
+
+    if(!valid){
+      return;
+    }
+
+
+
+    startLoading();
+
+
+
+    setTimeout(
+      function(){
+
+        stopLoading();
+
+      },
+      1200
+    );
+
+  }
+);
+
+
+
+/* OTP */
+
+otpBtn.addEventListener(
+  "click",
+  function(){
+
+    emailField.classList.remove(
+      "error"
+    );
+
+
+    const gmail =
+    email.value.trim();
+
+
+    if(!gmail){
+
+      setError(
+        emailField,
+        emailError,
+        "Please enter your Gmail"
+      );
+
+      email.focus();
+
+      return;
+
+    }
+
+
+    if(!validEmail(gmail)){
+
+      setError(
+        emailField,
+        emailError,
+        "Please enter a valid Gmail address"
+      );
+
+      email.focus();
+
+      return;
+
+    }
+
+  }
+);
+
+
+
+/* FORGOT PASSWORD */
+
+forgotBtn.addEventListener(
+  "click",
+  function(){
+
+    emailField.classList.remove(
+      "error"
+    );
+
+
+    const gmail =
+    email.value.trim();
+
+
+    if(!gmail){
+
+      setError(
+        emailField,
+        emailError,
+        "Please enter your Gmail"
+      );
+
+      email.focus();
+
+      return;
+
+    }
+
+
+    if(!validEmail(gmail)){
+
+      setError(
+        emailField,
+        emailError,
+        "Please enter a valid Gmail address"
+      );
+
+      email.focus();
+
+      return;
+
+    }
+
+  }
+);
+
+
+
+function setError(
+  field,
+  errorElement,
+  text
+){
+
+  field.classList.add(
+    "error"
+  );
+
+  errorElement.textContent =
+  text;
+
+}
+
+
+
+function validEmail(value){
+
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  .test(value);
+
+}
+
+
+
+function startLoading(){
+
+  loginBtn.disabled =
+  true;
+
+  loginText.style.display =
+  "none";
+
+  loader.style.display =
+  "block";
+
+}
+
+
+
+function stopLoading(){
+
+  loginBtn.disabled =
+  false;
+
+  loginText.style.display =
+  "inline";
+
+  loader.style.display =
+  "none";
+
+}
+
+</script>
+
+</body>
+</html>
