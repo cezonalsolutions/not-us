@@ -5,7 +5,7 @@
 
 <meta
   name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  content="width=device-width, initial-scale=1.0, viewport-fit=cover"
 />
 
 <title>NOT US WORKSPACE</title>
@@ -13,12 +13,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
 
 <link
   rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
 />
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
@@ -864,6 +866,101 @@ body{
 
 }
 
+
+/* =========================
+   MAIN WORKSPACE — STEP 1
+   SAFE AREA + TOPBAR = ONE PIECE
+========================= */
+.workspace-screen{
+  display:none;
+  width:100%;
+  min-height:100svh;
+  background:#f5f7f8;
+}
+.workspace-screen.show{display:block}
+
+.workspace-topbar{
+  position:sticky;
+  top:0;
+  z-index:100;
+  width:100%;
+  min-height:103px;
+  padding:35px 16px 0;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  background:#ffffff;
+  border:0;
+  border-bottom-left-radius:24px;
+  border-bottom-right-radius:24px;
+  box-shadow:0 5px 18px rgba(18,38,32,.05);
+}
+
+.workspace-company{
+  min-width:0;
+  height:68px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+.workspace-company-logo{
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  border-radius:13px;
+  overflow:hidden;
+  background:#eef5f3;
+  display:grid;
+  place-items:center;
+  border:1px solid #e1e9e6;
+}
+.workspace-company-logo img{
+  width:100%;height:100%;object-fit:cover;display:none;
+}
+.workspace-company-logo span{
+  width:100%;height:100%;display:grid;place-items:center;
+  font-family:"DM Sans",sans-serif;
+  font-size:16px;font-weight:700;color:#0f766e;
+}
+.workspace-company-info{min-width:0}
+.workspace-company-name{
+  max-width:235px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-family:"Outfit",sans-serif;
+  font-size:18px;
+  line-height:1.15;
+  font-weight:600;
+  letter-spacing:-.25px;
+  color:#171717;
+}
+.workspace-top-actions{
+  height:68px;
+  display:flex;
+  align-items:center;
+  gap:3px;
+}
+.workspace-icon-btn{
+  width:38px;height:38px;border:0;border-radius:11px;
+  background:transparent;color:#444b51;
+  display:grid;place-items:center;font-size:16px;cursor:pointer;
+}
+.workspace-icon-btn:active{background:#f1f4f3}
+.workspace-main{
+  min-height:calc(100svh - 103px);
+  margin-top:0;
+  background:#f5f7f8;
+  overflow:hidden;
+}
+.workspace-placeholder{
+  padding:24px 18px;color:#9aa1a7;font-size:11px;text-align:center;
+}
+
+@media(max-width:380px){
+  .workspace-topbar{padding-left:13px;padding-right:13px}
+  .workspace-company-name{max-width:185px;font-size:16px}
+}
 </style>
 </head>
 
@@ -1113,356 +1210,378 @@ body{
 </div>
 
 
+<!-- =========================
+     MAIN WORKSPACE — STEP 1
+========================== -->
+<div class="workspace-screen" id="workspaceScreen">
+  <header class="workspace-topbar">
+    <div class="workspace-company">
+      <div class="workspace-company-logo">
+        <img id="workspaceCompanyLogo" alt="Company logo">
+        <span id="workspaceCompanyFallback">C</span>
+      </div>
+      <div class="workspace-company-info">
+        <div class="workspace-company-name" id="workspaceCompanyName">Company</div>
+      </div>
+    </div>
+
+    <div class="workspace-top-actions">
+      <button class="workspace-icon-btn" type="button" aria-label="Search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="workspace-icon-btn" type="button" aria-label="More">
+        <i class="fa-solid fa-ellipsis-vertical"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="workspace-main" id="workspaceMain">
+    <!-- Next: WhatsApp-like main content goes here -->
+  </main>
+</div>
+
+
 <script>
+/* ================================
+   NOT US WORKSPACE — REAL LOGIN
+   Uses the same Supabase project + RPC login flow
+   as the existing NOT US Admin Workspace.
+================================ */
 
-const form =
-document.getElementById("loginForm");
+const SUPABASE_URL = "https://ombeqzdgfyokujhscoaf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6Jmaoj_y512Z91tAWTT6VA_r4VQEBwy";
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const email =
-document.getElementById("email");
+const form = document.getElementById("loginForm");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const emailField = document.getElementById("emailField");
+const passwordField = document.getElementById("passwordField");
+const emailError = document.getElementById("emailError");
+const passwordError = document.getElementById("passwordError");
+const showBtn = document.getElementById("showBtn");
+const forgotBtn = document.getElementById("forgotBtn");
+const otpBtn = document.getElementById("otpBtn");
+const loginBtn = document.getElementById("loginBtn");
+const loginText = document.getElementById("loginText");
+const loader = document.getElementById("loader");
 
-const password =
-document.getElementById("password");
+/* Small status message below form */
+const loginStatus = document.createElement("div");
+loginStatus.id = "loginStatus";
+loginStatus.style.cssText = `
+  display:none;
+  margin-top:12px;
+  text-align:center;
+  font-family:Inter,sans-serif;
+  font-size:10px;
+  font-weight:600;
+  line-height:1.5;
+`;
+form.appendChild(loginStatus);
 
-const emailField =
-document.getElementById("emailField");
+showBtn.addEventListener("click", function(){
+  const hidden = password.type === "password";
+  password.type = hidden ? "text" : "password";
+  showBtn.textContent = hidden ? "Hide" : "Show";
+});
 
-const passwordField =
-document.getElementById("passwordField");
+email.addEventListener("input", function(){
+  emailField.classList.remove("error");
+  hideStatus();
+});
 
-const emailError =
-document.getElementById("emailError");
+password.addEventListener("input", function(){
+  passwordField.classList.remove("error");
+  hideStatus();
+});
 
-const passwordError =
-document.getElementById("passwordError");
+form.addEventListener("submit", async function(e){
+  e.preventDefault();
 
-const showBtn =
-document.getElementById("showBtn");
+  emailField.classList.remove("error");
+  passwordField.classList.remove("error");
+  hideStatus();
 
-const forgotBtn =
-document.getElementById("forgotBtn");
+  const gmail = email.value.trim().toLowerCase();
+  const pass = password.value;
+  let valid = true;
 
-const otpBtn =
-document.getElementById("otpBtn");
-
-const loginBtn =
-document.getElementById("loginBtn");
-
-const loginText =
-document.getElementById("loginText");
-
-const loader =
-document.getElementById("loader");
-
-
-
-/* SHOW PASSWORD */
-
-showBtn.addEventListener(
-  "click",
-  function(){
-
-    const hidden =
-    password.type === "password";
-
-    password.type =
-    hidden
-    ? "text"
-    : "password";
-
-    showBtn.textContent =
-    hidden
-    ? "Hide"
-    : "Show";
-
+  if(!gmail){
+    setError(emailField, emailError, "Please enter your Gmail");
+    valid = false;
+  }else if(!validEmail(gmail)){
+    setError(emailField, emailError, "Please enter a valid Gmail address");
+    valid = false;
   }
-);
 
-
-
-/* REMOVE EMAIL ERROR */
-
-email.addEventListener(
-  "input",
-  function(){
-
-    if(email.value.trim()){
-
-      emailField.classList.remove(
-        "error"
-      );
-
-    }
-
+  if(!pass){
+    setError(passwordField, passwordError, "Please enter your password");
+    valid = false;
   }
-);
 
+  if(!valid) return;
 
+  startLoading();
 
-/* REMOVE PASSWORD ERROR */
+  try{
+    let session = null;
 
-password.addEventListener(
-  "input",
-  function(){
+    /* 1. COMPANY ADMIN */
+    const { data: companyData, error: companyError } = await db.rpc("company_login", {
+      p_gmail: gmail,
+      p_password: pass
+    });
+    if(companyError) throw companyError;
 
-    if(password.value.trim()){
+    const company = Array.isArray(companyData) ? companyData[0] : companyData;
 
-      passwordField.classList.remove(
-        "error"
-      );
-
+    if(company && company.success === true){
+      session = {
+        user_type: "company_admin",
+        company_id: company.company_id,
+        company_name: company.company_name,
+        gmail: company.gmail,
+        status: company.status,
+        logged_in_at: new Date().toISOString()
+      };
     }
 
-  }
-);
+    /* 2. HR */
+    if(!session){
+      const { data: hrData, error: hrError } = await db.rpc("hr_login", {
+        p_gmail: gmail,
+        p_password: pass
+      });
+      if(hrError) throw hrError;
 
+      const hr = Array.isArray(hrData) ? hrData[0] : hrData;
 
-
-/* LOGIN */
-
-form.addEventListener(
-  "submit",
-  function(e){
-
-    e.preventDefault();
-
-
-    emailField.classList.remove(
-      "error"
-    );
-
-    passwordField.classList.remove(
-      "error"
-    );
-
-
-    const gmail =
-    email.value.trim();
-
-    const pass =
-    password.value.trim();
-
-
-    let valid = true;
-
-
-
-    if(!gmail){
-
-      setError(
-        emailField,
-        emailError,
-        "Please enter your Gmail"
-      );
-
-      valid = false;
-
+      if(hr && hr.success === true){
+        session = {
+          user_type: "hr",
+          hr_id: hr.hr_id,
+          company_id: hr.company_id,
+          company_name: hr.company_name,
+          branch_id: hr.branch_id,
+          branch_name: hr.branch_name,
+          branch_location: hr.branch_location,
+          full_name: hr.full_name,
+          gmail: hr.gmail,
+          role: hr.role,
+          status: hr.status,
+          logged_in_at: new Date().toISOString()
+        };
+      }
     }
 
-    else if(!validEmail(gmail)){
+    /* 3. EMPLOYEE / TEAM LEAD / MANAGER / RECRUITER / IT / SUPPORT */
+    if(!session){
+      const { data: employeeData, error: employeeError } = await db.rpc("employee_login", {
+        p_gmail: gmail,
+        p_password: pass
+      });
+      if(employeeError) throw employeeError;
 
-      setError(
-        emailField,
-        emailError,
-        "Please enter a valid Gmail address"
-      );
+      const employee = Array.isArray(employeeData) ? employeeData[0] : employeeData;
 
-      valid = false;
+      if(employee && employee.success === true){
+        let resolvedEmployeeRole = String(
+          employee.role || employee.employee_role || "Employee"
+        ).trim();
 
+        try{
+          const loginEmail = String(employee.gmail || gmail).trim().toLowerCase();
+          const rr = await db
+            .from("employees")
+            .select("id,role")
+            .eq("company_id", employee.company_id)
+            .ilike("email", loginEmail)
+            .maybeSingle();
+
+          if(!rr.error && rr.data?.role){
+            resolvedEmployeeRole = String(rr.data.role).trim();
+            if(rr.data.id) employee.employee_id = rr.data.id;
+          }
+        }catch(roleErr){
+          console.warn("Could not refresh exact employee role:", roleErr);
+        }
+
+        const roleKey = resolvedEmployeeRole
+          .toLowerCase()
+          .replace(/[_-]+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        let employeeUserType = "employee";
+
+        if(roleKey === "team lead") employeeUserType = "team_lead";
+        else if(roleKey === "manager") employeeUserType = "manager";
+        else if(roleKey === "recruiter" || roleKey.includes("recruit")) employeeUserType = "recruiter";
+        else if(roleKey === "it administrator") employeeUserType = "it_admin";
+        else if(roleKey === "technical supporter") employeeUserType = "technical_supporter";
+
+        session = {
+          user_type: employeeUserType,
+          employee_id: employee.employee_id,
+          team_lead_id: employee.employee_id,
+          company_id: employee.company_id,
+          company_name: employee.company_name,
+          branch_id: employee.branch_id,
+          branch_name: employee.branch_name,
+          branch_location: employee.branch_location,
+          full_name: employee.full_name,
+          gmail: employee.gmail,
+          role: resolvedEmployeeRole || employee.role,
+          status: employee.status,
+          logged_in_at: new Date().toISOString()
+        };
+      }
     }
 
-
-
-    if(!pass){
-
-      setError(
-        passwordField,
-        passwordError,
-        "Please enter your password"
-      );
-
-      valid = false;
-
-    }
-
-
-
-    if(!valid){
+    if(!session){
+      setError(emailField, emailError, "Gmail or password is incorrect");
+      setError(passwordField, passwordError, "Check your login details");
       return;
     }
 
+    localStorage.setItem("notus_company_session", JSON.stringify(session));
+    window.notusSession = session;
 
+    showStatus("Login successful", "success");
 
-    startLoading();
+    setTimeout(function(){
+      showWorkspace(session);
+    }, 350);
 
-
-
-    setTimeout(
-      function(){
-
-        stopLoading();
-
-      },
-      1200
-    );
-
+  }catch(err){
+    console.error("Login error:", err);
+    showStatus(err?.message || "Unable to login. Please try again.", "error");
+  }finally{
+    stopLoading();
   }
-);
+});
 
-
-
-/* OTP */
-
-otpBtn.addEventListener(
-  "click",
-  function(){
-
-    emailField.classList.remove(
-      "error"
-    );
-
-
-    const gmail =
-    email.value.trim();
-
-
-    if(!gmail){
-
-      setError(
-        emailField,
-        emailError,
-        "Please enter your Gmail"
-      );
-
-      email.focus();
-
-      return;
-
-    }
-
-
-    if(!validEmail(gmail)){
-
-      setError(
-        emailField,
-        emailError,
-        "Please enter a valid Gmail address"
-      );
-
-      email.focus();
-
-      return;
-
-    }
-
+/* Only normal Login is connected right now */
+otpBtn.addEventListener("click", function(){
+  const gmail = email.value.trim();
+  if(!gmail){
+    setError(emailField, emailError, "Please enter your Gmail");
+    email.focus();
+    return;
   }
-);
+  showStatus("OTP login will be connected next.", "info");
+});
 
-
-
-/* FORGOT PASSWORD */
-
-forgotBtn.addEventListener(
-  "click",
-  function(){
-
-    emailField.classList.remove(
-      "error"
-    );
-
-
-    const gmail =
-    email.value.trim();
-
-
-    if(!gmail){
-
-      setError(
-        emailField,
-        emailError,
-        "Please enter your Gmail"
-      );
-
-      email.focus();
-
-      return;
-
-    }
-
-
-    if(!validEmail(gmail)){
-
-      setError(
-        emailField,
-        emailError,
-        "Please enter a valid Gmail address"
-      );
-
-      email.focus();
-
-      return;
-
-    }
-
+forgotBtn.addEventListener("click", function(){
+  const gmail = email.value.trim();
+  if(!gmail){
+    setError(emailField, emailError, "Please enter your Gmail");
+    email.focus();
+    return;
   }
-);
+  showStatus("Forgot password will be connected next.", "info");
+});
 
-
-
-function setError(
-  field,
-  errorElement,
-  text
-){
-
-  field.classList.add(
-    "error"
-  );
-
-  errorElement.textContent =
-  text;
-
+function setError(field, errorElement, text){
+  field.classList.add("error");
+  errorElement.textContent = text;
 }
-
-
 
 function validEmail(value){
-
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  .test(value);
-
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
-
-
 
 function startLoading(){
-
-  loginBtn.disabled =
-  true;
-
-  loginText.style.display =
-  "none";
-
-  loader.style.display =
-  "block";
-
+  loginBtn.disabled = true;
+  loginText.style.display = "none";
+  loader.style.display = "block";
 }
-
-
 
 function stopLoading(){
-
-  loginBtn.disabled =
-  false;
-
-  loginText.style.display =
-  "inline";
-
-  loader.style.display =
-  "none";
-
+  loginBtn.disabled = false;
+  loginText.style.display = "inline";
+  loader.style.display = "none";
 }
 
+function showStatus(text, type){
+  loginStatus.style.display = "block";
+  loginStatus.textContent = text;
+
+  if(type === "success") loginStatus.style.color = "#0f766e";
+  else if(type === "error") loginStatus.style.color = "#dc2626";
+  else loginStatus.style.color = "#6b7280";
+}
+
+
+/* ================================
+   OPEN MAIN WORKSPACE
+================================ */
+function formatCompanyName(value){
+  const text = String(value || "Company").trim().toLowerCase();
+  return text.replace(/(^|\s|[-&/()])([a-z])/g, (m, before, letter) => before + letter.toUpperCase());
+}
+
+async function showWorkspace(session){
+  const loginPage = document.querySelector(".page");
+  const workspace = document.getElementById("workspaceScreen");
+  if(loginPage) loginPage.style.display = "none";
+  if(workspace) workspace.classList.add("show");
+
+  const companyName = formatCompanyName(session?.company_name || "Company");
+  const nameEl = document.getElementById("workspaceCompanyName");
+  const fallback = document.getElementById("workspaceCompanyFallback");
+  if(nameEl) nameEl.textContent = companyName;
+  if(fallback) fallback.textContent = (companyName[0] || "C").toUpperCase();
+
+  await loadWorkspaceCompanyLogo(session?.company_id);
+}
+
+async function loadWorkspaceCompanyLogo(companyId){
+  const img = document.getElementById("workspaceCompanyLogo");
+  const fallback = document.getElementById("workspaceCompanyFallback");
+  if(!img || !fallback || !companyId) return;
+
+  img.style.display = "none";
+  fallback.style.display = "grid";
+
+  try{
+    const {data,error} = await db.rpc("list_companies_with_logo");
+    if(error) throw error;
+
+    const company = (data || []).find(x => String(x.id) === String(companyId));
+    const logo = company?.logo_url;
+    if(!logo) return;
+
+    img.onload = function(){
+      img.style.display = "block";
+      fallback.style.display = "none";
+    };
+    img.onerror = function(){
+      img.style.display = "none";
+      fallback.style.display = "grid";
+    };
+    img.src = logo;
+  }catch(err){
+    console.warn("Company logo load failed:", err);
+  }
+}
+
+/* Restore already logged-in session on reload */
+(function restoreLogin(){
+  try{
+    const saved = JSON.parse(localStorage.getItem("notus_company_session") || "null");
+    if(saved?.company_id){
+      window.notusSession = saved;
+      showWorkspace(saved);
+    }
+  }catch(e){}
+})();
+
+function hideStatus(){
+  loginStatus.style.display = "none";
+  loginStatus.textContent = "";
+}
 </script>
 
 </body>
