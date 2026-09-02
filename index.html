@@ -1042,6 +1042,55 @@ body{
   .workspace-top-actions{gap:2px}
 }
 
+/* SEARCH BAR BELOW TOP NAV */
+.workspace-search-row{
+  width:100%;
+  padding:10px 16px 8px;
+  background:#f5f7f8;
+}
+
+.workspace-search-box{
+  width:100%;
+  height:44px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 14px;
+  background:#ffffff;
+  border:1px solid #e6ebe9;
+  border-radius:13px;
+}
+
+.workspace-search-box i{
+  color:#8a9390;
+  font-size:14px;
+  flex:0 0 auto;
+}
+
+.workspace-search-box input{
+  width:100%;
+  height:100%;
+  border:0;
+  outline:none;
+  background:transparent;
+  font-family:"Inter",sans-serif;
+  font-size:12px;
+  font-weight:500;
+  color:#171717;
+}
+
+.workspace-search-box input::placeholder{
+  color:#9ba3a0;
+  font-weight:400;
+}
+
+@media(max-width:380px){
+  .workspace-search-row{
+    padding-left:13px;
+    padding-right:13px;
+  }
+}
+
 </style>
 </head>
 
@@ -1325,6 +1374,19 @@ body{
       </button>
     </div>
   </header>
+
+  <div class="workspace-search-row">
+    <div class="workspace-search-box">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input
+        type="search"
+        id="workspaceSearch"
+        placeholder="Search"
+        autocomplete="off"
+        aria-label="Search"
+      >
+    </div>
+  </div>
 
   <main class="workspace-main" id="workspaceMain">
     <!-- Next: WhatsApp-like main content goes here -->
