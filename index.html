@@ -5,7 +5,7 @@
 
 <meta
   name="viewport"
-  content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
 />
 
 <title>NOT US WORKSPACE</title>
@@ -961,6 +961,35 @@ body{
   .workspace-topbar{padding-left:13px;padding-right:13px}
   .workspace-company-name{max-width:185px;font-size:16px}
 }
+/* STATUS CONTROL BESIDE SEARCH */
+.workspace-status-wrap{position:relative}
+.workspace-status-btn{
+  height:36px;min-width:108px;padding:0 11px;border:1px solid #e4e8e6;border-radius:11px;
+  background:#fff;display:flex;align-items:center;justify-content:center;gap:7px;
+  color:#2f3734;font-family:"Inter",sans-serif;font-size:10px;font-weight:700;cursor:pointer;
+}
+.workspace-status-btn:active{background:#f5f7f6}
+.workspace-status-dot{width:7px;height:7px;border-radius:50%;background:#2f9e62;flex:0 0 7px}
+.workspace-status-btn i{font-size:8px;color:#8a9490}
+.workspace-status-menu{
+  display:none;position:absolute;right:0;top:44px;width:156px;padding:6px;background:#fff;
+  border:1px solid #e7ebe9;border-radius:13px;box-shadow:0 16px 42px rgba(18,38,32,.12);z-index:150;
+}
+.workspace-status-menu.show{display:block}
+.workspace-status-option{
+  width:100%;height:38px;border:0;background:transparent;border-radius:9px;padding:0 9px;
+  display:flex;align-items:center;gap:9px;text-align:left;color:#343b38;
+  font-family:"Inter",sans-serif;font-size:10px;font-weight:600;cursor:pointer;
+}
+.workspace-status-option:hover,.workspace-status-option.active{background:#f4f7f6}
+.workspace-status-option .dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px}
+.dot-available{background:#2f9e62}.dot-break{background:#d58a28}.dot-meeting{background:#5a6fd1}.dot-busy{background:#cf5757}.dot-offline{background:#8a9390}
+@media(max-width:420px){
+  .workspace-status-btn{min-width:0;width:36px;padding:0}
+  .workspace-status-btn .workspace-status-text,.workspace-status-btn .fa-chevron-down{display:none}
+  .workspace-top-actions{gap:1px}
+}
+
 </style>
 </head>
 
@@ -1229,6 +1258,21 @@ body{
       <button class="workspace-icon-btn" type="button" aria-label="Search">
         <i class="fa-solid fa-magnifying-glass"></i>
       </button>
+
+      <div class="workspace-status-wrap">
+        <button class="workspace-status-btn" id="workspaceStatusBtn" type="button" aria-label="Work status">
+          <span class="workspace-status-dot" id="workspaceStatusDot"></span>
+          <span class="workspace-status-text" id="workspaceStatusText">Available</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="workspace-status-menu" id="workspaceStatusMenu">
+          <button class="workspace-status-option active" type="button" data-status="available" data-label="Available"><span class="dot dot-available"></span>Available</button>
+          <button class="workspace-status-option" type="button" data-status="break" data-label="On Break"><span class="dot dot-break"></span>On Break</button>
+          <button class="workspace-status-option" type="button" data-status="meeting" data-label="In Meeting"><span class="dot dot-meeting"></span>In Meeting</button>
+          <button class="workspace-status-option" type="button" data-status="busy" data-label="Busy"><span class="dot dot-busy"></span>Busy</button>
+          <button class="workspace-status-option" type="button" data-status="offline" data-label="Offline"><span class="dot dot-offline"></span>Offline</button>
+        </div>
+      </div>
       <button class="workspace-icon-btn" type="button" aria-label="More">
         <i class="fa-solid fa-ellipsis-vertical"></i>
       </button>
@@ -1513,6 +1557,55 @@ function showStatus(text, type){
   else loginStatus.style.color = "#6b7280";
 }
 
+
+
+/* ================================
+   TOP WORK STATUS UI
+================================ */
+const workspaceStatusBtn = document.getElementById("workspaceStatusBtn");
+const workspaceStatusMenu = document.getElementById("workspaceStatusMenu");
+const workspaceStatusText = document.getElementById("workspaceStatusText");
+const workspaceStatusDot = document.getElementById("workspaceStatusDot");
+
+const statusColors = {
+  available:"#2f9e62",
+  break:"#d58a28",
+  meeting:"#5a6fd1",
+  busy:"#cf5757",
+  offline:"#8a9390"
+};
+
+function paintWorkspaceStatus(status,label){
+  if(workspaceStatusText) workspaceStatusText.textContent = label || "Available";
+  if(workspaceStatusDot) workspaceStatusDot.style.background = statusColors[status] || statusColors.available;
+  document.querySelectorAll(".workspace-status-option").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.status === status);
+  });
+}
+
+workspaceStatusBtn?.addEventListener("click", function(e){
+  e.stopPropagation();
+  workspaceStatusMenu?.classList.toggle("show");
+});
+
+document.querySelectorAll(".workspace-status-option").forEach(btn=>{
+  btn.addEventListener("click", function(){
+    const status = this.dataset.status || "available";
+    const label = this.dataset.label || "Available";
+    paintWorkspaceStatus(status,label);
+    workspaceStatusMenu?.classList.remove("show");
+    try{localStorage.setItem("notus_workspace_status",JSON.stringify({status,label}));}catch(e){}
+  });
+});
+
+document.addEventListener("click", function(){
+  workspaceStatusMenu?.classList.remove("show");
+});
+
+try{
+  const savedStatus = JSON.parse(localStorage.getItem("notus_workspace_status") || "null");
+  if(savedStatus?.status) paintWorkspaceStatus(savedStatus.status,savedStatus.label);
+}catch(e){}
 
 /* ================================
    OPEN MAIN WORKSPACE
