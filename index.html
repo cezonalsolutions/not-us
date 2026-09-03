@@ -2248,6 +2248,19 @@ body:has(.workspace-screen.show){
   flex:1;
 }
 
+
+/* TOP NAV — ANNOUNCEMENT */
+.workspace-announcement-btn{
+  position:relative;
+  color:#444b51!important;
+}
+.workspace-announcement-btn i{
+  font-size:15px;
+}
+.workspace-announcement-btn:active{
+  background:#f1f4f3!important;
+}
+
 </style>
 
 <style>
@@ -2972,7 +2985,10 @@ html,body{
           <button class="workspace-status-option" type="button" data-status="offline" data-label="Offline">Offline</button>
         </div>
       </div>
-<button class="workspace-profile-btn" id="workspaceProfileBtn" type="button" aria-label="Profile">
+<button class="workspace-icon-btn workspace-announcement-btn" id="workspaceAnnouncementBtn" type="button" aria-label="Announcements">
+          <i class="fa-solid fa-bullhorn"></i>
+        </button>
+        <button class="workspace-profile-btn" id="workspaceProfileBtn" type="button" aria-label="Profile">
         <img class="top-user-profile-img" id="topUserProfileImg" alt="Profile">
         <span class="top-user-profile-fallback" id="topUserProfileFallback"><i class="fa-solid fa-circle-user"></i></span>
       </button>
