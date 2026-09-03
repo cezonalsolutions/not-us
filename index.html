@@ -2192,6 +2192,62 @@ body:has(.workspace-screen.show){
   .workspace-meetings-main{padding-left:13px;padding-right:13px}
 }
 
+
+/* =========================================================
+   MOBILE MEETINGS — UPCOMING + COMPLETED STATUS
+   Completed meetings stay visible.
+   ========================================================= */
+.mobile-meeting-status,
+.workspace-meeting-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:20px;
+  padding:0 7px;
+  border-radius:999px;
+  font-family:"Inter",sans-serif;
+  font-size:6.5px;
+  line-height:1;
+  font-weight:800;
+  letter-spacing:.25px;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.mobile-meeting-status.upcoming,
+.workspace-meeting-status.upcoming{
+  background:#eef2ff;
+  color:#5267c9;
+}
+.mobile-meeting-status.completed,
+.workspace-meeting-status.completed{
+  background:#eef7f0;
+  color:#4f765b;
+}
+.mobile-meeting-title-row{
+  min-width:0;
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+}
+.mobile-meeting-row.completed{
+  opacity:.88;
+}
+.workspace-meetings-main-row.completed{
+  opacity:.88;
+}
+.workspace-meetings-main-title-row{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.workspace-meetings-main-title-row .workspace-meetings-main-title{
+  min-width:0;
+  flex:1;
+}
+
 </style>
 
 <style>
@@ -3016,8 +3072,8 @@ html,body{
       <i class="fa-solid fa-arrow-left"></i>
     </button>
     <div class="mobile-meetings-head-copy">
-      <h2>Upcoming Meetings</h2>
-      <p>Your scheduled meetings</p>
+      <h2>Meetings</h2>
+      <p>Upcoming and completed meetings</p>
     </div>
   </header>
 
@@ -3025,8 +3081,8 @@ html,body{
     <div class="mobile-meeting-list" id="mobileMeetingsList">
       <div class="mobile-meetings-empty">
         <i class="fa-regular fa-calendar"></i>
-        <b>No upcoming meetings</b>
-        <span>Your scheduled meetings will appear here.</span>
+        <b>No meetings</b>
+        <span>Your meetings will appear here.</span>
       </div>
     </div>
   </div>
@@ -6625,8 +6681,8 @@ function hideStatus(){
       list.innerHTML=`
         <div class="mobile-meetings-empty">
           <i class="fa-regular fa-calendar"></i>
-          <b>No upcoming meetings</b>
-          <span>Your scheduled meetings will appear here.</span>
+          <b>No meetings</b>
+          <span>Your upcoming and completed meetings will appear here.</span>
         </div>
       `;
       return;
@@ -6634,10 +6690,20 @@ function hideStatus(){
 
     list.innerHTML=rows.map((m,i)=>{
       const link=validMeetingLink(m.meeting_link);
+      const status=String(m.status||"scheduled").toLowerCase();
+      const completed=status==="completed";
+      const statusText=completed?"Completed":"Upcoming";
+
       return `
-        <article class="mobile-meeting-row" data-mobile-meeting-index="${i}">
+        <article class="mobile-meeting-row ${completed?"completed":""}" data-mobile-meeting-index="${i}">
           <div class="mobile-meeting-top">
-            <div class="mobile-meeting-title">${escMeeting(m.title||"Meeting")}</div>
+            <div class="mobile-meeting-title-row">
+              <div class="mobile-meeting-title">${escMeeting(m.title||"Meeting")}</div>
+              <span class="mobile-meeting-status ${completed?"completed":"upcoming"}">
+                ${statusText}
+              </span>
+            </div>
+
             <div class="mobile-meeting-when">
               <div class="mobile-meeting-date">${escMeeting(meetingDateLabel(m.meeting_date))}</div>
               <div class="mobile-meeting-time">${escMeeting(meetingTimeLabel(m.meeting_time))}</div>
@@ -6681,7 +6747,6 @@ function hideStatus(){
     });
   }
 
-
   function paintWorkspaceUpcoming(rows){
     const list=$("workspaceMeetingsMainList");
     if(!list) return;
@@ -6692,8 +6757,8 @@ function hideStatus(){
       list.innerHTML=`
         <div class="workspace-meetings-main-empty">
           <i class="fa-regular fa-calendar"></i>
-          <b>No upcoming meetings</b>
-          <span>Your scheduled meetings will appear here.</span>
+          <b>No meetings</b>
+          <span>Your upcoming and completed meetings will appear here.</span>
         </div>
       `;
       return;
@@ -6706,18 +6771,28 @@ function hideStatus(){
         ? d.toLocaleDateString(undefined,{month:"short"})
         : "---";
 
+      const status=String(row.status||"scheduled").toLowerCase();
+      const completed=status==="completed";
+
       return `
-        <button class="workspace-meetings-main-row" type="button" data-main-meeting-index="${i}">
+        <button class="workspace-meetings-main-row ${completed?"completed":""}" type="button" data-main-meeting-index="${i}">
           <div class="workspace-meetings-main-date">
             <strong>${escMeeting(day)}</strong>
             <span>${escMeeting(month)}</span>
           </div>
 
           <div class="workspace-meetings-main-info">
-            <div class="workspace-meetings-main-title">${escMeeting(row.title||"Meeting")}</div>
+            <div class="workspace-meetings-main-title-row">
+              <div class="workspace-meetings-main-title">${escMeeting(row.title||"Meeting")}</div>
+              <span class="workspace-meeting-status ${completed?"completed":"upcoming"}">
+                ${completed?"Completed":"Upcoming"}
+              </span>
+            </div>
+
             <div class="workspace-meetings-main-meta">
               ${escMeeting(meetingDateLabel(row.meeting_date))} · ${escMeeting(meetingTimeLabel(row.meeting_time))}
             </div>
+
             ${row.description?`
               <div class="workspace-meetings-main-desc">${escMeeting(row.description)}</div>
             `:""}
@@ -6744,7 +6819,7 @@ function hideStatus(){
 
     meetingLoadBusy=true;
     try{
-      const {data,error}=await db.rpc("notus_list_my_upcoming_meetings",{
+      const {data,error}=await db.rpc("notus_list_my_meetings",{
         p_company_id:s.company_id,
         p_member_type:member.type,
         p_member_id:member.id
@@ -6849,6 +6924,12 @@ function hideStatus(){
     loadMobileMeetings();
     startMobileMeetingsRealtime();
   },900);
+
+  setInterval(()=>{
+    if(document.visibilityState==="visible"){
+      loadMobileMeetings();
+    }
+  },30000);
 })();
 </script>
 
