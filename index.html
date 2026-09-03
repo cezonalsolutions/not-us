@@ -1399,6 +1399,57 @@ body{
   border-bottom:0!important;
 }
 
+
+/* LIVE DIRECT CHAT SEARCH / RECENTS */
+.workspace-empty-chat{
+  padding:42px 22px;
+  text-align:center;
+  font-family:"Inter",sans-serif;
+  font-size:11px;
+  color:#96a09c;
+}
+.chat-person-role{
+  margin-top:3px;
+  font-size:9px;
+  color:#8a9490;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.chat-search-label{
+  padding:10px 16px 5px;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.7px;
+  color:#98a19e;
+  text-transform:uppercase;
+}
+.chat-item .chat-item-body{
+  min-width:0;
+}
+.chat-item-name-row{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-width:0;
+}
+.chat-live-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#2f9e62;
+  flex:0 0 6px;
+}
+.chat-avatar img.person-avatar{
+  display:block;
+}
+.chat-load-state{
+  padding:28px 18px;
+  text-align:center;
+  font-size:10px;
+  color:#8d9793;
+}
+
 </style>
 </head>
 
@@ -1703,19 +1754,9 @@ body{
     </div>
 
     <div class="chat-list" id="workspaceChatList">
-      <button class="chat-item" id="companyChatItem" type="button">
-        <div class="chat-avatar" id="companyChatAvatar">
-          <img id="companyChatLogo" alt="Company">
-          <span id="companyChatFallback">C</span>
-        </div>
-        <div class="chat-item-body">
-          <div class="chat-item-top">
-            <div class="chat-item-name" id="companyChatName">Company</div>
-            <div class="chat-item-time" id="companyChatTime">Now</div>
-          </div>
-          <div class="chat-item-preview" id="companyChatPreview">Welcome to your company workspace.</div>
-        </div>
-      </button>
+      <div class="workspace-empty-chat" id="workspaceEmptyChat">
+        Search a teammate to start chatting.
+      </div>
     </div>
   </main>
 </div>
@@ -1731,7 +1772,7 @@ body{
     </div>
     <div class="chat-header-info">
       <div class="chat-header-name" id="chatHeaderName">Company</div>
-      <div class="chat-header-sub">Company chat</div>
+      <div class="chat-header-sub" id="chatHeaderSub">Direct chat</div>
     </div>
   </header>
 
@@ -2535,7 +2576,6 @@ async function showWorkspace(session){
   if(fallback) fallback.textContent = (companyName[0] || "C").toUpperCase();
 
   fillProfilePanel(session);
-  syncCompanyChatIdentity(session);
   await loadWorkspaceCompanyLogo(session?.company_id);
 
   if(typeof loadCurrentUserProfilePhoto==="function"){
@@ -2543,6 +2583,10 @@ async function showWorkspace(session){
   }
   if(typeof startCurrentUserProfileRealtime==="function"){
     startCurrentUserProfileRealtime();
+  }
+
+  if(typeof initDirectChatForSession==="function"){
+    await initDirectChatForSession(session);
   }
 }
 
@@ -2608,22 +2652,23 @@ async function loadWorkspaceCompanyLogo(companyId){
 
 
 /* ================================
-   CHAT + PULL TO REFRESH
+   LIVE DIRECT CHAT — SAME COMPANY ONLY
+   Supabase table: notus_direct_chats
+   Messages are stored in one JSONB array per conversation.
 ================================ */
 const workspaceMain = document.getElementById("workspaceMain");
 const pullRefresh = document.getElementById("pullRefresh");
-const companyChatItem = document.getElementById("companyChatItem");
 const companyChatScreen = document.getElementById("companyChatScreen");
 const chatBackBtn = document.getElementById("chatBackBtn");
 const chatMessages = document.getElementById("chatMessages");
 const chatMessageInput = document.getElementById("chatMessageInput");
 const chatSendBtn = document.getElementById("chatSendBtn");
 const workspaceSearch = document.getElementById("workspaceSearch");
+const workspaceChatList = document.getElementById("workspaceChatList");
 
 let pullStartY = 0;
 let pulling = false;
 let refreshing = false;
-const workspaceChatList = document.getElementById("workspaceChatList");
 
 let edgeSwipeActive = false;
 let edgeSwipeSide = "";
@@ -2631,78 +2676,439 @@ let edgeSwipeStartX = 0;
 let edgeSwipeStartY = 0;
 let edgeSwipeDistance = 0;
 
+let activeDirectPeer = null;
+let activeDirectChat = null;
+let directChatRealtime = null;
+let directChatSearchTimer = null;
+let directChatSession = null;
+
 function getTimeLabel(date = new Date()){
   return date.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
 }
 
-function getCompanyChatKey(){
-  const id = window.notusSession?.company_id || "default";
-  return "notus_company_fake_chat_" + id;
-}
-
-function defaultCompanyMessages(){
-  const company = formatCompanyName(window.notusSession?.company_name || "Company");
-  return [
-    {
-      side:"in",
-      text:`Welcome to ${company}. This is your official company chat.`,
-      time:getTimeLabel()
-    }
-  ];
-}
-
-function readCompanyMessages(){
+function getChatDateTime(value){
   try{
-    const saved = JSON.parse(localStorage.getItem(getCompanyChatKey()) || "null");
-    if(Array.isArray(saved) && saved.length) return saved;
-  }catch(e){}
-  return defaultCompanyMessages();
+    const d = new Date(value);
+    if(Number.isNaN(d.getTime())) return "";
+    const now = new Date();
+    const sameDay =
+      d.getFullYear()===now.getFullYear() &&
+      d.getMonth()===now.getMonth() &&
+      d.getDate()===now.getDate();
+
+    return sameDay
+      ? d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})
+      : d.toLocaleDateString([], {day:"2-digit",month:"short"});
+  }catch(e){
+    return "";
+  }
 }
 
-function saveCompanyMessages(messages){
-  try{ localStorage.setItem(getCompanyChatKey(), JSON.stringify(messages)); }catch(e){}
+function currentChatIdentity(session = directChatSession || window.notusSession || {}){
+  const type = String(session.user_type || "").toLowerCase();
+
+  if(type === "company_admin" || type === "admin"){
+    return {
+      key: "admin:" + String(session.company_id || ""),
+      id: String(session.company_id || ""),
+      type: "company_admin",
+      company_id: String(session.company_id || ""),
+      name: String(session.full_name || "Company Admin"),
+      email: String(session.gmail || session.email || ""),
+      role: "Company Admin",
+      designation: "",
+      profile_image_url: String(session.admin_profile_url || session.profile_image_url || "")
+    };
+  }
+
+  if(type === "hr" || type === "hr_member"){
+    const id = String(session.hr_id || session.member_id || session.id || "");
+    return {
+      key: "hr:" + id,
+      id,
+      type: "hr",
+      company_id: String(session.company_id || ""),
+      name: String(session.full_name || session.name || "HR"),
+      email: String(session.gmail || session.email || ""),
+      role: String(session.role || "HR"),
+      designation: String(session.designation || ""),
+      profile_image_url: String(session.profile_image_url || "")
+    };
+  }
+
+  const id = String(
+    session.employee_id ||
+    session.team_lead_id ||
+    session.member_id ||
+    session.id ||
+    ""
+  );
+
+  return {
+    key: "employee:" + id,
+    id,
+    type: "employee",
+    company_id: String(session.company_id || ""),
+    name: String(session.full_name || session.name || "Employee"),
+    email: String(session.gmail || session.email || ""),
+    role: String(session.role || "Employee"),
+    designation: String(session.designation || ""),
+    profile_image_url: String(session.profile_image_url || "")
+  };
 }
 
-function renderCompanyMessages(){
-  if(!chatMessages) return;
-  const messages = readCompanyMessages();
-  chatMessages.innerHTML = '<div class="chat-day"><span>Today</span></div>';
-  messages.forEach(msg=>{
-    const row = document.createElement("div");
-    row.className = "message-row " + (msg.side === "out" ? "out" : "in");
-    const bubble = document.createElement("div");
-    bubble.className = "message-bubble";
-    const text = document.createElement("div");
-    text.textContent = msg.text;
-    const time = document.createElement("span");
-    time.className = "message-time";
-    time.textContent = msg.time || "";
-    bubble.appendChild(text);
-    bubble.appendChild(time);
-    row.appendChild(bubble);
-    chatMessages.appendChild(row);
+function participantKey(type,id){
+  const t = String(type || "employee").toLowerCase();
+  if(t === "company_admin" || t === "admin") return "admin:" + String(id || "");
+  if(t === "hr" || t === "hr_member") return "hr:" + String(id || "");
+  return "employee:" + String(id || "");
+}
+
+function canonicalPair(me, peer){
+  const pair = [
+    {key:me.key, data:me},
+    {key:peer.key, data:peer}
+  ].sort((a,b)=>a.key.localeCompare(b.key));
+
+  return {
+    user_a_key:pair[0].key,
+    user_b_key:pair[1].key,
+    user_a:pair[0].data,
+    user_b:pair[1].data
+  };
+}
+
+function safeText(value){
+  return String(value ?? "").trim();
+}
+
+function personInitial(person){
+  return (safeText(person?.name)[0] || "U").toUpperCase();
+}
+
+function personRoleLabel(person){
+  const designation = safeText(person?.designation);
+  const role = safeText(person?.role);
+  return designation || role || "Employee";
+}
+
+function buildPersonAvatar(person){
+  const avatar = document.createElement("div");
+  avatar.className = "chat-avatar";
+
+  const url = safeText(person?.profile_image_url);
+  if(url){
+    const img = document.createElement("img");
+    img.className = "person-avatar";
+    img.alt = safeText(person?.name) || "Profile";
+    img.src = url;
+    img.onerror = ()=>{
+      img.remove();
+      avatar.textContent = personInitial(person);
+    };
+    avatar.appendChild(img);
+  }else{
+    avatar.textContent = personInitial(person);
+  }
+
+  return avatar;
+}
+
+function renderPeopleList(people, mode="search"){
+  if(!workspaceChatList) return;
+  workspaceChatList.innerHTML = "";
+
+  if(!people.length){
+    const empty = document.createElement("div");
+    empty.className = "workspace-empty-chat";
+    empty.textContent = mode === "search"
+      ? "No teammates found in your company."
+      : "No chats yet. Search a teammate to start chatting.";
+    workspaceChatList.appendChild(empty);
+    return;
+  }
+
+  if(mode === "search"){
+    const label = document.createElement("div");
+    label.className = "chat-search-label";
+    label.textContent = "People in your company";
+    workspaceChatList.appendChild(label);
+  }
+
+  people.forEach(item=>{
+    const peer = item.peer || item;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chat-item";
+
+    btn.appendChild(buildPersonAvatar(peer));
+
+    const body = document.createElement("div");
+    body.className = "chat-item-body";
+
+    const top = document.createElement("div");
+    top.className = "chat-item-top";
+
+    const name = document.createElement("div");
+    name.className = "chat-item-name";
+    name.textContent = safeText(peer.name) || "User";
+
+    const time = document.createElement("div");
+    time.className = "chat-item-time";
+    time.textContent = mode === "recent"
+      ? getChatDateTime(item.updated_at)
+      : "";
+
+    top.appendChild(name);
+    top.appendChild(time);
+
+    const preview = document.createElement("div");
+    preview.className = "chat-item-preview";
+
+    if(mode === "recent"){
+      const messages = Array.isArray(item.messages) ? item.messages : [];
+      const last = messages[messages.length - 1];
+      preview.textContent = last?.text || personRoleLabel(peer);
+    }else{
+      preview.textContent = personRoleLabel(peer);
+    }
+
+    body.appendChild(top);
+    body.appendChild(preview);
+    btn.appendChild(body);
+
+    btn.addEventListener("click", ()=>{
+      openDirectChat(peer);
+    });
+
+    workspaceChatList.appendChild(btn);
   });
-  requestAnimationFrame(()=>{ chatMessages.scrollTop = chatMessages.scrollHeight; });
-
-  const last = messages[messages.length - 1];
-  const preview = document.getElementById("companyChatPreview");
-  const time = document.getElementById("companyChatTime");
-  if(preview && last) preview.textContent = last.text;
-  if(time && last) time.textContent = last.time || "";
 }
 
-function syncCompanyChatIdentity(session){
-  const company = formatCompanyName(session?.company_name || "Company");
-  const first = (company[0] || "C").toUpperCase();
-  const listName = document.getElementById("companyChatName");
-  const fallback = document.getElementById("companyChatFallback");
-  const headerName = document.getElementById("chatHeaderName");
-  const headerFallback = document.getElementById("chatHeaderFallback");
-  if(listName) listName.textContent = company;
-  if(fallback) fallback.textContent = first;
-  if(headerName) headerName.textContent = company;
-  if(headerFallback) headerFallback.textContent = first;
-  renderCompanyMessages();
+async function fetchSameCompanyPeople(query){
+  const session = directChatSession || window.notusSession || {};
+  const companyId = session.company_id;
+  const me = currentChatIdentity(session);
+  const q = safeText(query).toLowerCase();
+
+  if(!companyId || !q) return [];
+
+  let people = [];
+
+  /* Employees */
+  try{
+    const {data,error} = await db
+      .from("employees")
+      .select("id,company_id,full_name,email,role,designation,profile_image_url")
+      .eq("company_id", companyId)
+      .limit(250);
+
+    if(error) throw error;
+
+    people.push(...(data || []).map(row=>({
+      key:participantKey("employee",row.id),
+      id:String(row.id || ""),
+      type:"employee",
+      company_id:String(row.company_id || companyId),
+      name:safeText(row.full_name) || safeText(row.email),
+      email:safeText(row.email),
+      role:safeText(row.role) || "Employee",
+      designation:safeText(row.designation),
+      profile_image_url:safeText(row.profile_image_url)
+    })));
+  }catch(err){
+    console.warn("Employee search failed:",err);
+  }
+
+  /* HR members — optional. If this table/columns differ, app continues normally. */
+  try{
+    const {data,error} = await db
+      .from("hr_members")
+      .select("*")
+      .eq("company_id", companyId)
+      .limit(100);
+
+    if(!error){
+      people.push(...(data || []).map(row=>({
+        key:participantKey("hr",row.id),
+        id:String(row.id || ""),
+        type:"hr",
+        company_id:String(row.company_id || companyId),
+        name:safeText(row.full_name || row.name) || safeText(row.email || row.gmail),
+        email:safeText(row.email || row.gmail),
+        role:safeText(row.role) || "HR",
+        designation:safeText(row.designation),
+        profile_image_url:safeText(row.profile_image_url)
+      })));
+    }
+  }catch(e){}
+
+  /* Company Admin */
+  try{
+    const {data,error} = await db
+      .from("companies")
+      .select("*")
+      .eq("id", companyId)
+      .maybeSingle();
+
+    if(!error && data){
+      people.push({
+        key:participantKey("company_admin",data.id),
+        id:String(data.id || companyId),
+        type:"company_admin",
+        company_id:String(data.id || companyId),
+        name:safeText(data.admin_name || data.company_admin_name) || "Company Admin",
+        email:safeText(data.gmail || data.email || data.admin_email),
+        role:"Company Admin",
+        designation:"",
+        profile_image_url:safeText(data.admin_profile_url)
+      });
+    }
+  }catch(e){}
+
+  /* same company + exclude current user + de-duplicate */
+  const seen = new Set();
+  people = people.filter(person=>{
+    if(!person.key || person.key === me.key) return false;
+    if(String(person.company_id) !== String(companyId)) return false;
+
+    const dedupeKey = (person.email || person.key).toLowerCase();
+    if(seen.has(dedupeKey)) return false;
+    seen.add(dedupeKey);
+    return true;
+  });
+
+  return people.filter(person=>{
+    const hay = [
+      person.name,
+      person.email,
+      person.role,
+      person.designation
+    ].join(" ").toLowerCase();
+
+    return hay.includes(q);
+  }).slice(0,50);
+}
+
+function rowPeer(row){
+  const me = currentChatIdentity();
+  if(!row) return null;
+
+  if(row.user_a_key === me.key) return row.user_b || null;
+  if(row.user_b_key === me.key) return row.user_a || null;
+  return null;
+}
+
+async function loadRecentDirectChats(){
+  const session = directChatSession || window.notusSession || {};
+  const me = currentChatIdentity(session);
+
+  if(!session.company_id || !me.key || me.key.endsWith(":")){
+    renderPeopleList([],"recent");
+    return;
+  }
+
+  if(workspaceChatList){
+    workspaceChatList.innerHTML = '<div class="chat-load-state">Loading chats...</div>';
+  }
+
+  try{
+    const {data,error} = await db
+      .from("notus_direct_chats")
+      .select("*")
+      .eq("company_id",session.company_id)
+      .or(`user_a_key.eq.${me.key},user_b_key.eq.${me.key}`)
+      .order("updated_at",{ascending:false});
+
+    if(error) throw error;
+
+    const items = (data || [])
+      .map(row=>({
+        ...row,
+        peer:rowPeer(row)
+      }))
+      .filter(x=>x.peer);
+
+    renderPeopleList(items,"recent");
+  }catch(err){
+    console.error("Load chats failed:",err);
+    if(workspaceChatList){
+      workspaceChatList.innerHTML =
+        '<div class="workspace-empty-chat">Chat database is not ready. Run the provided SQL once.</div>';
+    }
+  }
+}
+
+async function findConversation(peer){
+  const session = directChatSession || window.notusSession || {};
+  const me = currentChatIdentity(session);
+  const pair = canonicalPair(me,peer);
+
+  const {data,error} = await db
+    .from("notus_direct_chats")
+    .select("*")
+    .eq("company_id",session.company_id)
+    .eq("user_a_key",pair.user_a_key)
+    .eq("user_b_key",pair.user_b_key)
+    .maybeSingle();
+
+  if(error) throw error;
+  return data || null;
+}
+
+function renderDirectMessages(row){
+  if(!chatMessages) return;
+
+  const me = currentChatIdentity();
+  const messages = Array.isArray(row?.messages) ? row.messages : [];
+
+  chatMessages.innerHTML = '<div class="chat-day"><span>Today</span></div>';
+
+  messages.forEach(msg=>{
+    const item = {
+      side: msg.sender_key === me.key ? "out" : "in",
+      text:safeText(msg.text),
+      time:getChatDateTime(msg.created_at)
+    };
+    appendCompanyMessageBubble(item);
+  });
+
+  requestAnimationFrame(()=>{
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+}
+
+function paintDirectChatHeader(peer){
+  const name = document.getElementById("chatHeaderName");
+  const sub = document.getElementById("chatHeaderSub");
+  const img = document.getElementById("chatHeaderLogo");
+  const fallback = document.getElementById("chatHeaderFallback");
+
+  if(name) name.textContent = safeText(peer?.name) || "User";
+  if(sub) sub.textContent = personRoleLabel(peer);
+
+  if(fallback){
+    fallback.textContent = personInitial(peer);
+    fallback.style.display = "grid";
+  }
+
+  if(img){
+    img.style.display = "none";
+    img.removeAttribute("src");
+
+    const url = safeText(peer?.profile_image_url);
+    if(url){
+      img.onload = ()=>{
+        img.style.display = "block";
+        if(fallback) fallback.style.display = "none";
+      };
+      img.onerror = ()=>{
+        img.style.display = "none";
+        if(fallback) fallback.style.display = "grid";
+      };
+      img.src = url;
+    }
+  }
 }
 
 let chatBodyPreviousOverflow = "";
@@ -2730,7 +3136,6 @@ function updateChatViewportHeight(){
 }
 
 window.visualViewport?.addEventListener("resize", updateChatViewportHeight);
-/* visualViewport scroll listener intentionally omitted to prevent iPhone jump while typing */
 window.addEventListener("resize", updateChatViewportHeight);
 updateChatViewportHeight();
 
@@ -2738,7 +3143,6 @@ function lockPageBehindChat(){
   chatLockedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
   chatBodyPreviousOverflow = document.body.style.overflow;
   chatHtmlPreviousOverflow = document.documentElement.style.overflow;
-
   document.documentElement.style.overflow = "hidden";
   document.body.style.overflow = "hidden";
 }
@@ -2754,14 +3158,32 @@ function unlockPageBehindChat(){
   });
 }
 
-function openCompanyChat(){
-  renderCompanyMessages();
+async function openDirectChat(peer){
+  if(!peer) return;
+
+  activeDirectPeer = peer;
+  activeDirectChat = null;
+
+  paintDirectChatHeader(peer);
+  if(chatMessages){
+    chatMessages.innerHTML = '<div class="chat-load-state">Loading messages...</div>';
+  }
 
   lockPageBehindChat();
   updateChatViewportHeight();
-
   companyChatScreen?.classList.add("show");
   companyChatScreen?.setAttribute("aria-hidden","false");
+
+  try{
+    activeDirectChat = await findConversation(peer);
+    renderDirectMessages(activeDirectChat);
+  }catch(err){
+    console.error("Open chat failed:",err);
+    if(chatMessages){
+      chatMessages.innerHTML =
+        '<div class="workspace-empty-chat">Unable to load this chat.</div>';
+    }
+  }
 
   requestAnimationFrame(()=>{
     updateChatViewportHeight();
@@ -2771,9 +3193,9 @@ function openCompanyChat(){
 
 function closeCompanyChat(){
   chatMessageInput?.blur();
-
   companyChatScreen?.classList.remove("show");
   companyChatScreen?.setAttribute("aria-hidden","true");
+
   if(companyChatScreen){
     companyChatScreen.style.transition = "";
     companyChatScreen.style.transform = "";
@@ -2784,22 +3206,24 @@ function closeCompanyChat(){
   companyChatScreen?.style.setProperty("--chat-safe-bottom","env(safe-area-inset-bottom)");
 
   unlockPageBehindChat();
+  activeDirectPeer = null;
+  activeDirectChat = null;
+
+  if(workspaceSearch) workspaceSearch.value = "";
+  loadRecentDirectChats();
 }
-companyChatItem?.addEventListener("click", openCompanyChat);
+
 chatBackBtn?.addEventListener("click", closeCompanyChat);
-
-function refreshChatPreviewOnly(){
-  const messages = readCompanyMessages();
-  const last = messages[messages.length - 1];
-  const preview = document.getElementById("companyChatPreview");
-  const time = document.getElementById("companyChatTime");
-
-  if(preview && last) preview.textContent = last.text || "";
-  if(time && last) time.textContent = last.time || "";
-}
 
 function appendCompanyMessageBubble(message){
   if(!chatMessages || !message) return;
+
+  /* Remove temporary loading/empty state */
+  chatMessages.querySelectorAll(".chat-load-state,.workspace-empty-chat").forEach(el=>el.remove());
+
+  if(!chatMessages.querySelector(".chat-day")){
+    chatMessages.insertAdjacentHTML("afterbegin",'<div class="chat-day"><span>Today</span></div>');
+  }
 
   const row = document.createElement("div");
   row.className = "message-row " + (message.side === "out" ? "out" : "in");
@@ -2824,39 +3248,64 @@ function appendCompanyMessageBubble(message){
   });
 }
 
-function sendCompanyMessage(){
-  const text = String(chatMessageInput?.value || "").trim();
-  if(!text) return;
+async function sendCompanyMessage(){
+  const text = safeText(chatMessageInput?.value);
+  if(!text || !activeDirectPeer) return;
 
-  const message = {
-    side:"out",
-    text,
-    time:getTimeLabel()
-  };
-
-  const messages = readCompanyMessages();
-  messages.push(message);
-  saveCompanyMessages(messages);
+  const session = directChatSession || window.notusSession || {};
+  const me = currentChatIdentity(session);
+  const pair = canonicalPair(me,activeDirectPeer);
 
   chatMessageInput.value = "";
   chatMessageInput.style.height = "auto";
 
-  appendCompanyMessageBubble(message);
-  refreshChatPreviewOnly();
+  const optimistic = {
+    side:"out",
+    text,
+    time:getTimeLabel()
+  };
+  appendCompanyMessageBubble(optimistic);
 
-  /* Keep keyboard/input stable — no full chat repaint here */
+  try{
+    const {data,error} = await db.rpc("notus_send_direct_message",{
+      p_company_id:session.company_id,
+      p_user_a_key:pair.user_a_key,
+      p_user_b_key:pair.user_b_key,
+      p_user_a:pair.user_a,
+      p_user_b:pair.user_b,
+      p_sender_key:me.key,
+      p_text:text
+    });
+
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    if(row){
+      activeDirectChat = row;
+      renderDirectMessages(row);
+    }
+
+    loadRecentDirectChats();
+  }catch(err){
+    console.error("Send message failed:",err);
+    alert("Message not sent. Please check chat SQL / policies.");
+  }
+
   requestAnimationFrame(()=>{
     chatMessageInput?.focus({preventScroll:true});
     if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
   });
 }
+
 chatSendBtn?.addEventListener("click", sendCompanyMessage);
+
 chatMessageInput?.addEventListener("keydown", function(e){
   if(e.key === "Enter" && !e.shiftKey){
     e.preventDefault();
     sendCompanyMessage();
   }
 });
+
 chatMessageInput?.addEventListener("input", function(){
   this.style.height = "auto";
   this.style.height = Math.min(this.scrollHeight,88) + "px";
@@ -2867,7 +3316,6 @@ chatMessageInput?.addEventListener("input", function(){
 
 chatMessageInput?.addEventListener("focus", function(){
   updateChatViewportHeight();
-
   [40,100,180,300,450].forEach(delay=>{
     setTimeout(()=>{
       updateChatViewportHeight();
@@ -2884,11 +3332,91 @@ chatMessageInput?.addEventListener("blur", function(){
 });
 
 workspaceSearch?.addEventListener("input", function(){
-  const q = this.value.trim().toLowerCase();
-  const company = document.getElementById("companyChatName")?.textContent?.toLowerCase() || "";
-  const preview = document.getElementById("companyChatPreview")?.textContent?.toLowerCase() || "";
-  if(companyChatItem) companyChatItem.style.display = (!q || company.includes(q) || preview.includes(q)) ? "flex" : "none";
+  clearTimeout(directChatSearchTimer);
+  const q = safeText(this.value);
+
+  directChatSearchTimer = setTimeout(async ()=>{
+    if(!q){
+      await loadRecentDirectChats();
+      return;
+    }
+
+    if(workspaceChatList){
+      workspaceChatList.innerHTML = '<div class="chat-load-state">Searching company...</div>';
+    }
+
+    const people = await fetchSameCompanyPeople(q);
+    renderPeopleList(people,"search");
+  },180);
 });
+
+async function refreshChatPreviewOnly(){
+  if(safeText(workspaceSearch?.value)){
+    const people = await fetchSameCompanyPeople(workspaceSearch.value);
+    renderPeopleList(people,"search");
+  }else{
+    await loadRecentDirectChats();
+  }
+}
+
+function startDirectChatRealtime(){
+  const session = directChatSession || window.notusSession || {};
+  const me = currentChatIdentity(session);
+
+  if(!session.company_id || !me.key || typeof db === "undefined") return;
+
+  try{
+    if(directChatRealtime){
+      db.removeChannel(directChatRealtime);
+      directChatRealtime = null;
+    }
+
+    directChatRealtime = db
+      .channel("notus-direct-chat-" + session.company_id + "-" + me.key.replace(/[^a-zA-Z0-9]/g,"-"))
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"notus_direct_chats",
+          filter:`company_id=eq.${session.company_id}`
+        },
+        payload=>{
+          const row = payload.new || payload.old || {};
+          const involvesMe = row.user_a_key === me.key || row.user_b_key === me.key;
+          if(!involvesMe) return;
+
+          if(activeDirectPeer){
+            const pair = canonicalPair(me,activeDirectPeer);
+            if(row.user_a_key === pair.user_a_key && row.user_b_key === pair.user_b_key){
+              if(payload.new){
+                activeDirectChat = payload.new;
+                renderDirectMessages(payload.new);
+              }
+            }
+          }
+
+          if(!safeText(workspaceSearch?.value)){
+            loadRecentDirectChats();
+          }
+        }
+      )
+      .subscribe();
+  }catch(err){
+    console.warn("Direct chat realtime failed:",err);
+  }
+}
+
+async function initDirectChatForSession(session){
+  directChatSession = session || window.notusSession || null;
+  activeDirectPeer = null;
+  activeDirectChat = null;
+
+  if(workspaceSearch) workspaceSearch.value = "";
+  await loadRecentDirectChats();
+  startDirectChatRealtime();
+}
+
 
 /* Smooth iPhone-style pull to refresh */
 function resetPullRefresh(){
