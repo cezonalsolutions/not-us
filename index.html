@@ -1591,6 +1591,66 @@ body{
   100%{transform:translateY(0) scale(1)}
 }
 
+
+/* =========================================================
+   FINAL FIX — TOP STATUS BAR + SEARCH BAR MUST STAY IN PLACE
+   Only the chats list scrolls. Search bar will NOT go up.
+   ========================================================= */
+.workspace-screen.show{
+  height:100svh!important;
+  max-height:100svh!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+
+.workspace-topbar{
+  position:relative!important;
+  top:auto!important;
+  flex:0 0 103px!important;
+  min-height:103px!important;
+  z-index:110!important;
+}
+
+.workspace-search-row{
+  position:relative!important;
+  top:auto!important;
+  z-index:105!important;
+  flex:0 0 auto!important;
+  background:#f5f7f8!important;
+}
+
+.workspace-main{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  margin-top:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;
+}
+
+/* Prevent browser/body scroll while workspace is open. */
+body:has(.workspace-screen.show){
+  overflow:hidden!important;
+  height:100svh!important;
+}
+
+@supports not selector(:has(*)){
+  .workspace-screen.show{
+    overflow:hidden!important;
+  }
+}
+
+/* Small phones */
+@media(max-width:420px){
+  .workspace-screen.show{
+    height:100dvh!important;
+    max-height:100dvh!important;
+  }
+}
+
 </style>
 </head>
 
