@@ -1393,6 +1393,12 @@ body{
 .profile-quick-text{flex:1;font-family:"Inter",sans-serif;font-size:13px;font-weight:600;color:#202322}
 .profile-quick-arrow{font-size:11px;color:#a6aeab}
 
+
+/* FINAL PROFILE CLEANUP */
+.profile-details .profile-detail-item:last-child{
+  border-bottom:0!important;
+}
+
 </style>
 </head>
 
@@ -1755,10 +1761,29 @@ body{
   </div>
 
   <div class="profile-quick-menu">
-    <button class="profile-quick-item" type="button" data-profile-action="leave"><span class="profile-quick-icon"><i class="fa-regular fa-calendar-check"></i></span><span class="profile-quick-text">Leave</span><i class="fa-solid fa-chevron-right profile-quick-arrow"></i></button>
-    <button class="profile-quick-item" type="button" data-profile-action="payslip"><span class="profile-quick-icon"><i class="fa-regular fa-file-lines"></i></span><span class="profile-quick-text">Pay Slip</span><i class="fa-solid fa-chevron-right profile-quick-arrow"></i></button>
-    <button class="profile-quick-item" type="button" data-profile-action="meetings"><span class="profile-quick-icon"><i class="fa-solid fa-video"></i></span><span class="profile-quick-text">Upcoming Meetings</span><i class="fa-solid fa-chevron-right profile-quick-arrow"></i></button>
-    <button class="profile-quick-item" type="button" data-profile-action="help"><span class="profile-quick-icon"><i class="fa-regular fa-circle-question"></i></span><span class="profile-quick-text">Help &amp; Support</span><i class="fa-solid fa-chevron-right profile-quick-arrow"></i></button>
+    <button class="profile-quick-item" type="button" data-profile-action="meetings">
+      <span class="profile-quick-icon"><i class="fa-solid fa-video"></i></span>
+      <span class="profile-quick-text">Upcoming Meetings</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
+    <button class="profile-quick-item" type="button" data-profile-action="leave">
+      <span class="profile-quick-icon"><i class="fa-regular fa-calendar-check"></i></span>
+      <span class="profile-quick-text">Leave</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
+    <button class="profile-quick-item" type="button" data-profile-action="payslip">
+      <span class="profile-quick-icon"><i class="fa-regular fa-file-lines"></i></span>
+      <span class="profile-quick-text">Pay Slip</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
+    <button class="profile-quick-item" type="button" data-profile-action="help">
+      <span class="profile-quick-icon"><i class="fa-regular fa-circle-question"></i></span>
+      <span class="profile-quick-text">Help &amp; Support</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
   </div>
 
   <div class="profile-panel-footer"><button class="profile-logout-btn" id="profileLogoutBtn" type="button"><i class="fa-solid fa-arrow-right-from-bracket"></i>Logout</button></div>
