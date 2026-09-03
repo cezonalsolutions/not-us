@@ -1786,6 +1786,264 @@ body:has(.workspace-screen.show){
 }
 .mobile-leave-submit:disabled{opacity:.55}
 
+
+/* =========================================================
+   MOBILE UPCOMING MEETINGS — CLEAN / NOT CARD-HEAVY
+   ========================================================= */
+.mobile-meetings-screen{
+  position:fixed;
+  inset:0;
+  z-index:720;
+  display:flex;
+  flex-direction:column;
+  background:#f7f9f8;
+  transform:translateX(100%);
+  visibility:hidden;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s ease;
+}
+.mobile-meetings-screen.show{
+  transform:translateX(0);
+  visibility:visible;
+}
+.mobile-meetings-head{
+  flex:0 0 auto;
+  min-height:94px;
+  padding:max(18px,env(safe-area-inset-top)) 15px 13px;
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+  background:#fff;
+  border-bottom:1px solid #e9eeec;
+}
+.mobile-meetings-back{
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
+  border:0;
+  border-radius:11px;
+  background:transparent;
+  color:#303634;
+  display:grid;
+  place-items:center;
+  font-size:17px;
+}
+.mobile-meetings-back:active{background:#f1f4f3}
+.mobile-meetings-head-copy{
+  min-width:0;
+  flex:1;
+  padding-bottom:3px;
+}
+.mobile-meetings-head-copy h2{
+  margin:0;
+  font-family:"Outfit",sans-serif;
+  font-size:18px;
+  font-weight:600;
+  color:#171717;
+}
+.mobile-meetings-head-copy p{
+  margin:3px 0 0;
+  font-size:9px;
+  color:#8a9390;
+}
+.mobile-meetings-body{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:8px 15px calc(22px + env(safe-area-inset-bottom));
+}
+.mobile-meeting-list{width:100%}
+.mobile-meeting-row{
+  width:100%;
+  padding:17px 1px;
+  border-bottom:1px solid #e6ebe9;
+}
+.mobile-meeting-row:last-child{border-bottom:0}
+.mobile-meeting-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.mobile-meeting-title{
+  min-width:0;
+  flex:1;
+  font-family:"Outfit",sans-serif;
+  font-size:15px;
+  line-height:1.3;
+  font-weight:600;
+  color:#191d1b;
+}
+.mobile-meeting-when{
+  flex:0 0 auto;
+  text-align:right;
+}
+.mobile-meeting-date{
+  font-size:9px;
+  font-weight:700;
+  color:#0f766e;
+}
+.mobile-meeting-time{
+  margin-top:3px;
+  font-size:8px;
+  font-weight:600;
+  color:#737d79;
+}
+.mobile-meeting-desc{
+  margin-top:8px;
+  font-size:10px;
+  line-height:1.55;
+  color:#69736f;
+}
+.mobile-meeting-for{
+  margin-top:7px;
+  font-size:8px;
+  font-weight:600;
+  color:#929a97;
+}
+.mobile-meeting-link-line{
+  margin-top:12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.mobile-meeting-join{
+  height:36px;
+  padding:0 12px;
+  border:0;
+  border-radius:10px;
+  background:#171717;
+  color:#fff;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  font-family:"Inter",sans-serif;
+  font-size:9px;
+  font-weight:700;
+}
+.mobile-meeting-copy{
+  width:36px;
+  height:36px;
+  flex:0 0 36px;
+  border:1px solid #dde4e1;
+  border-radius:10px;
+  background:#fff;
+  color:#53605b;
+  display:grid;
+  place-items:center;
+  font-size:12px;
+}
+.mobile-meeting-copy.copied{
+  color:#0f766e;
+  border-color:#bcd8d2;
+  background:#f1f8f6;
+}
+.mobile-meetings-empty{
+  min-height:52vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#929a97;
+}
+.mobile-meetings-empty i{
+  font-size:23px;
+  margin-bottom:10px;
+  color:#b2bab7;
+}
+.mobile-meetings-empty b{
+  font-size:11px;
+  color:#3b423f;
+}
+.mobile-meetings-empty span{
+  margin-top:5px;
+  font-size:8.5px;
+  line-height:1.5;
+}
+
+/* Main workspace bottom upcoming meeting — hidden when there is no meeting */
+.workspace-upcoming-wrap{
+  display:none;
+  margin:5px 16px 14px;
+  padding:0 1px;
+}
+.workspace-upcoming-wrap.show{display:block}
+.workspace-upcoming-label{
+  margin-bottom:8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.workspace-upcoming-label b{
+  font-family:"Outfit",sans-serif;
+  font-size:11px;
+  font-weight:600;
+  color:#252a28;
+}
+.workspace-upcoming-label button{
+  border:0;
+  background:transparent;
+  color:#0f766e;
+  font-size:8px;
+  font-weight:700;
+}
+.workspace-upcoming-line{
+  width:100%;
+  border:0;
+  border-top:1px solid #dfe6e3;
+  border-bottom:1px solid #dfe6e3;
+  background:transparent;
+  padding:12px 0;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  text-align:left;
+}
+.workspace-upcoming-date{
+  width:42px;
+  flex:0 0 42px;
+  text-align:center;
+  color:#0f766e;
+}
+.workspace-upcoming-date strong{
+  display:block;
+  font-family:"Outfit",sans-serif;
+  font-size:15px;
+  line-height:1;
+}
+.workspace-upcoming-date span{
+  display:block;
+  margin-top:3px;
+  font-size:7px;
+  font-weight:700;
+  text-transform:uppercase;
+}
+.workspace-upcoming-info{
+  min-width:0;
+  flex:1;
+}
+.workspace-upcoming-title{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:11px;
+  font-weight:700;
+  color:#222725;
+}
+.workspace-upcoming-meta{
+  margin-top:4px;
+  font-size:8px;
+  color:#7e8884;
+}
+.workspace-upcoming-arrow{
+  flex:0 0 auto;
+  color:#9aa39f;
+  font-size:10px;
+}
+
 </style>
 
 <style>
@@ -2540,6 +2798,24 @@ html,body{
         Search a teammate to start chatting.
       </div>
     </div>
+
+    <div class="workspace-upcoming-wrap" id="workspaceUpcomingMeeting">
+      <div class="workspace-upcoming-label">
+        <b>Upcoming Meeting</b>
+        <button type="button" id="workspaceUpcomingViewAll">View all</button>
+      </div>
+      <button class="workspace-upcoming-line" id="workspaceUpcomingLine" type="button">
+        <div class="workspace-upcoming-date">
+          <strong id="workspaceUpcomingDay">--</strong>
+          <span id="workspaceUpcomingMonth">---</span>
+        </div>
+        <div class="workspace-upcoming-info">
+          <div class="workspace-upcoming-title" id="workspaceUpcomingTitle">Meeting</div>
+          <div class="workspace-upcoming-meta" id="workspaceUpcomingMeta">--</div>
+        </div>
+        <i class="fa-solid fa-chevron-right workspace-upcoming-arrow"></i>
+      </button>
+    </div>
   </main>
 </div>
 
@@ -2575,6 +2851,29 @@ html,body{
   </div>
 </section>
 
+
+
+<section class="mobile-meetings-screen" id="mobileMeetingsScreen" aria-hidden="true">
+  <header class="mobile-meetings-head">
+    <button class="mobile-meetings-back" id="mobileMeetingsBack" type="button" aria-label="Back">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <div class="mobile-meetings-head-copy">
+      <h2>Upcoming Meetings</h2>
+      <p>Your scheduled meetings</p>
+    </div>
+  </header>
+
+  <div class="mobile-meetings-body">
+    <div class="mobile-meeting-list" id="mobileMeetingsList">
+      <div class="mobile-meetings-empty">
+        <i class="fa-regular fa-calendar"></i>
+        <b>No upcoming meetings</b>
+        <span>Your scheduled meetings will appear here.</span>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section class="mobile-leave-screen" id="mobileLeaveScreen" aria-hidden="true">
   <header class="mobile-leave-head">
@@ -3845,7 +4144,7 @@ document.querySelectorAll("[data-profile-action]").forEach(btn=>{
 
     if(action==="leave"){ closeProfilePanel(); openMobileLeaveScreen(); }
     else if(action==="payslip") alert("Pay Slip");
-    else if(action==="meetings") alert("Upcoming Meetings");
+    else if(action==="meetings"){ closeProfilePanel(); openMobileMeetingsScreen(); }
     else if(action==="help") alert("Help & Support");
   });
 });
@@ -6041,6 +6340,314 @@ function hideStatus(){
 </script>
 
 
+
+<script>
+/* =========================================================
+   MOBILE UPCOMING MEETINGS — LIVE
+   Uses existing notus_list_my_upcoming_meetings RPC.
+   ========================================================= */
+(function(){
+  const $=id=>document.getElementById(id);
+
+  let meetingRows=[];
+  let meetingChannel=null;
+  let meetingChannelKey="";
+  let meetingLoadBusy=false;
+
+  function session(){
+    return window.notusSession ||
+      (()=>{try{return JSON.parse(localStorage.getItem("notus_company_session")||"null")}catch(_){return null}})();
+  }
+
+  function memberIdentity(){
+    const s=session()||{};
+    const t=String(s.user_type||"").toLowerCase();
+
+    if(t==="company_admin"||t==="admin"){
+      return {type:"admin",id:String(s.company_id||"")};
+    }
+    if(t==="hr"||t==="hr_member"){
+      return {type:"hr",id:String(s.hr_id||"")};
+    }
+    if(t==="manager"){
+      return {type:"manager",id:String(s.employee_id||"")};
+    }
+    if(t==="team_lead"||t==="teamlead"){
+      return {type:"team_lead",id:String(s.employee_id||"")};
+    }
+
+    return {type:"employee",id:String(s.employee_id||"")};
+  }
+
+  function escMeeting(v){
+    return String(v??"")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function meetingDateLabel(value){
+    if(!value) return "";
+    const d=new Date(`${String(value).slice(0,10)}T00:00:00`);
+    if(!Number.isFinite(d.getTime())) return String(value);
+    return d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+  }
+
+  function meetingTimeLabel(value){
+    const raw=String(value||"").slice(0,5);
+    if(!raw) return "";
+    const [h,m]=raw.split(":").map(Number);
+    if(!Number.isFinite(h)||!Number.isFinite(m)) return raw;
+    const d=new Date();
+    d.setHours(h,m,0,0);
+    return d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+  }
+
+  function audienceLabel(row){
+    if(row?.audience_label) return row.audience_label;
+    const t=String(row?.audience_type||"").toLowerCase();
+    if(t==="branch") return "Entire Branch";
+    if(t==="team") return "My Team";
+    return "Specific Person";
+  }
+
+  function validMeetingLink(link){
+    try{
+      const u=new URL(String(link||"").trim());
+      return /^https?:$/i.test(u.protocol) ? u.href : "";
+    }catch(_){ return ""; }
+  }
+
+  function openMeetingLink(link){
+    const url=validMeetingLink(link);
+    if(!url) return;
+
+    /* Mobile/WebView: tapping Join redirects immediately to the saved link. */
+    window.location.href=url;
+  }
+
+  async function copyMeetingLink(link,button){
+    const url=validMeetingLink(link);
+    if(!url) return;
+
+    try{
+      if(navigator.clipboard?.writeText){
+        await navigator.clipboard.writeText(url);
+      }else{
+        const ta=document.createElement("textarea");
+        ta.value=url;
+        ta.style.position="fixed";
+        ta.style.opacity="0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+      }
+
+      if(button){
+        const old=button.innerHTML;
+        button.classList.add("copied");
+        button.innerHTML='<i class="fa-solid fa-check"></i>';
+        setTimeout(()=>{
+          button.classList.remove("copied");
+          button.innerHTML=old;
+        },1200);
+      }
+    }catch(err){
+      console.warn("Copy meeting link:",err);
+    }
+  }
+
+  function renderMeetingScreen(rows){
+    const list=$("mobileMeetingsList");
+    if(!list) return;
+
+    if(!rows.length){
+      list.innerHTML=`
+        <div class="mobile-meetings-empty">
+          <i class="fa-regular fa-calendar"></i>
+          <b>No upcoming meetings</b>
+          <span>Your scheduled meetings will appear here.</span>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML=rows.map((m,i)=>{
+      const link=validMeetingLink(m.meeting_link);
+      return `
+        <article class="mobile-meeting-row" data-mobile-meeting-index="${i}">
+          <div class="mobile-meeting-top">
+            <div class="mobile-meeting-title">${escMeeting(m.title||"Meeting")}</div>
+            <div class="mobile-meeting-when">
+              <div class="mobile-meeting-date">${escMeeting(meetingDateLabel(m.meeting_date))}</div>
+              <div class="mobile-meeting-time">${escMeeting(meetingTimeLabel(m.meeting_time))}</div>
+            </div>
+          </div>
+
+          ${m.description?`<div class="mobile-meeting-desc">${escMeeting(m.description)}</div>`:""}
+
+          <div class="mobile-meeting-for">
+            ${escMeeting(audienceLabel(m))}
+            ${m.creator_name?` · Created by ${escMeeting(m.creator_name)}`:""}
+          </div>
+
+          ${link?`
+            <div class="mobile-meeting-link-line">
+              <button class="mobile-meeting-join" type="button" data-meeting-join="${i}">
+                <i class="fa-solid fa-video"></i>
+                Join Meeting
+              </button>
+              <button class="mobile-meeting-copy" type="button" aria-label="Copy meeting link" data-meeting-copy="${i}">
+                <i class="fa-regular fa-copy"></i>
+              </button>
+            </div>
+          `:""}
+        </article>
+      `;
+    }).join("");
+
+    list.querySelectorAll("[data-meeting-join]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const row=rows[Number(btn.dataset.meetingJoin)];
+        openMeetingLink(row?.meeting_link);
+      });
+    });
+
+    list.querySelectorAll("[data-meeting-copy]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const row=rows[Number(btn.dataset.meetingCopy)];
+        copyMeetingLink(row?.meeting_link,btn);
+      });
+    });
+  }
+
+  function paintWorkspaceUpcoming(rows){
+    const wrap=$("workspaceUpcomingMeeting");
+    if(!wrap) return;
+
+    const row=rows?.[0];
+    if(!row){
+      wrap.classList.remove("show");
+      return;
+    }
+
+    const d=new Date(`${String(row.meeting_date||"").slice(0,10)}T00:00:00`);
+
+    $("workspaceUpcomingDay").textContent=
+      Number.isFinite(d.getTime()) ? String(d.getDate()).padStart(2,"0") : "--";
+
+    $("workspaceUpcomingMonth").textContent=
+      Number.isFinite(d.getTime())
+        ? d.toLocaleDateString(undefined,{month:"short"})
+        : "---";
+
+    $("workspaceUpcomingTitle").textContent=row.title||"Meeting";
+    $("workspaceUpcomingMeta").textContent=
+      `${meetingDateLabel(row.meeting_date)} · ${meetingTimeLabel(row.meeting_time)}`;
+
+    wrap.classList.add("show");
+  }
+
+  async function loadMobileMeetings(){
+    if(meetingLoadBusy) return;
+    const s=session();
+    const member=memberIdentity();
+
+    if(!s?.company_id || !member.id) return;
+
+    meetingLoadBusy=true;
+    try{
+      const {data,error}=await db.rpc("notus_list_my_upcoming_meetings",{
+        p_company_id:s.company_id,
+        p_member_type:member.type,
+        p_member_id:member.id
+      });
+
+      if(error) throw error;
+
+      meetingRows=Array.isArray(data)?data:[];
+      renderMeetingScreen(meetingRows);
+      paintWorkspaceUpcoming(meetingRows);
+    }catch(err){
+      console.warn("Mobile meetings:",err);
+    }finally{
+      meetingLoadBusy=false;
+    }
+  }
+
+  function openMobileMeetingsScreen(){
+    closeProfilePanel?.();
+    const screen=$("mobileMeetingsScreen");
+    screen?.classList.add("show");
+    screen?.setAttribute("aria-hidden","false");
+    loadMobileMeetings();
+  }
+
+  function closeMobileMeetingsScreen(){
+    const screen=$("mobileMeetingsScreen");
+    screen?.classList.remove("show");
+    screen?.setAttribute("aria-hidden","true");
+  }
+
+  async function startMobileMeetingsRealtime(){
+    const s=session();
+    const member=memberIdentity();
+    if(!s?.company_id || !member.id) return;
+
+    const key=`${s.company_id}:${member.type}:${member.id}`;
+    if(meetingChannel && meetingChannelKey===key) return;
+
+    if(meetingChannel){
+      try{await db.removeChannel(meetingChannel)}catch(_){}
+      meetingChannel=null;
+      meetingChannelKey="";
+    }
+
+    const topic=`mobile-meetings:${key}:${Date.now()}`;
+    const ch=db.channel(topic);
+
+    ch.on("postgres_changes",{
+      event:"*",
+      schema:"public",
+      table:"notus_meetings",
+      filter:`company_id=eq.${s.company_id}`
+    },()=>loadMobileMeetings());
+
+    ch.on("postgres_changes",{
+      event:"*",
+      schema:"public",
+      table:"notus_meeting_attendees",
+      filter:`company_id=eq.${s.company_id}`
+    },()=>loadMobileMeetings());
+
+    meetingChannel=ch;
+    meetingChannelKey=key;
+    ch.subscribe();
+  }
+
+  $("mobileMeetingsBack")?.addEventListener("click",closeMobileMeetingsScreen);
+  $("workspaceUpcomingViewAll")?.addEventListener("click",openMobileMeetingsScreen);
+  $("workspaceUpcomingLine")?.addEventListener("click",openMobileMeetingsScreen);
+
+  window.openMobileMeetingsScreen=openMobileMeetingsScreen;
+  window.loadMobileMeetings=loadMobileMeetings;
+
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible"){
+      loadMobileMeetings();
+    }
+  });
+
+  setTimeout(()=>{
+    loadMobileMeetings();
+    startMobileMeetingsRealtime();
+  },900);
+})();
+</script>
+
 <script>
 /* =========================================================
    MOBILE LEAVE — iOS/Android EDGE SWIPE BACK
@@ -6142,6 +6749,59 @@ function hideStatus(){
 
     tracking=false;
     horizontal=false;
+  },{passive:true});
+})();
+</script>
+
+
+<script>
+(function(){
+  const screen=document.getElementById("mobileMeetingsScreen");
+  if(!screen) return;
+
+  let sx=0,sy=0,cx=0,tracking=false,horizontal=false;
+  const EDGE=34,TRIGGER=78;
+
+  screen.addEventListener("touchstart",e=>{
+    if(!screen.classList.contains("show")||e.touches?.length!==1) return;
+    const t=e.touches[0];
+    if(t.clientX>EDGE) return;
+    sx=cx=t.clientX; sy=t.clientY; tracking=true; horizontal=false;
+  },{passive:true});
+
+  screen.addEventListener("touchmove",e=>{
+    if(!tracking||e.touches?.length!==1) return;
+    const t=e.touches[0],dx=t.clientX-sx,dy=t.clientY-sy;
+    if(!horizontal){
+      if(Math.abs(dx)<8&&Math.abs(dy)<8) return;
+      if(Math.abs(dy)>Math.abs(dx)){tracking=false;return}
+      horizontal=true;
+    }
+    if(dx<=0) return;
+    cx=t.clientX;
+    screen.style.transition="none";
+    screen.style.transform=`translate3d(${Math.min(dx,innerWidth)}px,0,0)`;
+  },{passive:true});
+
+  screen.addEventListener("touchend",()=>{
+    if(!tracking) return;
+    const dx=cx-sx;
+    if(horizontal&&dx>=TRIGGER){
+      screen.classList.remove("show");
+      screen.setAttribute("aria-hidden","true");
+      screen.style.transition="";
+      screen.style.transform="";
+    }else{
+      screen.style.transition="transform .22s cubic-bezier(.2,.8,.2,1)";
+      screen.style.transform="translate3d(0,0,0)";
+      setTimeout(()=>{
+        if(screen.classList.contains("show")){
+          screen.style.transition="";
+          screen.style.transform="";
+        }
+      },230);
+    }
+    tracking=false;horizontal=false;
   },{passive:true});
 })();
 </script>
