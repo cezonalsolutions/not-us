@@ -2255,7 +2255,8 @@ body:has(.workspace-screen.show){
   color:#444b51!important;
 }
 .workspace-announcement-btn i{
-  font-size:15px;
+  font-size:16px;
+  stroke-width:1.5;
 }
 .workspace-announcement-btn:active{
   background:#f1f4f3!important;
@@ -2986,7 +2987,7 @@ html,body{
         </div>
       </div>
 <button class="workspace-icon-btn workspace-announcement-btn" id="workspaceAnnouncementBtn" type="button" aria-label="Announcements">
-          <i class="fa-solid fa-bullhorn"></i>
+          <i class="fa-regular fa-bell"></i>
         </button>
         <button class="workspace-profile-btn" id="workspaceProfileBtn" type="button" aria-label="Profile">
         <img class="top-user-profile-img" id="topUserProfileImg" alt="Profile">
@@ -6654,7 +6655,7 @@ function hideStatus(){
     if(!url) return;
 
     /* Mobile/WebView: tapping Join redirects immediately to the saved link. */
-    window.location.href=url;
+    openOutsideApp(url);
   }
 
   async function copyMeetingLink(link,button){
@@ -7105,6 +7106,43 @@ function hideStatus(){
     tracking=false;horizontal=false;
   },{passive:true});
 })();
+</script>
+
+
+<script>
+/* ===== OPEN EXTERNAL LINKS OUTSIDE APP / WEBVIEW ===== */
+window.openOutsideApp = function(rawUrl){
+  const url = String(rawUrl || "").trim();
+  if(!url) return;
+
+  // Native wrappers can intercept this custom event if available.
+  try{
+    if(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openExternal){
+      window.webkit.messageHandlers.openExternal.postMessage(url);
+      return;
+    }
+  }catch(_){}
+
+  try{
+    if(window.Android && typeof window.Android.openExternal === "function"){
+      window.Android.openExternal(url);
+      return;
+    }
+  }catch(_){}
+
+  // Browser/PWA fallback: new external browsing context, never replace this app page.
+  const opened = window.open(url, "_blank", "noopener,noreferrer");
+  if(opened) return;
+
+  // Last fallback: synthetic external anchor.
+  const a=document.createElement("a");
+  a.href=url;
+  a.target="_blank";
+  a.rel="noopener noreferrer external";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
 </script>
 
 </body>
