@@ -2055,19 +2055,11 @@ form.addEventListener("submit", async function(e){
             .ilike("email", loginEmail)
             .maybeSingle();
 
-          if(!rr.error && rr.data){
-            /* IMPORTANT:
-               Designation-based users may not have a meaningful role value.
-               Always save the exact employee id + profile image first. */
+          if(!rr.error && rr.data?.role){
+            resolvedEmployeeRole = String(rr.data.role).trim();
             if(rr.data.id) employee.employee_id = rr.data.id;
-            if(rr.data.full_name) employee.full_name = rr.data.full_name;
-            if(rr.data.email) employee.gmail = rr.data.email;
             if(rr.data.designation) employee.designation = rr.data.designation;
             if(rr.data.profile_image_url) employee.profile_image_url = rr.data.profile_image_url;
-
-            if(rr.data.role){
-              resolvedEmployeeRole = String(rr.data.role).trim();
-            }
           }
         }catch(roleErr){
           console.warn("Could not refresh exact employee role:", roleErr);
@@ -2098,7 +2090,6 @@ form.addEventListener("submit", async function(e){
           branch_location: employee.branch_location,
           full_name: employee.full_name,
           gmail: employee.gmail || gmail,
-          designation: employee.designation || "",
           profile_image_url: employee.profile_image_url || "",
           role: resolvedEmployeeRole || employee.role,
           designation: employee.designation || "",
@@ -3233,19 +3224,6 @@ function buildPersonAvatar(person){
       ()=>{
         img.style.display = "none";
         initial.style.display = "grid";
-
-        /* One delayed retry for Safari/WebView intermittent image failures. */
-        setTimeout(()=>{
-          loadProfileImageInto(
-            img,
-            url,
-            ()=>{
-              img.style.display = "block";
-              initial.style.display = "none";
-            },
-            ()=>{}
-          );
-        },450);
       }
     );
   }
@@ -3519,135 +3497,6 @@ function rowPeer(row){
   return null;
 }
 
-
-async function refreshDirectPeerIdentity(peer){
-  if(!peer) return peer;
-
-  const session = directChatSession || window.notusSession || {};
-  const companyId = session.company_id;
-  if(!companyId) return peer;
-
-  try{
-    if(peer.type === "employee"){
-      let row = null;
-
-      /* ID first */
-      if(peer.id){
-        const byId = await db
-          .from("employees")
-          .select("id,company_id,full_name,email,role,designation,profile_image_url")
-          .eq("company_id",companyId)
-          .eq("id",peer.id)
-          .maybeSingle();
-
-        if(!byId.error && byId.data) row = byId.data;
-      }
-
-      /* Email fallback for older JSON chat records */
-      if(!row && peer.email){
-        const byEmail = await db
-          .from("employees")
-          .select("id,company_id,full_name,email,role,designation,profile_image_url")
-          .eq("company_id",companyId)
-          .ilike("email",String(peer.email).trim())
-          .limit(1);
-
-        if(!byEmail.error && byEmail.data?.length) row = byEmail.data[0];
-      }
-
-      if(row){
-        peer.id = String(row.id || peer.id || "");
-        peer.key = participantKey("employee",peer.id);
-        peer.name = safeText(row.full_name) || peer.name;
-        peer.email = safeText(row.email) || peer.email;
-        peer.role = safeText(row.role) || peer.role || "Employee";
-        peer.designation = safeText(row.designation) || peer.designation || "";
-        peer.profile_image_url =
-          normalizeProfileImageUrl(row.profile_image_url) ||
-          normalizeProfileImageUrl(peer.profile_image_url);
-      }
-    }
-
-    else if(peer.type === "hr"){
-      let row = null;
-
-      if(peer.id){
-        const byId = await db
-          .from("hr_members")
-          .select("*")
-          .eq("company_id",companyId)
-          .eq("id",peer.id)
-          .maybeSingle();
-
-        if(!byId.error && byId.data) row = byId.data;
-      }
-
-      if(!row && peer.email){
-        const all = await db
-          .from("hr_members")
-          .select("*")
-          .eq("company_id",companyId)
-          .limit(200);
-
-        if(!all.error){
-          row = (all.data || []).find(x =>
-            String(x.email || x.gmail || "").trim().toLowerCase() ===
-            String(peer.email || "").trim().toLowerCase()
-          ) || null;
-        }
-      }
-
-      if(row){
-        peer.id = String(row.id || peer.id || "");
-        peer.key = participantKey("hr",peer.id);
-        peer.name = safeText(row.full_name || row.name) || peer.name;
-        peer.email = safeText(row.email || row.gmail) || peer.email;
-        peer.role = safeText(row.role) || peer.role || "HR";
-        peer.designation = safeText(row.designation) || peer.designation || "";
-        peer.profile_image_url =
-          normalizeProfileImageUrl(row.profile_image_url) ||
-          normalizeProfileImageUrl(peer.profile_image_url);
-      }
-    }
-
-    else if(peer.type === "company_admin"){
-      const {data,error} = await db
-        .from("companies")
-        .select("*")
-        .eq("id",companyId)
-        .maybeSingle();
-
-      if(!error && data){
-        peer.id = String(data.id || companyId);
-        peer.key = participantKey("company_admin",peer.id);
-        peer.name =
-          safeText(data.admin_name || data.company_admin_name) ||
-          peer.name ||
-          "Company Admin";
-        peer.email =
-          safeText(data.gmail || data.email || data.admin_email) ||
-          peer.email;
-        peer.role = "Company Admin";
-        peer.designation = "";
-        peer.profile_image_url =
-          normalizeProfileImageUrl(data.admin_profile_url) ||
-          normalizeProfileImageUrl(peer.profile_image_url);
-      }
-    }
-  }catch(err){
-    console.warn("Direct peer identity refresh failed:",err);
-  }
-
-  return peer;
-}
-
-async function refreshDirectPeerIdentities(items){
-  await Promise.all(
-    (items || []).map(item => refreshDirectPeerIdentity(item.peer || item))
-  );
-  return items;
-}
-
 async function loadRecentDirectChats(){
   const session = directChatSession || window.notusSession || {};
   const me = currentChatIdentity(session);
@@ -3678,8 +3527,6 @@ async function loadRecentDirectChats(){
       }))
       .filter(x=>x.peer);
 
-    /* Main chat list must use the CURRENT DB identity/image, not stale JSON. */
-    await refreshDirectPeerIdentities(items);
     await enrichPeopleAttendance(items);
     renderPeopleList(items,"recent");
   }catch(err){
@@ -3767,18 +3614,6 @@ function paintDirectChatHeader(peer){
         ()=>{
           img.style.display = "none";
           if(fallback) fallback.style.display = "grid";
-
-          setTimeout(()=>{
-            loadProfileImageInto(
-              img,
-              url,
-              ()=>{
-                img.style.display = "block";
-                if(fallback) fallback.style.display = "none";
-              },
-              ()=>{}
-            );
-          },450);
         }
       );
     }
@@ -4347,6 +4182,145 @@ function hideStatus(){
   loginStatus.style.display = "none";
   loginStatus.textContent = "";
 }
+</script>
+
+
+<script>
+/* =========================================================
+   NOT US — FULL LIVE SYNC (NO MANUAL REFRESH)
+   Realtime first + small fallback sync for DB/RPC changes.
+========================================================= */
+let notusWorkspaceLiveChannel = null;
+let notusWorkspaceLiveTimer = null;
+let notusWorkspaceLiveBusy = false;
+
+async function notusLiveRefreshWorkspace(){
+  if(notusWorkspaceLiveBusy) return;
+  const s = window.notusSession || (()=>{try{return JSON.parse(localStorage.getItem("notus_company_session")||"null")}catch(e){return null}})();
+  if(!s?.company_id || document.visibilityState === "hidden") return;
+  notusWorkspaceLiveBusy = true;
+  try{
+    /* Current logged-in profile/photo/status */
+    if(typeof loadCurrentUserProfilePhoto === "function") await loadCurrentUserProfilePhoto();
+    if(typeof loadMyWorkspaceStatus === "function") await loadMyWorkspaceStatus();
+
+    /* Search results / recent chats + peer status */
+    if(typeof refreshChatPreviewOnly === "function") await refreshChatPreviewOnly();
+
+    /* If a direct chat is open, refresh exact peer + conversation too. */
+    if(typeof activeDirectPeer !== "undefined" && activeDirectPeer){
+      if(typeof refreshPeerBeforeOpen === "function"){
+        await refreshPeerBeforeOpen(activeDirectPeer);
+        if(typeof paintDirectChatHeader === "function") paintDirectChatHeader(activeDirectPeer);
+      }
+      if(typeof findConversation === "function"){
+        const row = await findConversation(activeDirectPeer);
+        if(row){
+          activeDirectChat = row;
+          if(typeof renderDirectMessages === "function") renderDirectMessages(row);
+        }
+      }
+    }
+  }catch(e){
+    console.warn("Live workspace refresh skipped:", e);
+  }finally{
+    notusWorkspaceLiveBusy = false;
+  }
+}
+
+function stopNotusWorkspaceLive(){
+  try{
+    if(notusWorkspaceLiveChannel && typeof db !== "undefined") db.removeChannel(notusWorkspaceLiveChannel);
+  }catch(e){}
+  notusWorkspaceLiveChannel = null;
+  if(notusWorkspaceLiveTimer){ clearInterval(notusWorkspaceLiveTimer); notusWorkspaceLiveTimer = null; }
+}
+
+function startNotusWorkspaceLive(){
+  const s = window.notusSession || (()=>{try{return JSON.parse(localStorage.getItem("notus_company_session")||"null")}catch(e){return null}})();
+  if(!s?.company_id || typeof db === "undefined") return;
+
+  stopNotusWorkspaceLive();
+  const companyId = String(s.company_id);
+  let refreshTimer = null;
+  const queueRefresh = ()=>{
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(notusLiveRefreshWorkspace, 80);
+  };
+
+  try{
+    let ch = db.channel("notus-workspace-live-" + companyId + "-" + Date.now());
+    ["employees","hr_members","companies","notus_direct_chats"].forEach(table=>{
+      ch = ch.on("postgres_changes", {event:"*",schema:"public",table}, payload=>{
+        const row = payload?.new || payload?.old || {};
+        if(table === "companies"){
+          if(String(row.id||"") !== companyId) return;
+        }else if(row.company_id != null && String(row.company_id) !== companyId){
+          return;
+        }
+        queueRefresh();
+      });
+    });
+    notusWorkspaceLiveChannel = ch.subscribe();
+  }catch(e){
+    console.warn("Workspace realtime channel unavailable; fallback sync stays active.",e);
+  }
+
+  /* RPC-backed attendance may not expose its underlying table here.
+     This lightweight fallback keeps Available/Break/Meeting/Busy/Offline,
+     profile changes, search results and messages fresh without page reload. */
+  notusWorkspaceLiveTimer = setInterval(notusLiveRefreshWorkspace, 3000);
+  setTimeout(notusLiveRefreshWorkspace, 120);
+}
+
+/* Correct HR profile realtime source too (old function mapped HR to employees). */
+function startCurrentUserProfileRealtime(){
+  const s = typeof getNotusSession === "function" ? getNotusSession() : window.notusSession;
+  if(!s?.company_id || typeof db === "undefined") return;
+  try{
+    const source = typeof getLoggedInProfileSource === "function" ? getLoggedInProfileSource(s) : {kind:"employee"};
+    if(typeof notusProfileChannel !== "undefined" && notusProfileChannel){
+      db.removeChannel(notusProfileChannel);
+      notusProfileChannel = null;
+    }
+    const table = source.kind === "company" ? "companies" : (source.kind === "hr" ? "hr_members" : "employees");
+    notusProfileChannel = db.channel("notus-current-profile-live-"+s.company_id+"-"+table+"-"+Date.now())
+      .on("postgres_changes",{event:"UPDATE",schema:"public",table},payload=>{
+        const row=payload?.new||{};
+        if(table === "companies"){
+          if(String(row.id||"") !== String(s.company_id)) return;
+        }else if(String(row.company_id||"") !== String(s.company_id)) return;
+        setTimeout(()=>{ if(typeof loadCurrentUserProfilePhoto === "function") loadCurrentUserProfilePhoto(); },40);
+      }).subscribe();
+  }catch(e){ console.warn("Profile realtime failed:",e); }
+}
+
+/* Start live sync whenever workspace/session is shown. */
+if(typeof showWorkspace === "function"){
+  const __notusOriginalShowWorkspaceLive = showWorkspace;
+  showWorkspace = function(session){
+    const result = __notusOriginalShowWorkspaceLive.apply(this,arguments);
+    setTimeout(()=>{
+      startNotusWorkspaceLive();
+      if(typeof startCurrentUserProfileRealtime === "function") startCurrentUserProfileRealtime();
+    },180);
+    return result;
+  };
+}
+
+window.addEventListener("pageshow",()=>setTimeout(startNotusWorkspaceLive,180));
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState === "visible"){
+    startNotusWorkspaceLive();
+    setTimeout(notusLiveRefreshWorkspace,80);
+  }
+});
+window.addEventListener("online",()=>{ startNotusWorkspaceLive(); setTimeout(notusLiveRefreshWorkspace,80); });
+window.addEventListener("beforeunload",stopNotusWorkspaceLive);
+
+/* Existing restored session may already be visible before this patch runs. */
+setTimeout(startNotusWorkspaceLive,250);
+window.refreshNotusWorkspaceLive = notusLiveRefreshWorkspace;
 </script>
 
 </body>
