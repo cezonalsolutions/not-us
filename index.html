@@ -3158,6 +3158,43 @@ body:has(.workspace-screen.show){
   display:none!important;
 }
 
+
+
+/* ===== WORK REPORT EDIT — RIGHT SIDE ONLY ===== */
+.mobile-work-report-item-top{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+}
+
+.mobile-work-report-title{
+  min-width:0!important;
+  flex:1 1 auto!important;
+}
+
+.mobile-work-report-edit{
+  flex:0 0 auto!important;
+  margin:0!important;
+  height:28px!important;
+  padding:0 2px!important;
+  border:0!important;
+  background:transparent!important;
+  color:#0f766e!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:5px!important;
+  font-family:"Inter",sans-serif!important;
+  font-size:8.5px!important;
+  font-weight:700!important;
+  white-space:nowrap!important;
+}
+
+.mobile-work-report-edit i{
+  font-size:8px!important;
+}
+
 </style>
 
 <style>
@@ -8709,6 +8746,12 @@ window.openOutsideApp = function(rawUrl){
       <article class="mobile-work-report-item ${canEditReport(r)?"editable":"locked"}">
         <div class="mobile-work-report-item-top">
           <div class="mobile-work-report-title">${esc(r.title||"Work Report")}</div>
+          ${canEditReport(r)?`
+            <button class="mobile-work-report-edit" type="button" data-work-report-edit="${esc(r.id)}">
+              <i class="fa-regular fa-pen-to-square"></i>
+              Edit
+            </button>
+          `:""}
         </div>
         <div class="mobile-work-report-desc">${esc(r.description||"")}</div>
         <div class="mobile-work-report-meta">
@@ -8717,12 +8760,6 @@ window.openOutsideApp = function(rawUrl){
           <span>·</span>
           <span>${esc(timeText(r.created_at))}</span>
         </div>
-        ${canEditReport(r)?`
-          <button class="mobile-work-report-edit" type="button" data-work-report-edit="${esc(r.id)}">
-            <i class="fa-regular fa-pen-to-square"></i>
-            Edit
-          </button>
-        `:""}
       </article>
     `).join("");
   }
