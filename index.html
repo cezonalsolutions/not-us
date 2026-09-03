@@ -2262,6 +2262,198 @@ body:has(.workspace-screen.show){
   background:#f1f4f3!important;
 }
 
+
+
+/* =========================================================
+   MOBILE ANNOUNCEMENTS — LIVE COMPANY UPDATES
+   ========================================================= */
+.workspace-announcement-badge{
+  position:absolute;
+  top:1px;
+  right:0;
+  min-width:14px;
+  height:14px;
+  padding:0 4px;
+  border-radius:999px;
+  border:2px solid #fff;
+  background:#171717;
+  color:#fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-family:"Inter",sans-serif;
+  font-size:6px;
+  font-weight:800;
+  line-height:1;
+}
+.workspace-announcement-badge[hidden]{display:none!important}
+
+.mobile-announcements-screen{
+  position:fixed;
+  inset:0;
+  z-index:735;
+  width:100%;
+  max-width:100vw;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:#f7f9f8;
+  transform:translate3d(100%,0,0);
+  visibility:hidden;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s ease;
+  will-change:transform;
+  overscroll-behavior-x:none;
+  touch-action:pan-y;
+}
+.mobile-announcements-screen.show{
+  transform:translate3d(0,0,0);
+  visibility:visible;
+}
+.mobile-announcements-head{
+  flex:0 0 auto;
+  min-height:94px;
+  padding:max(18px,env(safe-area-inset-top)) 15px 13px;
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+  background:#fff;
+  border-bottom:1px solid #e9eeec;
+  box-shadow:0 2px 10px rgba(20,40,34,.025);
+}
+.mobile-announcements-back{
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
+  border:0;
+  border-radius:11px;
+  background:transparent;
+  color:#303634;
+  display:grid;
+  place-items:center;
+  font-size:17px;
+}
+.mobile-announcements-back:active{background:#f1f4f3}
+.mobile-announcements-head-copy{
+  min-width:0;
+  flex:1;
+  padding-bottom:3px;
+}
+.mobile-announcements-head-copy h2{
+  margin:0;
+  font-family:"Outfit",sans-serif;
+  font-size:18px;
+  font-weight:600;
+  color:#171717;
+}
+.mobile-announcements-head-copy p{
+  margin:3px 0 0;
+  font-size:9px;
+  color:#8a9390;
+}
+.mobile-announcements-body{
+  flex:1 1 auto;
+  min-height:0;
+  width:100%;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:7px 15px calc(24px + env(safe-area-inset-bottom));
+}
+.mobile-announcements-list{width:100%}
+.mobile-announcement-row{
+  width:100%;
+  padding:17px 1px;
+  border-bottom:1px solid #e6ebe9;
+}
+.mobile-announcement-row:last-child{border-bottom:0}
+.mobile-announcement-row-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.mobile-announcement-title{
+  min-width:0;
+  flex:1;
+  font-family:"Outfit",sans-serif;
+  font-size:14px;
+  line-height:1.4;
+  font-weight:600;
+  color:#1c211f;
+  overflow-wrap:anywhere;
+}
+.mobile-announcement-audience{
+  flex:0 0 auto;
+  max-width:132px;
+  min-height:21px;
+  padding:0 7px;
+  border-radius:999px;
+  background:#eef4f2;
+  color:#55746b;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:6.5px;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.mobile-announcement-description{
+  margin-top:8px;
+  font-size:10px;
+  line-height:1.65;
+  color:#66716d;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.mobile-announcement-meta{
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:5px;
+  font-size:7.5px;
+  color:#939c98;
+}
+.mobile-announcement-meta b{
+  color:#616b67;
+  font-weight:700;
+}
+.mobile-announcements-empty{
+  min-height:300px;
+  padding:32px 24px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#929a97;
+}
+.mobile-announcements-empty i{
+  font-size:23px;
+  margin-bottom:11px;
+  color:#aeb6b2;
+}
+.mobile-announcements-empty b{
+  font-size:11px;
+  color:#3b423f;
+}
+.mobile-announcements-empty span{
+  margin-top:5px;
+  max-width:235px;
+  font-size:8.5px;
+  line-height:1.55;
+}
+.mobile-announcements-loading{
+  min-height:220px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#929a97;
+  font-size:9px;
+}
+
 </style>
 
 <style>
@@ -2988,6 +3180,7 @@ html,body{
       </div>
 <button class="workspace-icon-btn workspace-announcement-btn" id="workspaceAnnouncementBtn" type="button" aria-label="Announcements">
           <i class="fa-regular fa-bell"></i>
+          <span class="workspace-announcement-badge" id="workspaceAnnouncementBadge" hidden>0</span>
         </button>
         <button class="workspace-profile-btn" id="workspaceProfileBtn" type="button" aria-label="Profile">
         <img class="top-user-profile-img" id="topUserProfileImg" alt="Profile">
@@ -3082,6 +3275,29 @@ html,body{
 </section>
 
 
+
+
+<section class="mobile-announcements-screen" id="mobileAnnouncementsScreen" aria-hidden="true">
+  <header class="mobile-announcements-head">
+    <button class="mobile-announcements-back" id="mobileAnnouncementsBack" type="button" aria-label="Back">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <div class="mobile-announcements-head-copy">
+      <h2>Announcements</h2>
+      <p>Company updates shared with you</p>
+    </div>
+  </header>
+
+  <div class="mobile-announcements-body" id="mobileAnnouncementsBody">
+    <div class="mobile-announcements-list" id="mobileAnnouncementsList">
+      <div class="mobile-announcements-empty">
+        <i class="fa-regular fa-bell"></i>
+        <b>No announcements</b>
+        <span>Company updates shared with you will appear here.</span>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section class="mobile-meetings-screen" id="mobileMeetingsScreen" aria-hidden="true">
   <header class="mobile-meetings-head">
@@ -7143,6 +7359,378 @@ window.openOutsideApp = function(rawUrl){
   a.click();
   a.remove();
 };
+</script>
+
+
+<script>
+/* =========================================================
+   MOBILE ANNOUNCEMENTS — LIVE + TARGETED + BACK SWIPE
+   ========================================================= */
+(function(){
+  const announcementScreen=document.getElementById("mobileAnnouncementsScreen");
+  const announcementBack=document.getElementById("mobileAnnouncementsBack");
+  const announcementBell=document.getElementById("workspaceAnnouncementBtn");
+  const announcementBadge=document.getElementById("workspaceAnnouncementBadge");
+  const announcementList=document.getElementById("mobileAnnouncementsList");
+
+  let announcementRows=[];
+  let announcementChannel=null;
+  let announcementLoadPromise=null;
+
+  function escAnnouncement(v){
+    return String(v??"")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function getAnnouncementSession(){
+    try{
+      return window.notusSession ||
+             JSON.parse(localStorage.getItem("notus_company_session")||"null") ||
+             null;
+    }catch(_){
+      return window.notusSession||null;
+    }
+  }
+
+  function announcementMember(){
+    const s=getAnnouncementSession()||{};
+    const t=String(s.user_type||s.login_type||"").toLowerCase();
+    const role=String(s.role||s.employee_role||"").trim();
+
+    if(t==="hr"||t==="hr_member"){
+      return {
+        type:"hr",
+        id:String(s.hr_id||""),
+        branch_id:s.branch_id||null,
+        role:role||"HR"
+      };
+    }
+
+    if(t==="manager"){
+      return {
+        type:"manager",
+        id:String(s.employee_id||""),
+        branch_id:s.branch_id||null,
+        role:role||"Manager"
+      };
+    }
+
+    if(t==="team_lead"||t==="teamlead"){
+      return {
+        type:"team_lead",
+        id:String(s.employee_id||""),
+        branch_id:s.branch_id||null,
+        role:role||"Team Lead"
+      };
+    }
+
+    if(t==="recruiter"){
+      return {
+        type:"recruiter",
+        id:String(s.employee_id||""),
+        branch_id:s.branch_id||null,
+        role:role||"Recruiter"
+      };
+    }
+
+    if(t==="it_admin"){
+      return {
+        type:"it_admin",
+        id:String(s.employee_id||""),
+        branch_id:s.branch_id||null,
+        role:role||"IT Supporter"
+      };
+    }
+
+    if(t==="technical_supporter"){
+      return {
+        type:"technical_supporter",
+        id:String(s.employee_id||""),
+        branch_id:s.branch_id||null,
+        role:role||"Technical Supporter"
+      };
+    }
+
+    if(t==="employee"){
+      return {
+        type:"employee",
+        id:String(s.employee_id||""),
+        branch_id:s.branch_id||null,
+        role:role||"Employee"
+      };
+    }
+
+    return {
+      type:"admin",
+      id:String(s.company_id||""),
+      branch_id:null,
+      role:"Administrator"
+    };
+  }
+
+  function announcementAudienceLabel(row){
+    if(row?.audience_label) return String(row.audience_label);
+
+    const type=String(row?.audience_type||"company").toLowerCase();
+    if(type==="company") return "Entire Company";
+    if(type==="branch") return row?.target_name?`Branch · ${row.target_name}`:"Entire Branch";
+    if(type==="role") return row?.target_name?`Role · ${row.target_name}`:"Role / Group";
+    if(type==="person") return row?.target_name?`Person · ${row.target_name}`:"Specific Person";
+    return "Company Update";
+  }
+
+  function announcementTime(value){
+    if(!value) return "";
+    const d=new Date(value);
+    if(Number.isNaN(d.getTime())) return "";
+    return d.toLocaleString("en-IN",{
+      day:"2-digit",
+      month:"short",
+      year:"numeric",
+      hour:"2-digit",
+      minute:"2-digit"
+    });
+  }
+
+  function paintAnnouncementBadge(){
+    if(!announcementBadge) return;
+    const n=announcementRows.length;
+    announcementBadge.textContent=n>99?"99+":String(n);
+    announcementBadge.hidden=n<=0;
+  }
+
+  function renderAnnouncements(){
+    if(!announcementList) return;
+
+    if(!announcementRows.length){
+      announcementList.innerHTML=`
+        <div class="mobile-announcements-empty">
+          <i class="fa-regular fa-bell"></i>
+          <b>No announcements</b>
+          <span>Company updates shared with you will appear here.</span>
+        </div>
+      `;
+      paintAnnouncementBadge();
+      return;
+    }
+
+    announcementList.innerHTML=announcementRows.map(row=>`
+      <article class="mobile-announcement-row">
+        <div class="mobile-announcement-row-top">
+          <div class="mobile-announcement-title">
+            ${escAnnouncement(row.title||"Announcement")}
+          </div>
+          <span class="mobile-announcement-audience">
+            ${escAnnouncement(announcementAudienceLabel(row))}
+          </span>
+        </div>
+
+        <div class="mobile-announcement-description">
+          ${escAnnouncement(row.description||"")}
+        </div>
+
+        <div class="mobile-announcement-meta">
+          <b>${escAnnouncement(row.creator_name||"Company")}</b>
+          <span>·</span>
+          <span>${escAnnouncement(announcementTime(row.created_at))}</span>
+        </div>
+      </article>
+    `).join("");
+
+    paintAnnouncementBadge();
+  }
+
+  async function loadMobileAnnouncements(){
+    const s=getAnnouncementSession();
+    if(!s?.company_id || typeof db==="undefined") return [];
+    if(announcementLoadPromise) return announcementLoadPromise;
+
+    announcementLoadPromise=(async()=>{
+      try{
+        if(announcementList && !announcementRows.length){
+          announcementList.innerHTML='<div class="mobile-announcements-loading">Loading announcements...</div>';
+        }
+
+        const member=announcementMember();
+        if(!member.id) return [];
+
+        const {data,error}=await db.rpc("notus_list_my_announcements",{
+          p_company_id:s.company_id,
+          p_member_type:member.type,
+          p_member_id:member.id,
+          p_branch_id:member.branch_id||null,
+          p_role:member.role||""
+        });
+
+        if(error) throw error;
+
+        announcementRows=Array.isArray(data)?data:[];
+        renderAnnouncements();
+        return announcementRows;
+      }catch(err){
+        console.error("Mobile announcements:",err);
+        announcementRows=[];
+        if(announcementList){
+          announcementList.innerHTML=`
+            <div class="mobile-announcements-empty">
+              <i class="fa-regular fa-bell"></i>
+              <b>Unable to load announcements</b>
+              <span>${escAnnouncement(err?.message||"Please try again.")}</span>
+            </div>
+          `;
+        }
+        paintAnnouncementBadge();
+        return [];
+      }finally{
+        announcementLoadPromise=null;
+      }
+    })();
+
+    return announcementLoadPromise;
+  }
+  window.loadMobileAnnouncements=loadMobileAnnouncements;
+
+  function openMobileAnnouncements(){
+    if(!announcementScreen) return;
+    closeProfilePanel?.();
+    announcementScreen.classList.add("show");
+    announcementScreen.setAttribute("aria-hidden","false");
+    loadMobileAnnouncements();
+  }
+  window.openMobileAnnouncements=openMobileAnnouncements;
+
+  function closeMobileAnnouncements(){
+    if(!announcementScreen) return;
+    announcementScreen.style.transition="";
+    announcementScreen.style.transform="";
+    announcementScreen.classList.remove("show");
+    announcementScreen.setAttribute("aria-hidden","true");
+  }
+  window.closeMobileAnnouncements=closeMobileAnnouncements;
+
+  announcementBell?.addEventListener("click",openMobileAnnouncements);
+  announcementBack?.addEventListener("click",closeMobileAnnouncements);
+
+  function startAnnouncementRealtime(){
+    const s=getAnnouncementSession();
+    if(!s?.company_id || typeof db==="undefined") return;
+
+    if(announcementChannel){
+      try{db.removeChannel(announcementChannel)}catch(_){}
+      announcementChannel=null;
+    }
+
+    const topic=`notus-mobile-announcements-${s.company_id}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+
+    announcementChannel=db.channel(topic)
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"notus_announcements",
+          filter:`company_id=eq.${s.company_id}`
+        },
+        ()=>loadMobileAnnouncements()
+      )
+      .subscribe(status=>{
+        if(status==="CHANNEL_ERROR"){
+          console.warn("Announcements realtime channel error");
+        }
+      });
+  }
+  window.startMobileAnnouncementRealtime=startAnnouncementRealtime;
+
+  /* iPhone-style LEFT EDGE back swipe. */
+  let swipeActive=false;
+  let swipeStartX=0;
+  let swipeStartY=0;
+  let swipeDx=0;
+
+  announcementScreen?.addEventListener("touchstart",e=>{
+    if(!announcementScreen.classList.contains("show") || e.touches?.length!==1) return;
+    const touch=e.touches[0];
+    if(touch.clientX>28){
+      swipeActive=false;
+      return;
+    }
+
+    swipeActive=true;
+    swipeStartX=touch.clientX;
+    swipeStartY=touch.clientY;
+    swipeDx=0;
+    announcementScreen.style.transition="none";
+  },{passive:true});
+
+  announcementScreen?.addEventListener("touchmove",e=>{
+    if(!swipeActive || e.touches?.length!==1) return;
+
+    const touch=e.touches[0];
+    const dx=touch.clientX-swipeStartX;
+    const dy=touch.clientY-swipeStartY;
+
+    if(Math.abs(dy)>Math.abs(dx)+12){
+      swipeActive=false;
+      announcementScreen.style.transition="";
+      announcementScreen.style.transform="";
+      return;
+    }
+
+    swipeDx=Math.max(0,dx);
+    if(swipeDx>0){
+      e.preventDefault();
+      announcementScreen.style.transform=`translate3d(${Math.min(swipeDx,window.innerWidth)}px,0,0)`;
+    }
+  },{passive:false});
+
+  function finishAnnouncementSwipe(){
+    if(!swipeActive) return;
+    swipeActive=false;
+
+    const shouldClose=swipeDx>Math.min(90,window.innerWidth*.24);
+    announcementScreen.style.transition="transform .24s cubic-bezier(.2,.8,.2,1),visibility .24s ease";
+
+    if(shouldClose){
+      announcementScreen.style.transform="translate3d(100%,0,0)";
+      setTimeout(()=>{
+        announcementScreen.classList.remove("show");
+        announcementScreen.setAttribute("aria-hidden","true");
+        announcementScreen.style.transition="";
+        announcementScreen.style.transform="";
+      },245);
+    }else{
+      announcementScreen.style.transform="translate3d(0,0,0)";
+      setTimeout(()=>{
+        announcementScreen.style.transition="";
+        announcementScreen.style.transform="";
+      },245);
+    }
+
+    swipeDx=0;
+  }
+
+  announcementScreen?.addEventListener("touchend",finishAnnouncementSwipe,{passive:true});
+  announcementScreen?.addEventListener("touchcancel",finishAnnouncementSwipe,{passive:true});
+
+  /* Initial load after login/session restore. */
+  setTimeout(()=>{
+    const s=getAnnouncementSession();
+    if(s?.company_id){
+      loadMobileAnnouncements();
+      startAnnouncementRealtime();
+    }
+  },1100);
+
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible" && getAnnouncementSession()?.company_id){
+      loadMobileAnnouncements();
+    }
+  });
+})();
 </script>
 
 </body>
