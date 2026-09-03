@@ -2839,6 +2839,295 @@ body:has(.workspace-screen.show){
 }
 .mobile-work-report-submit:disabled{opacity:.55}
 
+
+
+/* =========================================================
+   WORK REPORT — FINAL CLEAN CONTINUOUS UI
+   No mixed cards / boxes. One simple professional flow.
+   ========================================================= */
+#workspaceWorkReportPanel{
+  background:#f5f7f8!important;
+}
+
+.mobile-work-report-main{
+  min-height:100%!important;
+  padding:0 14px calc(22px + env(safe-area-inset-bottom))!important;
+  background:#f5f7f8!important;
+}
+
+.mobile-work-report-main-head{
+  min-height:56px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  border-bottom:1px solid #e3e9e6!important;
+  background:transparent!important;
+}
+
+.mobile-work-report-main-head > div{
+  min-width:0!important;
+}
+
+.mobile-work-report-main-head b{
+  display:block!important;
+  font-family:"Outfit",sans-serif!important;
+  font-size:15px!important;
+  line-height:1.2!important;
+  font-weight:600!important;
+  letter-spacing:-.15px!important;
+  color:#1b211e!important;
+}
+
+.mobile-work-report-main-head span:not(.mobile-work-report-add span){
+  display:none!important;
+}
+
+.mobile-work-report-add{
+  height:34px!important;
+  min-width:auto!important;
+  padding:0 2px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#0f766e!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  box-shadow:none!important;
+  font-family:"Inter",sans-serif!important;
+  font-size:9.5px!important;
+  font-weight:700!important;
+}
+
+.mobile-work-report-add i{
+  width:20px!important;
+  height:20px!important;
+  border-radius:50%!important;
+  display:grid!important;
+  place-items:center!important;
+  background:#e9f4f1!important;
+  color:#0f766e!important;
+  font-size:8px!important;
+}
+
+.mobile-work-report-add:active{
+  opacity:.68!important;
+  transform:none!important;
+}
+
+.mobile-work-report-list{
+  width:100%!important;
+  display:block!important;
+  padding:0!important;
+  margin:0!important;
+  background:transparent!important;
+}
+
+.mobile-work-report-item{
+  position:relative!important;
+  width:100%!important;
+  margin:0!important;
+  padding:15px 2px 14px!important;
+  border:0!important;
+  border-bottom:1px solid #e1e7e4!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+.mobile-work-report-item:last-child{
+  border-bottom:0!important;
+}
+
+.mobile-work-report-item-top{
+  width:100%!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+}
+
+.mobile-work-report-title{
+  min-width:0!important;
+  flex:1!important;
+  font-family:"Outfit",sans-serif!important;
+  font-size:13.5px!important;
+  line-height:1.38!important;
+  font-weight:600!important;
+  color:#1b211e!important;
+  letter-spacing:-.08px!important;
+  overflow-wrap:anywhere!important;
+}
+
+.mobile-work-report-date{
+  flex:0 0 auto!important;
+  padding-top:2px!important;
+  font-family:"Inter",sans-serif!important;
+  font-size:7.5px!important;
+  line-height:1.2!important;
+  font-weight:600!important;
+  color:#929b97!important;
+  white-space:nowrap!important;
+}
+
+.mobile-work-report-desc{
+  margin-top:6px!important;
+  padding:0!important;
+  max-width:100%!important;
+  font-family:"Inter",sans-serif!important;
+  font-size:10.2px!important;
+  line-height:1.62!important;
+  font-weight:400!important;
+  color:#66706c!important;
+  white-space:pre-wrap!important;
+  word-break:break-word!important;
+  overflow-wrap:anywhere!important;
+}
+
+.mobile-work-report-meta{
+  margin-top:7px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  flex-wrap:wrap!important;
+  gap:4px!important;
+  font-family:"Inter",sans-serif!important;
+  font-size:7.2px!important;
+  line-height:1.25!important;
+  color:#9aa29f!important;
+}
+
+.mobile-work-report-meta b{
+  font-weight:600!important;
+  color:#7a8580!important;
+}
+
+.mobile-work-report-empty{
+  min-height:260px!important;
+  padding:34px 18px!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+.mobile-work-report-empty i{
+  width:38px!important;
+  height:38px!important;
+  display:grid!important;
+  place-items:center!important;
+  margin:0 0 11px!important;
+  border-radius:50%!important;
+  background:#eaf1ef!important;
+  color:#7f8e89!important;
+  font-size:15px!important;
+}
+
+.mobile-work-report-empty b{
+  font-size:11px!important;
+  font-weight:600!important;
+  color:#414945!important;
+}
+
+.mobile-work-report-empty span{
+  margin-top:5px!important;
+  font-size:8.5px!important;
+  line-height:1.5!important;
+  color:#949d99!important;
+}
+
+/* Compose sheet also follows one visual language instead of nested boxes. */
+.mobile-work-report-sheet{
+  background:#fff!important;
+  border-radius:20px 20px 0 0!important;
+}
+
+.mobile-work-report-sheet-head{
+  min-height:58px!important;
+  padding:0 16px!important;
+  border-bottom:1px solid #edf0ef!important;
+}
+
+.mobile-work-report-sheet-head h3{
+  font-size:16px!important;
+  font-weight:600!important;
+}
+
+.mobile-work-report-sheet-head button{
+  background:transparent!important;
+  border-radius:0!important;
+  font-size:15px!important;
+}
+
+.mobile-work-report-form{
+  padding:17px 16px calc(20px + env(safe-area-inset-bottom))!important;
+}
+
+.mobile-work-report-field{
+  margin-bottom:15px!important;
+}
+
+.mobile-work-report-field label{
+  margin-bottom:7px!important;
+  font-size:9px!important;
+  color:#525c58!important;
+}
+
+.mobile-work-report-field input,
+.mobile-work-report-field textarea{
+  border:0!important;
+  border-bottom:1px solid #dfe5e2!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  padding-left:0!important;
+  padding-right:0!important;
+}
+
+.mobile-work-report-field input{
+  height:43px!important;
+}
+
+.mobile-work-report-field textarea{
+  min-height:120px!important;
+  padding-top:9px!important;
+  padding-bottom:27px!important;
+}
+
+.mobile-work-report-field input:focus,
+.mobile-work-report-field textarea:focus{
+  border-bottom-color:#0f766e!important;
+}
+
+.mobile-work-report-count{
+  right:0!important;
+  bottom:7px!important;
+}
+
+.mobile-work-report-submit{
+  margin-top:2px!important;
+  height:46px!important;
+  border-radius:11px!important;
+  background:#171717!important;
+}
+
+
+
+/* ===== WORK REPORT DATE/TIME FINAL FIX ===== */
+.mobile-work-report-item-top{
+  display:block!important;
+}
+.mobile-work-report-date{
+  display:none!important;
+}
+.mobile-work-report-meta{
+  justify-content:flex-start!important;
+  text-align:left!important;
+  width:100%!important;
+}
+
 </style>
 
 <style>
@@ -3634,11 +3923,10 @@ html,body{
         <div class="mobile-work-report-main-head">
           <div>
             <b>Work Report</b>
-            <span>Daily work updates</span>
           </div>
-          <button class="mobile-work-report-add" id="mobileWorkReportAdd" type="button">
+          <button class="mobile-work-report-add" id="mobileWorkReportAdd" type="button" aria-label="Add work report">
             <i class="fa-solid fa-plus"></i>
-            Add
+            <span>Add Report</span>
           </button>
         </div>
         <div class="mobile-work-report-list" id="mobileWorkReportList">
@@ -8371,11 +8659,12 @@ window.openOutsideApp = function(rawUrl){
       <article class="mobile-work-report-item">
         <div class="mobile-work-report-item-top">
           <div class="mobile-work-report-title">${esc(r.title||"Work Report")}</div>
-          <span class="mobile-work-report-date">${esc(dateText(r.report_date))}</span>
         </div>
         <div class="mobile-work-report-desc">${esc(r.description||"")}</div>
         <div class="mobile-work-report-meta">
           ${adminView?`<b>${esc(r.member_name||"Member")}</b><span>·</span><span>${esc(r.member_role||r.member_type||"")}</span><span>·</span>`:""}
+          <span>${esc(dateText(r.report_date))}</span>
+          <span>·</span>
           <span>${esc(timeText(r.created_at))}</span>
         </div>
       </article>
