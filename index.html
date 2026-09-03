@@ -4266,10 +4266,9 @@ function startNotusWorkspaceLive(){
     console.warn("Workspace realtime channel unavailable; fallback sync stays active.",e);
   }
 
-  /* RPC-backed attendance may not expose its underlying table here.
-     This lightweight fallback keeps Available/Break/Meeting/Busy/Offline,
-     profile changes, search results and messages fresh without page reload. */
-  notusWorkspaceLiveTimer = setInterval(notusLiveRefreshWorkspace, 3000);
+  /* No interval-based full repaint here.
+     Supabase Realtime pushes DB changes immediately, so the chat list/page
+     is not rebuilt every few seconds (prevents visible blinking). */
   setTimeout(notusLiveRefreshWorkspace, 120);
 }
 
