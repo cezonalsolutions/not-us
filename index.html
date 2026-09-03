@@ -1847,7 +1847,7 @@ form.addEventListener("submit", async function(e){
         user_type: "company_admin",
         company_id: company.company_id,
         company_name: company.company_name,
-        gmail: company.gmail,
+        gmail: company.gmail || gmail,
         status: company.status,
         logged_in_at: new Date().toISOString()
       };
@@ -1873,7 +1873,7 @@ form.addEventListener("submit", async function(e){
           branch_name: hr.branch_name,
           branch_location: hr.branch_location,
           full_name: hr.full_name,
-          gmail: hr.gmail,
+          gmail: hr.gmail || gmail,
           role: hr.role,
           status: hr.status,
           logged_in_at: new Date().toISOString()
@@ -1900,7 +1900,7 @@ form.addEventListener("submit", async function(e){
           const loginEmail = String(employee.gmail || gmail).trim().toLowerCase();
           const rr = await db
             .from("employees")
-            .select("id,role")
+            .select("id,role,email,full_name,profile_image_url")
             .eq("company_id", employee.company_id)
             .ilike("email", loginEmail)
             .maybeSingle();
@@ -1908,6 +1908,7 @@ form.addEventListener("submit", async function(e){
           if(!rr.error && rr.data?.role){
             resolvedEmployeeRole = String(rr.data.role).trim();
             if(rr.data.id) employee.employee_id = rr.data.id;
+            if(rr.data.profile_image_url) employee.profile_image_url = rr.data.profile_image_url;
           }
         }catch(roleErr){
           console.warn("Could not refresh exact employee role:", roleErr);
@@ -1937,7 +1938,8 @@ form.addEventListener("submit", async function(e){
           branch_name: employee.branch_name,
           branch_location: employee.branch_location,
           full_name: employee.full_name,
-          gmail: employee.gmail,
+          gmail: employee.gmail || gmail,
+          profile_image_url: employee.profile_image_url || "",
           role: resolvedEmployeeRole || employee.role,
           status: employee.status,
           logged_in_at: new Date().toISOString()
@@ -2094,27 +2096,16 @@ function getLoggedInProfileSource(s){
 
   if(type === "company_admin" || type === "admin"){
     return {
-      table: "companies",
-      id: s.company_id,
-      key: "id",
-      column: "admin_profile_url"
-    };
-  }
-
-  if(type === "hr" || type === "hr_member"){
-    return {
-      table: "hr_members",
-      id: s.hr_id || s.member_id || s.id,
-      key: "id",
-      column: "profile_image_url"
+      kind:"company",
+      table:"companies",
+      column:"admin_profile_url"
     };
   }
 
   return {
-    table: "employees",
-    id: s.employee_id || s.team_lead_id || s.member_id || s.id,
-    key: "id",
-    column: "profile_image_url"
+    kind:"employee",
+    table:"employees",
+    column:"profile_image_url"
   };
 }
 
@@ -2190,7 +2181,6 @@ function showProfilePhoto(profileUrl, companyLogo){
 
   const topImg = document.getElementById("topUserProfileImg");
   const topFallback = document.getElementById("topUserProfileFallback");
-
   const sideImg = document.getElementById("sideUserProfileImg");
   const sideFallback = document.getElementById("sideUserProfileFallback");
 
@@ -2216,6 +2206,8 @@ function showProfilePhoto(profileUrl, companyLogo){
       paintFallback(fallback, logo, session, isTop);
     };
 
+    /* Use the saved public URL exactly as stored.
+       Saved URLs may already contain ?v=... */
     img.src = url;
   }
 
@@ -2227,30 +2219,100 @@ async function loadCurrentUserProfilePhoto(){
   const session = getNotusSession();
   if(!session?.company_id || typeof db === "undefined") return;
 
-  const logo = await fetchCompanyLogoForProfile(session.company_id);
   const source = getLoggedInProfileSource(session);
-
-  if(!source?.id){
-    showProfilePhoto("", logo);
-    return;
-  }
+  const companyLogo = await fetchCompanyLogoForProfile(session.company_id);
 
   try{
-    const {data,error} = await db
-      .from(source.table)
-      .select(source.column)
-      .eq(source.key, source.id)
-      .maybeSingle();
+    let profileUrl = "";
 
-    if(error) throw error;
+    /* COMPANY ADMIN:
+       companies.id = session.company_id
+       picture column = admin_profile_url
+    */
+    if(source.kind === "company"){
+      const {data,error} = await db
+        .from("companies")
+        .select("admin_profile_url")
+        .eq("id", session.company_id)
+        .maybeSingle();
 
-    const url = String(data?.[source.column] || "").trim();
+      if(error) throw error;
+      profileUrl = String(data?.admin_profile_url || "").trim();
+    }
 
-    if(url){
-      session.profile_image_url = url;
+    /* ALL STAFF:
+       employees.company_id + email
+       picture column = profile_image_url
 
-      if(source.table === "companies"){
-        session.admin_profile_url = url;
+       Email lookup is intentional: custom login sessions can have no employee_id.
+    */
+    else{
+      const loginEmail = String(
+        session.email ||
+        session.gmail ||
+        session.employee_email ||
+        ""
+      ).trim().toLowerCase();
+
+      const employeeId = String(
+        session.employee_id ||
+        session.team_lead_id ||
+        session.member_id ||
+        session.id ||
+        ""
+      ).trim();
+
+      const loginName = String(
+        session.full_name ||
+        session.name ||
+        ""
+      ).trim().toLowerCase();
+
+      /* Load company employees once, then match robustly.
+         This avoids session-id differences between custom login RPCs. */
+      const staffRes = await db
+        .from("employees")
+        .select("id,email,full_name,profile_image_url")
+        .eq("company_id", session.company_id);
+
+      if(staffRes.error) throw staffRes.error;
+
+      const rows = Array.isArray(staffRes.data) ? staffRes.data : [];
+
+      let row = null;
+
+      if(employeeId){
+        row = rows.find(r => String(r.id || "").trim() === employeeId) || null;
+      }
+
+      if(!row && loginEmail){
+        row = rows.find(r =>
+          String(r.email || "").trim().toLowerCase() === loginEmail
+        ) || null;
+      }
+
+      if(!row && loginName){
+        row = rows.find(r =>
+          String(r.full_name || "").trim().toLowerCase() === loginName
+        ) || null;
+      }
+
+      profileUrl = String(row?.profile_image_url || session.profile_image_url || "").trim();
+
+      if(row?.id){
+        session.employee_id = row.id;
+      }
+
+      if(row?.email && !session.gmail){
+        session.gmail = row.email;
+      }
+    }
+
+    if(profileUrl){
+      session.profile_image_url = profileUrl;
+
+      if(source.kind === "company"){
+        session.admin_profile_url = profileUrl;
       }
 
       localStorage.setItem(
@@ -2259,20 +2321,29 @@ async function loadCurrentUserProfilePhoto(){
       );
 
       window.notusSession = session;
+    }else{
+      /* Keep existing session URL as a last valid source.
+         Company logo is fallback only when there is truly no profile URL. */
+      profileUrl = String(
+        source.kind === "company"
+          ? (session.admin_profile_url || session.profile_image_url || "")
+          : (session.profile_image_url || "")
+      ).trim();
     }
 
-    showProfilePhoto(url, logo);
+    showProfilePhoto(profileUrl, companyLogo);
 
   }catch(err){
-    console.warn("Profile image load failed:", err);
+    console.warn("Current user profile image load failed:", err);
 
+    /* DB failed: only then try cached URL */
     const cached = String(
-      session.profile_image_url ||
-      session.admin_profile_url ||
-      ""
+      source.kind === "company"
+        ? (session.admin_profile_url || session.profile_image_url || "")
+        : (session.profile_image_url || "")
     ).trim();
 
-    showProfilePhoto(cached, logo);
+    showProfilePhoto(cached, companyLogo);
   }
 }
 
@@ -2282,28 +2353,49 @@ function startCurrentUserProfileRealtime(){
 
   try{
     const source = getLoggedInProfileSource(session);
-    if(!source?.table) return;
 
     if(notusProfileChannel){
       db.removeChannel(notusProfileChannel);
       notusProfileChannel = null;
     }
 
+    const table = source.kind === "company" ? "companies" : "employees";
+
     notusProfileChannel = db
       .channel(
         "notus-current-profile-" +
         session.company_id + "-" +
-        String(source.id || "user")
+        table
       )
       .on(
         "postgres_changes",
         {
-          event: "UPDATE",
-          schema: "public",
-          table: source.table
+          event:"UPDATE",
+          schema:"public",
+          table:table
         },
-        function(){
-          setTimeout(loadCurrentUserProfilePhoto, 100);
+        function(payload){
+          /* Ignore updates from other companies/employees when possible */
+          const row = payload?.new || {};
+          if(table === "companies"){
+            if(String(row.id || "") !== String(session.company_id)) return;
+          }else{
+            if(String(row.company_id || "") !== String(session.company_id)) return;
+
+            const loggedEmail = String(
+              session.email ||
+              session.gmail ||
+              session.employee_email ||
+              ""
+            ).trim().toLowerCase();
+
+            if(loggedEmail && row.email &&
+               String(row.email).trim().toLowerCase() !== loggedEmail){
+              return;
+            }
+          }
+
+          setTimeout(loadCurrentUserProfilePhoto, 80);
         }
       )
       .subscribe();
