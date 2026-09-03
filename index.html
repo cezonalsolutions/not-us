@@ -1727,6 +1727,7 @@ body:has(.workspace-screen.show){
   flex:0 0 auto;padding:5px 8px;border-radius:999px;font-size:7px;font-weight:800;text-transform:uppercase;
 }
 .mobile-leave-status.upcoming{background:#eef2ff;color:#5267c9}
+.mobile-leave-status.on-leave{background:#f3ecfb;color:#7d4caf}
 .mobile-leave-status.completed{background:#eef7f0;color:#4f765b}
 .mobile-leave-status.cancelled{background:#fff1f1;color:#b24b4b}
 .mobile-leave-meta{
@@ -3210,6 +3211,10 @@ async function saveMyWorkspaceStatus(status){
 
   status = normalizeWorkspaceStatus(status);
 
+  if(window.__notusScheduledLeaveActive && status!=="leave"){
+    status="leave";
+  }
+
   try{
     const {error} = await db.rpc("set_member_attendance_status",{
       p_company_id:session.company_id,
@@ -3247,10 +3252,24 @@ workspaceStatusBtn?.addEventListener("click",function(e){
 
 document.querySelectorAll(".workspace-status-option").forEach(btn=>{
   btn.addEventListener("click",async function(){
-    const status = normalizeWorkspaceStatus(this.dataset.status || "available");
+    let status = normalizeWorkspaceStatus(this.dataset.status || "available");
 
     workspaceStatusMenu?.classList.remove("show");
     workspaceStatusWrap?.classList.remove("open");
+
+    /* Scheduled leave owns the status for the full leave window. */
+    if(window.__notusScheduledLeaveActive && status!=="leave"){
+      status="leave";
+      paintWorkspaceStatus("leave",statusLabels.leave||"On Leave");
+
+      try{
+        if(typeof syncMobileScheduledLeaveStatus==="function"){
+          await syncMobileScheduledLeaveStatus();
+        }
+      }catch(_e){}
+
+      return;
+    }
 
     /* Update ONLY the status control.
        Do NOT reload/re-render the full chat list after status change. */
@@ -5641,11 +5660,46 @@ function hideStatus(){
     });
   }
 
+  function leaveInterval(row){
+    const start=new Date(row?.leave_at||"").getTime();
+    let end=new Date(row?.leave_end_at||"").getTime();
+
+    if(!Number.isFinite(end) && Number.isFinite(start)){
+      const value=Number(row?.leave_duration_value||0);
+      const unit=String(row?.leave_duration_unit||"").toLowerCase();
+
+      if(value>0){
+        end=start+(unit==="days"
+          ? value*24*60*60*1000
+          : value*60*60*1000);
+      }
+    }
+
+    return {start,end};
+  }
+
   function statusOf(row){
-    const raw=String(row.status||"upcoming").toLowerCase();
+    const raw=String(row?.status||"upcoming").toLowerCase();
     if(raw==="cancelled") return "cancelled";
-    if(raw==="completed") return "completed";
-    return new Date(row.leave_at).getTime()<=Date.now()?"completed":"upcoming";
+
+    const {start,end}=leaveInterval(row);
+    const now=Date.now();
+
+    if(Number.isFinite(start) && Number.isFinite(end)){
+      if(now<start) return "upcoming";
+      if(now>=start && now<end) return "on-leave";
+      return "completed";
+    }
+
+    if(Number.isFinite(start) && now<start) return "upcoming";
+    return raw==="completed" ? "completed" : "upcoming";
+  }
+
+  function leaveStatusText(status){
+    if(status==="on-leave") return "On Leave";
+    if(status==="completed") return "Completed";
+    if(status==="cancelled") return "Cancelled";
+    return "Upcoming";
   }
 
   function durationLabel(row){
@@ -5676,7 +5730,7 @@ function hideStatus(){
 
     listBox.innerHTML=rows.map(row=>{
       const status=statusOf(row);
-      const canCancel=status==="upcoming"&&new Date(row.leave_at).getTime()>Date.now();
+      const canCancel=status==="upcoming"||status==="on-leave";
 
       return `
         <div class="mobile-leave-item">
@@ -5685,7 +5739,7 @@ function hideStatus(){
               <div class="mobile-leave-date">${esc(prettyDate(row.leave_at))}</div>
               <div class="mobile-leave-time">${esc(prettyTime(row.leave_at))}</div>
             </div>
-            <span class="mobile-leave-status ${esc(status)}">${esc(status)}</span>
+            <span class="mobile-leave-status ${esc(status)}">${esc(leaveStatusText(status))}</span>
           </div>
 
           <div class="mobile-leave-meta">
@@ -5713,6 +5767,85 @@ function hideStatus(){
     });
   }
 
+  function mobileLeaveAutoKey(r,s){
+    return `notus_auto_leave:${s?.company_id||""}:${r?.type||""}:${r?.id||""}`;
+  }
+
+  async function syncMobileScheduledLeaveStatus(rows=null){
+    const s=getSession();
+    const r=requester();
+    if(!s?.company_id||!r) return;
+
+    try{
+      let items=Array.isArray(rows)?rows:null;
+
+      if(!items){
+        const {data,error}=await db.rpc("notus_list_my_leave_requests",{
+          p_company_id:s.company_id,
+          p_requester_type:r.type,
+          p_requester_id:r.id
+        });
+        if(error) throw error;
+        items=Array.isArray(data)?data:[];
+      }
+
+      const now=Date.now();
+      const active=(items||[]).find(row=>{
+        if(String(row?.status||"").toLowerCase()==="cancelled") return false;
+        const {start,end}=leaveInterval(row);
+        return Number.isFinite(start)&&Number.isFinite(end)&&now>=start&&now<end;
+      });
+
+      const member={
+        member_type:r.type==="admin"?"admin":r.type,
+        member_id:String(r.id)
+      };
+
+      const key=mobileLeaveAutoKey(r,s);
+      const wasAuto=localStorage.getItem(key)==="1";
+
+      if(active){
+        window.__notusScheduledLeaveActive=true;
+
+        const {error}=await db.rpc("set_member_attendance_status",{
+          p_company_id:s.company_id,
+          p_member_type:member.member_type,
+          p_member_id:member.member_id,
+          p_status:"leave"
+        });
+        if(error) throw error;
+
+        localStorage.setItem(key,"1");
+
+        try{
+          paintWorkspaceStatus("leave",statusLabels?.leave||"On Leave");
+        }catch(_){}
+
+        return;
+      }
+
+      window.__notusScheduledLeaveActive=false;
+
+      if(wasAuto){
+        const {error}=await db.rpc("set_member_attendance_status",{
+          p_company_id:s.company_id,
+          p_member_type:member.member_type,
+          p_member_id:member.member_id,
+          p_status:"available"
+        });
+        if(error) throw error;
+
+        localStorage.removeItem(key);
+
+        try{
+          paintWorkspaceStatus("available",statusLabels?.available||"Available");
+        }catch(_){}
+      }
+    }catch(err){
+      console.error("Mobile scheduled leave status sync:",err);
+    }
+  }
+
   window.loadMobileLeaveRequests=async function(){
     const s=getSession();
     const r=requester();
@@ -5726,6 +5859,7 @@ function hideStatus(){
       });
       if(error) throw error;
       render(data||[]);
+      await syncMobileScheduledLeaveStatus(data||[]);
     }catch(err){
       console.error("mobile leave list",err);
       listBox.innerHTML=`
@@ -5782,6 +5916,7 @@ function hideStatus(){
 
       closeCancelLeaveSheet();
       await loadMobileLeaveRequests();
+      await syncMobileScheduledLeaveStatus();
     }catch(err){
       alert(err?.message||"Unable to cancel leave.");
     }finally{
@@ -5841,6 +5976,7 @@ function hideStatus(){
 
       closeSheet();
       await loadMobileLeaveRequests();
+      await syncMobileScheduledLeaveStatus();
     }catch(err){
       console.error("mobile apply leave",err);
       alert(err?.message||"Unable to submit leave.");
@@ -5877,17 +6013,30 @@ function hideStatus(){
     el?.addEventListener("change",calcDuration);
   });
 
-  leaveTimer=setInterval(()=>{
-    if(screen?.classList.contains("show")&&document.visibilityState==="visible"){
+  leaveTimer=setInterval(async()=>{
+    if(document.visibilityState!=="visible") return;
+
+    await syncMobileScheduledLeaveStatus();
+
+    if(screen?.classList.contains("show")){
       loadMobileLeaveRequests();
     }
-  },30000);
+  },3000);
 
   document.addEventListener("visibilitychange",()=>{
-    if(document.visibilityState==="visible"&&screen?.classList.contains("show")){
-      loadMobileLeaveRequests();
+    if(document.visibilityState==="visible"){
+      syncMobileScheduledLeaveStatus();
+      if(screen?.classList.contains("show")){
+        loadMobileLeaveRequests();
+      }
     }
   });
+
+  window.addEventListener("focus",()=>{
+    syncMobileScheduledLeaveStatus();
+  });
+
+  setTimeout(()=>syncMobileScheduledLeaveStatus(),600);
 })();
 </script>
 
