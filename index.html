@@ -1118,25 +1118,25 @@ body{
 .pull-refresh{
   position:absolute;
   left:50%;
-  top:3px;
+  top:5px;
   z-index:20;
-  width:36px;
-  height:36px;
+  width:28px;
+  height:28px;
   display:grid;
   place-items:center;
-  border-radius:50%;
-  background:rgba(255,255,255,.94);
-  box-shadow:0 5px 18px rgba(25,45,39,.12);
+  background:transparent;
+  border:0;
+  box-shadow:none;
   opacity:0;
   pointer-events:none;
-  transform:translate3d(-50%,-30px,0) scale(.82);
+  transform:translate3d(-50%,-24px,0) scale(.82);
   transition:opacity .16s ease,transform .20s cubic-bezier(.2,.8,.2,1);
   will-change:transform,opacity;
 }
 .pull-refresh.show{opacity:1}
 .pull-spinner{
-  width:20px;
-  height:20px;
+  width:18px;
+  height:18px;
   border-radius:50%;
   background:conic-gradient(
     from 0deg,
@@ -2249,7 +2249,7 @@ function updateChatViewportHeight(){
 }
 
 window.visualViewport?.addEventListener("resize", updateChatViewportHeight);
-window.visualViewport?.addEventListener("scroll", updateChatViewportHeight);
+/* visualViewport scroll listener intentionally omitted to prevent iPhone jump while typing */
 window.addEventListener("resize", updateChatViewportHeight);
 updateChatViewportHeight();
 
@@ -2267,7 +2267,9 @@ function unlockPageBehindChat(){
   document.body.style.overflow = chatBodyPreviousOverflow || "";
 
   requestAnimationFrame(()=>{
-    window.scrollTo(0, chatLockedScrollY);
+    window.scrollTo(0,0);
+    const workspaceMainEl = document.getElementById("workspaceMain");
+    if(workspaceMainEl) workspaceMainEl.scrollTop = 0;
   });
 }
 
@@ -2291,6 +2293,10 @@ function closeCompanyChat(){
 
   companyChatScreen?.classList.remove("show");
   companyChatScreen?.setAttribute("aria-hidden","true");
+  if(companyChatScreen){
+    companyChatScreen.style.transition = "";
+    companyChatScreen.style.transform = "";
+  }
 
   companyChatScreen?.style.setProperty("--chat-viewport-top","0px");
   companyChatScreen?.style.setProperty("--chat-viewport-height","100dvh");
@@ -2301,15 +2307,67 @@ function closeCompanyChat(){
 companyChatItem?.addEventListener("click", openCompanyChat);
 chatBackBtn?.addEventListener("click", closeCompanyChat);
 
+function refreshChatPreviewOnly(){
+  const messages = readCompanyMessages();
+  const last = messages[messages.length - 1];
+  const preview = document.getElementById("companyChatPreview");
+  const time = document.getElementById("companyChatTime");
+
+  if(preview && last) preview.textContent = last.text || "";
+  if(time && last) time.textContent = last.time || "";
+}
+
+function appendCompanyMessageBubble(message){
+  if(!chatMessages || !message) return;
+
+  const row = document.createElement("div");
+  row.className = "message-row " + (message.side === "out" ? "out" : "in");
+
+  const bubble = document.createElement("div");
+  bubble.className = "message-bubble";
+
+  const textNode = document.createElement("span");
+  textNode.textContent = message.text || "";
+
+  const timeNode = document.createElement("span");
+  timeNode.className = "message-time";
+  timeNode.textContent = message.time || "";
+
+  bubble.appendChild(textNode);
+  bubble.appendChild(timeNode);
+  row.appendChild(bubble);
+  chatMessages.appendChild(row);
+
+  requestAnimationFrame(()=>{
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+}
+
 function sendCompanyMessage(){
   const text = String(chatMessageInput?.value || "").trim();
   if(!text) return;
+
+  const message = {
+    side:"out",
+    text,
+    time:getTimeLabel()
+  };
+
   const messages = readCompanyMessages();
-  messages.push({side:"out", text, time:getTimeLabel()});
+  messages.push(message);
   saveCompanyMessages(messages);
+
   chatMessageInput.value = "";
   chatMessageInput.style.height = "auto";
-  renderCompanyMessages();
+
+  appendCompanyMessageBubble(message);
+  refreshChatPreviewOnly();
+
+  /* Keep keyboard/input stable — no full chat repaint here */
+  requestAnimationFrame(()=>{
+    chatMessageInput?.focus({preventScroll:true});
+    if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
 }
 chatSendBtn?.addEventListener("click", sendCompanyMessage);
 chatMessageInput?.addEventListener("keydown", function(e){
@@ -2354,12 +2412,12 @@ workspaceSearch?.addEventListener("input", function(){
 /* Smooth iPhone-style pull to refresh */
 function resetPullRefresh(){
   if(workspaceChatList){
-    workspaceChatList.style.transition = "transform .22s cubic-bezier(.2,.8,.2,1)";
-    workspaceChatList.style.transform = "translate3d(0,0,0)";
+    workspaceChatList.style.transition = "";
+    workspaceChatList.style.transform = "";
   }
   if(pullRefresh){
     pullRefresh.classList.remove("show","loading");
-    pullRefresh.style.transform = "translate3d(-50%,-30px,0) scale(.82)";
+    pullRefresh.style.transform = "translate3d(-50%,-24px,0) scale(.82)";
     pullRefresh.style.opacity = "0";
   }
 }
@@ -2369,7 +2427,6 @@ workspaceMain?.addEventListener("touchstart", function(e){
   if(workspaceMain.scrollTop <= 0 && e.touches?.length === 1){
     pullStartY = e.touches[0].clientY;
     pulling = true;
-    if(workspaceChatList) workspaceChatList.style.transition = "none";
     if(pullRefresh) pullRefresh.style.transition = "none";
   }
 },{passive:true});
@@ -2385,21 +2442,17 @@ workspaceMain?.addEventListener("touchmove", function(e){
 
   e.preventDefault();
 
-  const pull = Math.min(66, rawDistance * .48);
-
-  if(workspaceChatList){
-    workspaceChatList.style.transform = `translate3d(0,${pull}px,0)`;
-  }
+  const pull = Math.min(62, rawDistance * .46);
 
   if(pullRefresh){
-    const spinnerY = Math.min(18, -18 + pull * .55);
-    const scale = Math.min(1, .78 + pull / 180);
+    const spinnerY = Math.min(14, -18 + pull * .50);
+    const scale = Math.min(1, .80 + pull / 190);
     pullRefresh.classList.add("show");
-    pullRefresh.style.opacity = String(Math.min(1, pull / 34));
+    pullRefresh.style.opacity = String(Math.min(1, pull / 30));
     pullRefresh.style.transform = `translate3d(-50%,${spinnerY}px,0) scale(${scale})`;
 
     const spinner = pullRefresh.querySelector(".pull-spinner");
-    if(spinner) spinner.style.transform = `rotate(${Math.min(280,rawDistance * 2.2)}deg)`;
+    if(spinner) spinner.style.transform = `rotate(${Math.min(260,rawDistance * 2)}deg)`;
   }
 },{passive:false});
 
@@ -2407,32 +2460,25 @@ workspaceMain?.addEventListener("touchend", function(){
   if(!pulling) return;
   pulling = false;
 
-  const transform = workspaceChatList?.style.transform || "";
-  const match = transform.match(/translate3d\(0,\s*([0-9.]+)px/i);
-  const pull = match ? parseFloat(match[1]) : 0;
+  const currentOpacity = parseFloat(pullRefresh?.style.opacity || "0");
 
-  if(pull >= 44){
+  if(currentOpacity >= .80){
     refreshing = true;
-
-    if(workspaceChatList){
-      workspaceChatList.style.transition = "transform .22s cubic-bezier(.2,.8,.2,1)";
-      workspaceChatList.style.transform = "translate3d(0,54px,0)";
-    }
 
     if(pullRefresh){
       pullRefresh.style.transition = "opacity .18s ease,transform .22s cubic-bezier(.2,.8,.2,1)";
       pullRefresh.classList.add("show","loading");
       pullRefresh.style.opacity = "1";
-      pullRefresh.style.transform = "translate3d(-50%,10px,0) scale(1)";
+      pullRefresh.style.transform = "translate3d(-50%,8px,0) scale(1)";
       const spinner = pullRefresh.querySelector(".pull-spinner");
       if(spinner) spinner.style.transform = "";
     }
 
     setTimeout(()=>{
-      renderCompanyMessages();
+      refreshChatPreviewOnly();
       refreshing = false;
       resetPullRefresh();
-    },700);
+    },620);
   }else{
     resetPullRefresh();
   }
