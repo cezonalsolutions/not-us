@@ -4266,10 +4266,9 @@ function startNotusWorkspaceLive(){
     console.warn("Workspace realtime channel unavailable; fallback sync stays active.",e);
   }
 
-  /* RPC-backed attendance may not expose its underlying table here.
-     This lightweight fallback keeps Available/Break/Meeting/Busy/Offline,
-     profile changes, search results and messages fresh without page reload. */
-  notusWorkspaceLiveTimer = setInterval(notusLiveRefreshWorkspace, 3000);
+  /* No interval-based full repaint here.
+     Supabase Realtime pushes DB changes immediately, so the chat list/page
+     is not rebuilt every few seconds (prevents visible blinking). */
   setTimeout(notusLiveRefreshWorkspace, 120);
 }
 
@@ -4321,6 +4320,202 @@ window.addEventListener("beforeunload",stopNotusWorkspaceLive);
 /* Existing restored session may already be visible before this patch runs. */
 setTimeout(startNotusWorkspaceLive,250);
 window.refreshNotusWorkspaceLive = notusLiveRefreshWorkspace;
+</script>
+
+
+<script>
+/* =========================================================
+   SILENT LIVE FALLBACK — NO PAGE/LIST BLINK
+   Realtime can be disabled/not published in Supabase.
+   This polls only data and repaints ONLY when something changed.
+========================================================= */
+(function(){
+  let silentTimer = null;
+  let silentBusy = false;
+  let lastChatSig = "";
+  let lastRecentSig = "";
+  let lastSearchSig = "";
+  let lastStatusSig = "";
+  let lastProfileSig = "";
+
+  const stable = (v)=>{
+    try{return JSON.stringify(v ?? null)}catch(e){return String(v ?? "")}
+  };
+
+  function currentSession(){
+    try{
+      return window.notusSession || JSON.parse(localStorage.getItem("notus_company_session")||"null");
+    }catch(e){return null}
+  }
+
+  function chatSignature(row){
+    const msgs = Array.isArray(row?.messages) ? row.messages : [];
+    return stable(msgs.map(m=>[m?.sender_key||"",m?.text||"",m?.created_at||""]));
+  }
+
+  function peopleSignature(items){
+    return stable((items||[]).map(item=>{
+      const p=item?.peer||item||{};
+      const msgs=Array.isArray(item?.messages)?item.messages:[];
+      const last=msgs[msgs.length-1]||{};
+      return [
+        p.key||"",p.id||"",p.name||"",p.email||"",p.role||"",p.designation||"",
+        p.profile_image_url||"",p.live_status||"",p.live_status_label||"",
+        item?.updated_at||"",last.text||"",last.created_at||""
+      ];
+    }));
+  }
+
+  async function silentRefreshActiveChat(){
+    if(typeof activeDirectPeer === "undefined" || !activeDirectPeer || typeof findConversation !== "function") return;
+    try{
+      if(typeof refreshPeerBeforeOpen === "function"){
+        const before = stable([
+          activeDirectPeer.profile_image_url||"",
+          activeDirectPeer.live_status||"",
+          activeDirectPeer.live_status_label||""
+        ]);
+        await refreshPeerBeforeOpen(activeDirectPeer);
+        const after = stable([
+          activeDirectPeer.profile_image_url||"",
+          activeDirectPeer.live_status||"",
+          activeDirectPeer.live_status_label||""
+        ]);
+        if(before !== after && typeof paintDirectChatHeader === "function"){
+          paintDirectChatHeader(activeDirectPeer);
+        }
+      }
+
+      const row = await findConversation(activeDirectPeer);
+      const sig = chatSignature(row);
+      if(sig !== lastChatSig){
+        lastChatSig = sig;
+        if(row){
+          activeDirectChat = row;
+          if(typeof renderDirectMessages === "function") renderDirectMessages(row);
+        }else if(typeof renderDirectMessages === "function"){
+          renderDirectMessages(null);
+        }
+      }
+    }catch(e){
+      console.warn("Silent active-chat sync skipped:",e);
+    }
+  }
+
+  async function silentRefreshRecentOrSearch(){
+    const s = currentSession();
+    if(!s?.company_id) return;
+
+    const q = typeof workspaceSearch !== "undefined" ? String(workspaceSearch?.value||"").trim() : "";
+
+    if(q){
+      if(typeof fetchSameCompanyPeople !== "function" || typeof renderPeopleList !== "function") return;
+      try{
+        const people = await fetchSameCompanyPeople(q);
+        const sig = peopleSignature(people);
+        if(sig !== lastSearchSig){
+          lastSearchSig = sig;
+          renderPeopleList(people,"search");
+        }
+      }catch(e){
+        console.warn("Silent search sync skipped:",e);
+      }
+      return;
+    }
+
+    if(typeof currentChatIdentity !== "function" || typeof rowPeer !== "function" || typeof renderPeopleList !== "function") return;
+    try{
+      const me = currentChatIdentity(s);
+      if(!me?.key || String(me.key).endsWith(":")) return;
+
+      const {data,error} = await db
+        .from("notus_direct_chats")
+        .select("*")
+        .eq("company_id",s.company_id)
+        .or(`user_a_key.eq.${me.key},user_b_key.eq.${me.key}`)
+        .order("updated_at",{ascending:false});
+      if(error) throw error;
+
+      const items=(data||[]).map(row=>({...row,peer:rowPeer(row)})).filter(x=>x.peer);
+      if(typeof enrichPeopleAttendance === "function") await enrichPeopleAttendance(items);
+
+      const sig=peopleSignature(items);
+      if(sig !== lastRecentSig){
+        lastRecentSig=sig;
+        renderPeopleList(items,"recent");
+      }
+    }catch(e){
+      console.warn("Silent recent-chat sync skipped:",e);
+    }
+  }
+
+  async function silentRefreshOwnState(){
+    try{
+      if(typeof loadMyWorkspaceStatus === "function"){
+        const before = document.getElementById("workspaceStatusText")?.textContent || "";
+        await loadMyWorkspaceStatus();
+        const after = document.getElementById("workspaceStatusText")?.textContent || "";
+        lastStatusSig = after || before;
+      }
+    }catch(e){}
+
+    try{
+      if(typeof loadCurrentUserProfilePhoto === "function"){
+        const img=document.getElementById("topUserProfileImg");
+        const before=img?.getAttribute("src")||"";
+        await loadCurrentUserProfilePhoto();
+        const after=img?.getAttribute("src")||"";
+        lastProfileSig=after||before;
+      }
+    }catch(e){}
+  }
+
+  async function silentTick(){
+    if(silentBusy || document.visibilityState === "hidden") return;
+    const s=currentSession();
+    if(!s?.company_id || typeof db === "undefined") return;
+    silentBusy=true;
+    try{
+      await Promise.allSettled([
+        silentRefreshActiveChat(),
+        silentRefreshRecentOrSearch(),
+        silentRefreshOwnState()
+      ]);
+    }finally{
+      silentBusy=false;
+    }
+  }
+
+  function startSilentLive(){
+    if(silentTimer) clearInterval(silentTimer);
+    setTimeout(silentTick,250);
+    silentTimer=setInterval(silentTick,1500);
+  }
+
+  function stopSilentLive(){
+    if(silentTimer){clearInterval(silentTimer);silentTimer=null;}
+  }
+
+  window.addEventListener("pageshow",startSilentLive);
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState === "visible") startSilentLive();
+    else stopSilentLive();
+  });
+  window.addEventListener("online",startSilentLive);
+  window.addEventListener("beforeunload",stopSilentLive);
+
+  if(typeof showWorkspace === "function"){
+    const original=showWorkspace;
+    showWorkspace=function(){
+      const r=original.apply(this,arguments);
+      setTimeout(startSilentLive,180);
+      return r;
+    };
+  }
+
+  setTimeout(startSilentLive,350);
+  window.forceSilentLiveTick=silentTick;
+})();
 </script>
 
 </body>
