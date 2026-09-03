@@ -1450,6 +1450,46 @@ body{
   color:#8d9793;
 }
 
+
+/* SAME EXISTING ATTENDANCE STATUS — SEARCH + RECENT CHATS */
+.chat-person-status{
+  margin-top:4px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  font-family:"Inter",sans-serif;
+  font-size:9px;
+  font-weight:600;
+  color:#8a9390;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.chat-person-status-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  flex:0 0 6px;
+  background:#8a9390;
+}
+
+/* IMAGE PAINT STABILITY */
+.chat-avatar,
+.chat-header-avatar,
+#workspaceProfileBtn,
+#profileUserAvatar{
+  contain:paint;
+}
+.chat-avatar img.person-avatar,
+#chatHeaderLogo,
+#topUserProfileImg,
+#sideUserProfileImg{
+  -webkit-user-drag:none;
+  backface-visibility:hidden;
+  transform:translateZ(0);
+}
+
 </style>
 </head>
 
@@ -1725,6 +1765,7 @@ body{
           <button class="workspace-status-option" type="button" data-status="break" data-label="On Break">On Break</button>
           <button class="workspace-status-option" type="button" data-status="meeting" data-label="In Meeting">In Meeting</button>
           <button class="workspace-status-option" type="button" data-status="busy" data-label="Busy">Busy</button>
+          <button class="workspace-status-option" type="button" data-status="leave" data-label="On Leave">On Leave</button>
           <button class="workspace-status-option" type="button" data-status="offline" data-label="Offline">Offline</button>
         </div>
       </div>
@@ -2121,46 +2162,172 @@ const statusColors = {
   break:"#d58a28",
   meeting:"#5a6fd1",
   busy:"#cf5757",
+  leave:"#8b5bb5",
   offline:"#8a9390"
 };
 
+const statusLabels = {
+  available:"Available",
+  break:"On Break",
+  meeting:"In Meeting",
+  busy:"Busy",
+  leave:"On Leave",
+  offline:"Offline"
+};
+
+function normalizeWorkspaceStatus(value){
+  const raw = String(value || "available").trim().toLowerCase();
+  const map = {
+    available:"available",
+    break:"break",
+    "on break":"break",
+    meeting:"meeting",
+    "in meeting":"meeting",
+    busy:"busy",
+    leave:"leave",
+    "on leave":"leave",
+    offline:"offline"
+  };
+  return map[raw] || "available";
+}
+
 function paintWorkspaceStatus(status,label){
-  if(workspaceStatusText) workspaceStatusText.textContent = label || "Available";
+  status = normalizeWorkspaceStatus(status);
+  label = label || statusLabels[status] || "Available";
+
+  if(workspaceStatusText) workspaceStatusText.textContent = label;
   if(workspaceStatusBtn) workspaceStatusBtn.style.color = statusColors[status] || statusColors.available;
+
   document.querySelectorAll(".workspace-status-option").forEach(btn=>{
     const active = btn.dataset.status === status;
-    btn.classList.toggle("active", active);
+    btn.classList.toggle("active",active);
     btn.style.color = active ? (statusColors[status] || statusColors.available) : "#343b38";
   });
 }
 
-workspaceStatusBtn?.addEventListener("click", function(e){
+function getCurrentMobileAttendanceMember(session){
+  session = session || window.notusSession || getNotusSession?.() || {};
+  if(!session?.company_id) return null;
+
+  const type = String(session.user_type || "").toLowerCase().trim();
+
+  if(type === "hr" || type === "hr_member"){
+    return {
+      member_type:"hr",
+      member_id:session.hr_id || session.member_id || session.id
+    };
+  }
+
+  if(
+    type === "employee" ||
+    type === "team_lead" ||
+    type === "teamlead" ||
+    type === "manager" ||
+    type === "recruiter" ||
+    type === "it_admin" ||
+    type === "technical_supporter"
+  ){
+    return {
+      member_type:"employee",
+      member_id:
+        session.employee_id ||
+        session.team_lead_id ||
+        session.member_id ||
+        session.id
+    };
+  }
+
+  return {
+    member_type:"admin",
+    member_id:session.company_id
+  };
+}
+
+async function loadMyWorkspaceStatus(){
+  const session = window.notusSession || getNotusSession?.() || {};
+  const member = getCurrentMobileAttendanceMember(session);
+  if(!member?.member_id || !session?.company_id) return;
+
+  try{
+    const {data,error} = await db.rpc("get_member_attendance_status",{
+      p_company_id:session.company_id,
+      p_member_type:member.member_type,
+      p_member_id:member.member_id
+    });
+
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    const status = normalizeWorkspaceStatus(
+      row?.current_status ||
+      row?.status ||
+      row?.work_status ||
+      "available"
+    );
+
+    paintWorkspaceStatus(status,statusLabels[status]);
+  }catch(err){
+    console.warn("Workspace status load failed:",err);
+  }
+}
+
+async function saveMyWorkspaceStatus(status){
+  const session = window.notusSession || getNotusSession?.() || {};
+  const member = getCurrentMobileAttendanceMember(session);
+  if(!member?.member_id || !session?.company_id) return false;
+
+  status = normalizeWorkspaceStatus(status);
+
+  try{
+    const {error} = await db.rpc("set_member_attendance_status",{
+      p_company_id:session.company_id,
+      p_member_type:member.member_type,
+      p_member_id:member.member_id,
+      p_status:status
+    });
+
+    if(error) throw error;
+
+    paintWorkspaceStatus(status,statusLabels[status]);
+    return true;
+  }catch(err){
+    console.error("Workspace status save failed:",err);
+    await loadMyWorkspaceStatus();
+    return false;
+  }
+}
+
+workspaceStatusBtn?.addEventListener("click",async function(e){
   e.stopPropagation();
+
   const opening = !workspaceStatusMenu?.classList.contains("show");
-  workspaceStatusMenu?.classList.toggle("show", opening);
-  workspaceStatusWrap?.classList.toggle("open", opening);
+  workspaceStatusMenu?.classList.toggle("show",opening);
+  workspaceStatusWrap?.classList.toggle("open",opening);
+
+  if(opening) await loadMyWorkspaceStatus();
 });
 
 document.querySelectorAll(".workspace-status-option").forEach(btn=>{
-  btn.addEventListener("click", function(){
-    const status = this.dataset.status || "available";
-    const label = this.dataset.label || "Available";
-    paintWorkspaceStatus(status,label);
+  btn.addEventListener("click",async function(){
+    const status = normalizeWorkspaceStatus(this.dataset.status || "available");
+
     workspaceStatusMenu?.classList.remove("show");
     workspaceStatusWrap?.classList.remove("open");
-    try{localStorage.setItem("notus_workspace_status",JSON.stringify({status,label}));}catch(e){}
+
+    /* Optimistic paint, then save to SAME existing attendance backend */
+    paintWorkspaceStatus(status,statusLabels[status]);
+    await saveMyWorkspaceStatus(status);
+
+    if(typeof refreshChatPreviewOnly === "function"){
+      refreshChatPreviewOnly();
+    }
   });
 });
 
-document.addEventListener("click", function(){
+document.addEventListener("click",function(){
   workspaceStatusMenu?.classList.remove("show");
   workspaceStatusWrap?.classList.remove("open");
 });
-
-try{
-  const savedStatus = JSON.parse(localStorage.getItem("notus_workspace_status") || "null");
-  if(savedStatus?.status) paintWorkspaceStatus(savedStatus.status,savedStatus.label);
-}catch(e){}
 
 /* CURRENT LOGGED-IN USER PROFILE IMAGE — WORKING FINAL */
 let notusProfileChannel = null;
@@ -2305,7 +2472,19 @@ async function loadCurrentUserProfilePhoto(){
   if(!session?.company_id || typeof db === "undefined") return;
 
   const source = getLoggedInProfileSource(session);
-  const companyLogo = await fetchCompanyLogoForProfile(session.company_id);
+
+  /* Paint cached DB URL immediately, while fresh DB + company-logo load run. */
+  const cachedProfileUrl = String(
+    source.kind === "company"
+      ? (session.admin_profile_url || session.profile_image_url || "")
+      : (session.profile_image_url || "")
+  ).trim();
+
+  if(cachedProfileUrl){
+    showProfilePhoto(cachedProfileUrl,notusCompanyLogoCache || "");
+  }
+
+  const companyLogoPromise = fetchCompanyLogoForProfile(session.company_id);
 
   try{
     let profileUrl = "";
@@ -2416,6 +2595,7 @@ async function loadCurrentUserProfilePhoto(){
       ).trim();
     }
 
+    const companyLogo = await companyLogoPromise;
     showProfilePhoto(profileUrl, companyLogo);
 
   }catch(err){
@@ -2428,6 +2608,7 @@ async function loadCurrentUserProfilePhoto(){
         : (session.profile_image_url || "")
     ).trim();
 
+    const companyLogo = await companyLogoPromise;
     showProfilePhoto(cached, companyLogo);
   }
 }
@@ -2566,26 +2747,54 @@ function formatCompanyName(value){
 async function showWorkspace(session){
   const loginPage = document.querySelector(".page");
   const workspace = document.getElementById("workspaceScreen");
+
   if(loginPage) loginPage.style.display = "none";
   if(workspace) workspace.classList.add("show");
 
   const companyName = formatCompanyName(session?.company_name || "Company");
   const nameEl = document.getElementById("workspaceCompanyName");
   const fallback = document.getElementById("workspaceCompanyFallback");
+
   if(nameEl) nameEl.textContent = companyName;
   if(fallback) fallback.textContent = (companyName[0] || "C").toUpperCase();
 
   fillProfilePanel(session);
-  await loadWorkspaceCompanyLogo(session?.company_id);
 
-  if(typeof loadCurrentUserProfilePhoto==="function"){
-    await loadCurrentUserProfilePhoto();
+  /* IMPORTANT:
+     Paint saved profile URL immediately.
+     Do NOT wait for company logo RPC first. */
+  const cachedProfileUrl = String(
+    session?.admin_profile_url ||
+    session?.profile_image_url ||
+    ""
+  ).trim();
+
+  if(cachedProfileUrl && typeof showProfilePhoto === "function"){
+    showProfilePhoto(cachedProfileUrl,"");
   }
-  if(typeof startCurrentUserProfileRealtime==="function"){
+
+  /* Run independent loads together so profile does not appear late. */
+  const jobs = [];
+
+  if(typeof loadWorkspaceCompanyLogo === "function"){
+    jobs.push(loadWorkspaceCompanyLogo(session?.company_id));
+  }
+
+  if(typeof loadCurrentUserProfilePhoto === "function"){
+    jobs.push(loadCurrentUserProfilePhoto());
+  }
+
+  if(typeof loadMyWorkspaceStatus === "function"){
+    jobs.push(loadMyWorkspaceStatus());
+  }
+
+  await Promise.allSettled(jobs);
+
+  if(typeof startCurrentUserProfileRealtime === "function"){
     startCurrentUserProfileRealtime();
   }
 
-  if(typeof initDirectChatForSession==="function"){
+  if(typeof initDirectChatForSession === "function"){
     await initDirectChatForSession(session);
   }
 }
@@ -2792,26 +3001,126 @@ function personRoleLabel(person){
   return designation || role || "Employee";
 }
 
+function preloadImage(url){
+  return new Promise(resolve=>{
+    const clean = safeText(url);
+    if(!clean) return resolve(false);
+
+    const probe = new Image();
+    probe.decoding = "async";
+
+    probe.onload = ()=>resolve(true);
+    probe.onerror = ()=>resolve(false);
+    probe.src = clean;
+
+    if(probe.complete){
+      resolve(probe.naturalWidth > 0);
+    }
+  });
+}
+
 function buildPersonAvatar(person){
   const avatar = document.createElement("div");
   avatar.className = "chat-avatar";
+
+  const initial = document.createElement("span");
+  initial.textContent = personInitial(person);
+  initial.style.width = "100%";
+  initial.style.height = "100%";
+  initial.style.display = "grid";
+  initial.style.placeItems = "center";
+  avatar.appendChild(initial);
 
   const url = safeText(person?.profile_image_url);
   if(url){
     const img = document.createElement("img");
     img.className = "person-avatar";
     img.alt = safeText(person?.name) || "Profile";
-    img.src = url;
-    img.onerror = ()=>{
-      img.remove();
-      avatar.textContent = personInitial(person);
+    img.decoding = "async";
+    img.loading = "eager";
+    img.style.display = "none";
+
+    img.onload = ()=>{
+      img.style.display = "block";
+      initial.style.display = "none";
     };
+
+    img.onerror = ()=>{
+      img.style.display = "none";
+      initial.style.display = "grid";
+    };
+
+    /* Keep the exact saved public URL, including existing ?v=... */
+    img.src = url;
+
     avatar.appendChild(img);
-  }else{
-    avatar.textContent = personInitial(person);
+
+    if(img.complete && img.naturalWidth > 0){
+      img.style.display = "block";
+      initial.style.display = "none";
+    }
   }
 
   return avatar;
+}
+
+function peerAttendanceMember(peer){
+  if(!peer) return null;
+
+  if(peer.type === "company_admin" || peer.type === "admin"){
+    return {member_type:"admin",member_id:peer.company_id || peer.id};
+  }
+
+  if(peer.type === "hr" || peer.type === "hr_member"){
+    return {member_type:"hr",member_id:peer.id};
+  }
+
+  return {member_type:"employee",member_id:peer.id};
+}
+
+async function loadPeerAttendanceStatus(peer){
+  const session = directChatSession || window.notusSession || {};
+  const member = peerAttendanceMember(peer);
+
+  if(!session?.company_id || !member?.member_id){
+    peer.live_status = "offline";
+    peer.live_status_label = "Offline";
+    return peer;
+  }
+
+  try{
+    const {data,error} = await db.rpc("get_member_attendance_status",{
+      p_company_id:session.company_id,
+      p_member_type:member.member_type,
+      p_member_id:member.member_id
+    });
+
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    const status = normalizeWorkspaceStatus(
+      row?.current_status ||
+      row?.status ||
+      row?.work_status ||
+      "offline"
+    );
+
+    peer.live_status = status;
+    peer.live_status_label = statusLabels[status] || "Offline";
+  }catch(err){
+    peer.live_status = "offline";
+    peer.live_status_label = "Offline";
+  }
+
+  return peer;
+}
+
+async function enrichPeopleAttendance(items){
+  const list = Array.isArray(items) ? items : [];
+  await Promise.all(
+    list.map(item=>loadPeerAttendanceStatus(item.peer || item))
+  );
+  return list;
 }
 
 function renderPeopleList(people, mode="search"){
@@ -2873,8 +3182,27 @@ function renderPeopleList(people, mode="search"){
       preview.textContent = personRoleLabel(peer);
     }
 
+    const statusLine = document.createElement("div");
+    statusLine.className = "chat-person-status";
+
+    const statusDot = document.createElement("span");
+    statusDot.className = "chat-person-status-dot";
+    statusDot.style.background =
+      statusColors[normalizeWorkspaceStatus(peer.live_status || "offline")] ||
+      statusColors.offline;
+
+    const statusText = document.createElement("span");
+    statusText.textContent =
+      peer.live_status_label ||
+      statusLabels[normalizeWorkspaceStatus(peer.live_status || "offline")] ||
+      "Offline";
+
+    statusLine.appendChild(statusDot);
+    statusLine.appendChild(statusText);
+
     body.appendChild(top);
     body.appendChild(preview);
+    body.appendChild(statusLine);
     btn.appendChild(body);
 
     btn.addEventListener("click", ()=>{
@@ -2978,7 +3306,7 @@ async function fetchSameCompanyPeople(query){
     return true;
   });
 
-  return people.filter(person=>{
+  const filtered = people.filter(person=>{
     const hay = [
       person.name,
       person.email,
@@ -2988,6 +3316,9 @@ async function fetchSameCompanyPeople(query){
 
     return hay.includes(q);
   }).slice(0,50);
+
+  await enrichPeopleAttendance(filtered);
+  return filtered;
 }
 
 function rowPeer(row){
@@ -3029,6 +3360,7 @@ async function loadRecentDirectChats(){
       }))
       .filter(x=>x.peer);
 
+    await enrichPeopleAttendance(items);
     renderPeopleList(items,"recent");
   }catch(err){
     console.error("Load chats failed:",err);
@@ -3085,7 +3417,14 @@ function paintDirectChatHeader(peer){
   const fallback = document.getElementById("chatHeaderFallback");
 
   if(name) name.textContent = safeText(peer?.name) || "User";
-  if(sub) sub.textContent = personRoleLabel(peer);
+
+  if(sub){
+    const role = personRoleLabel(peer);
+    const live = peer?.live_status_label ||
+      statusLabels[normalizeWorkspaceStatus(peer?.live_status || "offline")] ||
+      "Offline";
+    sub.textContent = role + " • " + live;
+  }
 
   if(fallback){
     fallback.textContent = personInitial(peer);
@@ -3098,17 +3437,86 @@ function paintDirectChatHeader(peer){
 
     const url = safeText(peer?.profile_image_url);
     if(url){
+      img.decoding = "async";
+
       img.onload = ()=>{
         img.style.display = "block";
         if(fallback) fallback.style.display = "none";
       };
+
       img.onerror = ()=>{
         img.style.display = "none";
         if(fallback) fallback.style.display = "grid";
       };
+
       img.src = url;
+
+      if(img.complete && img.naturalWidth > 0){
+        img.style.display = "block";
+        if(fallback) fallback.style.display = "none";
+      }
     }
   }
+}
+
+async function refreshPeerBeforeOpen(peer){
+  if(!peer) return peer;
+
+  const session = directChatSession || window.notusSession || {};
+  const companyId = session.company_id;
+
+  try{
+    if(peer.type === "employee"){
+      const {data,error} = await db
+        .from("employees")
+        .select("id,full_name,email,role,designation,profile_image_url")
+        .eq("company_id",companyId)
+        .eq("id",peer.id)
+        .maybeSingle();
+
+      if(!error && data){
+        peer.name = safeText(data.full_name) || peer.name;
+        peer.email = safeText(data.email) || peer.email;
+        peer.role = safeText(data.role) || peer.role;
+        peer.designation = safeText(data.designation) || peer.designation;
+        peer.profile_image_url = safeText(data.profile_image_url) || peer.profile_image_url;
+      }
+    }else if(peer.type === "hr"){
+      const {data,error} = await db
+        .from("hr_members")
+        .select("*")
+        .eq("company_id",companyId)
+        .eq("id",peer.id)
+        .maybeSingle();
+
+      if(!error && data){
+        peer.name = safeText(data.full_name || data.name) || peer.name;
+        peer.role = safeText(data.role) || peer.role;
+        peer.designation = safeText(data.designation) || peer.designation;
+        peer.profile_image_url = safeText(data.profile_image_url) || peer.profile_image_url;
+      }
+    }else if(peer.type === "company_admin"){
+      const {data,error} = await db
+        .from("companies")
+        .select("*")
+        .eq("id",companyId)
+        .maybeSingle();
+
+      if(!error && data){
+        peer.profile_image_url = safeText(data.admin_profile_url) || peer.profile_image_url;
+      }
+    }
+  }catch(err){
+    console.warn("Peer profile refresh failed:",err);
+  }
+
+  await loadPeerAttendanceStatus(peer);
+
+  if(peer.profile_image_url){
+    await preloadImage(peer.profile_image_url);
+  }
+
+  return peer;
 }
 
 let chatBodyPreviousOverflow = "";
@@ -3164,6 +3572,8 @@ async function openDirectChat(peer){
   activeDirectPeer = peer;
   activeDirectChat = null;
 
+  /* Refresh exact DB image + existing attendance status before header paint. */
+  await refreshPeerBeforeOpen(peer);
   paintDirectChatHeader(peer);
   if(chatMessages){
     chatMessages.innerHTML = '<div class="chat-load-state">Loading messages...</div>';
@@ -3413,7 +3823,12 @@ async function initDirectChatForSession(session){
   activeDirectChat = null;
 
   if(workspaceSearch) workspaceSearch.value = "";
-  await loadRecentDirectChats();
+
+  await Promise.allSettled([
+    loadMyWorkspaceStatus(),
+    loadRecentDirectChats()
+  ]);
+
   startDirectChatRealtime();
 }
 
