@@ -1942,7 +1942,7 @@ form.addEventListener("submit", async function(e){
           const loginEmail = String(employee.gmail || gmail).trim().toLowerCase();
           const rr = await db
             .from("employees")
-            .select("id,role,email,full_name,profile_image_url")
+            .select("id,role,designation,email,full_name,profile_image_url")
             .eq("company_id", employee.company_id)
             .ilike("email", loginEmail)
             .maybeSingle();
@@ -1950,6 +1950,7 @@ form.addEventListener("submit", async function(e){
           if(!rr.error && rr.data?.role){
             resolvedEmployeeRole = String(rr.data.role).trim();
             if(rr.data.id) employee.employee_id = rr.data.id;
+            if(rr.data.designation) employee.designation = rr.data.designation;
             if(rr.data.profile_image_url) employee.profile_image_url = rr.data.profile_image_url;
           }
         }catch(roleErr){
@@ -1983,6 +1984,7 @@ form.addEventListener("submit", async function(e){
           gmail: employee.gmail || gmail,
           profile_image_url: employee.profile_image_url || "",
           role: resolvedEmployeeRole || employee.role,
+          designation: employee.designation || "",
           status: employee.status,
           logged_in_at: new Date().toISOString()
         };
@@ -2461,7 +2463,14 @@ document.addEventListener("visibilitychange", function(){
 
 /* PROFILE SIDE NAV */
 const workspaceProfileBtn=document.getElementById("workspaceProfileBtn");const workspaceProfilePanel=document.getElementById("workspaceProfilePanel");const workspaceProfileOverlay=document.getElementById("workspaceProfileOverlay");const profilePanelClose=document.getElementById("profilePanelClose");const profileLogoutBtn=document.getElementById("profileLogoutBtn");
-function roleDisplayName(session){const directRole=String(session?.role||"").trim();if(directRole)return directRole;const map={company_admin:"Company Admin",hr:"HR",team_lead:"Team Lead",manager:"Manager",recruiter:"Recruiter",it_admin:"IT Administrator",technical_supporter:"Technical Supporter",employee:"Employee"};return map[session?.user_type]||"Employee"}
+function roleDisplayName(session){
+  const directRole=String(session?.role||"").trim();
+  const designation=String(session?.designation||"").trim();
+  if(directRole.toLowerCase()==="employee" && designation) return designation;
+  if(directRole) return directRole;
+  const map={company_admin:"Company Admin",hr:"HR",team_lead:"Team Lead",manager:"Manager",recruiter:"Recruiter",it_admin:"IT Administrator",technical_supporter:"Technical Supporter",employee:"Employee"};
+  return map[session?.user_type]||"Employee";
+}
 function fillProfilePanel(session){
   const fullName=String(session?.full_name||session?.name||(session?.user_type==="company_admin"?"Company Admin":"User")).trim();
   const companyName=formatCompanyName(session?.company_name||"Company");
