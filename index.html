@@ -1106,80 +1106,118 @@ body{
 .workspace-profile-btn:active,.workspace-profile-btn:hover{background:transparent !important;}
 
 /* =========================
-   CHAT LIST + PULL REFRESH
+   CHAT LIST + iPHONE STYLE PULL REFRESH
 ========================= */
 .workspace-main{
   position:relative;
   overflow:auto;
   -webkit-overflow-scrolling:touch;
   overscroll-behavior-y:contain;
+  background:#f3f6f5;
 }
 .pull-refresh{
-  height:0;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:height .2s ease;
-}
-.pull-refresh.show{height:52px}
-.pull-spinner{
-  width:22px;height:22px;
-  border:2px solid #dfe7e4;
-  border-top-color:#0f766e;
+  position:absolute;
+  left:50%;
+  top:3px;
+  z-index:20;
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
   border-radius:50%;
+  background:rgba(255,255,255,.94);
+  box-shadow:0 5px 18px rgba(25,45,39,.12);
+  opacity:0;
+  pointer-events:none;
+  transform:translate3d(-50%,-30px,0) scale(.82);
+  transition:opacity .16s ease,transform .20s cubic-bezier(.2,.8,.2,1);
+  will-change:transform,opacity;
 }
-.pull-refresh.loading .pull-spinner{animation:spin .75s linear infinite}
-.chat-list{background:#fff}
+.pull-refresh.show{opacity:1}
+.pull-spinner{
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:conic-gradient(
+    from 0deg,
+    rgba(15,118,110,.10),
+    rgba(15,118,110,.22),
+    rgba(15,118,110,.38),
+    rgba(15,118,110,.58),
+    rgba(15,118,110,.82),
+    #0f766e
+  );
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2.4px),#000 0);
+  mask:radial-gradient(farthest-side,transparent calc(100% - 2.4px),#000 0);
+  will-change:transform;
+}
+.pull-refresh.loading .pull-spinner{
+  animation:iosSpin .72s linear infinite;
+}
+@keyframes iosSpin{
+  to{transform:rotate(360deg)}
+}
+.chat-list{
+  background:transparent;
+  transform:translate3d(0,0,0);
+  transition:transform .22s cubic-bezier(.2,.8,.2,1);
+  will-change:transform;
+}
 .chat-item{
   width:100%;
-  min-height:76px;
+  min-height:78px;
   border:0;
-  background:#fff;
+  background:transparent;
   display:flex;
   align-items:center;
   gap:12px;
   padding:11px 16px;
   text-align:left;
   cursor:pointer;
+  transition:background .16s ease;
 }
-.chat-item:active{background:#f6f8f7}
+.chat-item:active{background:rgba(15,118,110,.045)}
 .chat-avatar{
   width:52px;height:52px;flex:0 0 52px;
   border-radius:50%;
   display:grid;place-items:center;
-  background:#e9f5f2;color:#0f766e;
+  background:#e6f3ef;color:#0f766e;
   font-family:"Outfit",sans-serif;font-size:18px;font-weight:700;
   overflow:hidden;
+  box-shadow:0 1px 3px rgba(20,50,42,.06);
 }
 .chat-avatar img{width:100%;height:100%;object-fit:cover;display:none}
-.chat-item-body{min-width:0;flex:1;border-bottom:1px solid #f0f2f1;padding:7px 0 14px}
+.chat-item-body{min-width:0;flex:1;border-bottom:1px solid rgba(130,145,140,.16);padding:7px 0 14px}
 .chat-item-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .chat-item-name{font-family:"Outfit",sans-serif;font-size:15px;font-weight:600;color:#171717;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chat-item-time{font-size:9px;color:#8f9895;flex:0 0 auto}
 .chat-item-preview{margin-top:5px;font-size:11px;color:#7e8784;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* =========================
-   CHAT SCREEN
+   CHAT SCREEN — WHATSAPP-LIKE
 ========================= */
 .chat-screen{
   position:fixed;
   inset:0;
   z-index:500;
-  background:#f3f5f4;
+  background:#efeae2;
   display:flex;
   flex-direction:column;
   transform:translateX(100%);
   visibility:hidden;
   transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s ease;
+  will-change:transform;
+  touch-action:pan-y;
 }
 .chat-screen.show{transform:translateX(0);visibility:visible}
 .chat-header{
   padding:max(12px,env(safe-area-inset-top)) 12px 10px;
   min-height:76px;
-  background:#fff;
+  background:#ffffff;
   display:flex;align-items:flex-end;gap:8px;
-  border-bottom:1px solid #edf0ef;
+  border-bottom:1px solid #e7ebe9;
+  box-shadow:0 1px 4px rgba(18,38,32,.05);
+  z-index:5;
 }
 .chat-back{
   width:36px;height:40px;border:0;background:transparent;color:#303634;
@@ -1188,44 +1226,82 @@ body{
 .chat-header-avatar{
   width:40px;height:40px;border-radius:50%;background:#e9f5f2;color:#0f766e;
   display:grid;place-items:center;font-family:"Outfit",sans-serif;font-size:15px;font-weight:700;
+  box-shadow:0 1px 3px rgba(20,50,42,.07);
 }
 .chat-header-info{min-width:0;flex:1;padding-bottom:2px}
 .chat-header-name{font-family:"Outfit",sans-serif;font-size:14px;font-weight:600;color:#171717;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chat-header-sub{margin-top:2px;font-size:9px;color:#8b9491}
+.chat-header-sub{margin-top:2px;font-size:9px;color:#71807b}
 .chat-messages{
   flex:1;
   overflow-y:auto;
-  padding:18px 12px 12px;
+  padding:18px 11px 14px;
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:7px;
   -webkit-overflow-scrolling:touch;
+  background-color:#efeae2;
+  background-image:
+    radial-gradient(circle at 18px 18px,rgba(91,111,103,.055) 1.1px,transparent 1.2px),
+    radial-gradient(circle at 55px 42px,rgba(91,111,103,.04) 1px,transparent 1.1px);
+  background-size:72px 72px,84px 84px;
 }
 .chat-day{text-align:center;margin:2px 0 8px}
-.chat-day span{display:inline-block;padding:5px 9px;border-radius:8px;background:#fff;color:#8a9390;font-size:8px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.message-row{display:flex}.message-row.in{justify-content:flex-start}.message-row.out{justify-content:flex-end}
+.chat-day span{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:8px;
+  background:rgba(255,255,255,.84);
+  backdrop-filter:blur(5px);
+  color:#78827e;
+  font-size:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.message-row{display:flex}
+.message-row.in{justify-content:flex-start}
+.message-row.out{justify-content:flex-end}
 .message-bubble{
+  position:relative;
   max-width:82%;
   padding:8px 9px 6px;
-  border-radius:11px;
+  border-radius:9px;
   font-size:11px;
   line-height:1.45;
   color:#232725;
-  box-shadow:0 1px 2px rgba(0,0,0,.05);
+  box-shadow:0 1px 1.5px rgba(0,0,0,.08);
 }
-.message-row.in .message-bubble{background:#fff;border-top-left-radius:4px}
-.message-row.out .message-bubble{background:#dff3ed;border-top-right-radius:4px}
-.message-time{display:block;margin-top:4px;text-align:right;font-size:7.5px;color:#89928f}
+.message-row.in .message-bubble{
+  background:#ffffff;
+  border-top-left-radius:3px;
+}
+.message-row.out .message-bubble{
+  background:#d9fdd3;
+  border-top-right-radius:3px;
+}
+.message-time{
+  display:block;
+  margin-top:4px;
+  text-align:right;
+  font-size:7.5px;
+  color:#7f8c87;
+}
 .chat-compose-wrap{
-  background:#f3f5f4;
-  padding:8px 10px calc(8px + env(safe-area-inset-bottom));
-  display:flex;align-items:flex-end;gap:7px;
+  background:#efeae2;
+  padding:7px 9px calc(7px + env(safe-area-inset-bottom));
+  display:flex;
+  align-items:flex-end;
+  gap:7px;
 }
 .chat-compose{
-  flex:1;min-height:44px;max-height:110px;
-  border:0;border-radius:22px;background:#fff;
-  display:flex;align-items:center;padding:0 14px;
-  box-shadow:0 1px 4px rgba(18,38,32,.05);
+  flex:1;
+  min-height:45px;
+  max-height:110px;
+  border:0;
+  border-radius:23px;
+  background:#ffffff;
+  display:flex;
+  align-items:center;
+  padding:0 14px;
+  box-shadow:0 1px 4px rgba(18,38,32,.08);
 }
 .chat-compose textarea{
   width:100%;max-height:88px;resize:none;border:0;outline:none;background:transparent;
@@ -1234,8 +1310,10 @@ body{
 .chat-send{
   width:44px;height:44px;flex:0 0 44px;border:0;border-radius:50%;
   background:#0f766e;color:#fff;display:grid;place-items:center;font-size:14px;cursor:pointer;
+  box-shadow:0 2px 5px rgba(15,118,110,.18);
+  transition:transform .15s ease;
 }
-.chat-send:active{transform:scale(.96)}
+.chat-send:active{transform:scale(.94)}
 
 </style>
 </head>
@@ -2012,6 +2090,14 @@ const workspaceSearch = document.getElementById("workspaceSearch");
 
 let pullStartY = 0;
 let pulling = false;
+let refreshing = false;
+const workspaceChatList = document.getElementById("workspaceChatList");
+
+let edgeSwipeActive = false;
+let edgeSwipeSide = "";
+let edgeSwipeStartX = 0;
+let edgeSwipeStartY = 0;
+let edgeSwipeDistance = 0;
 
 function getTimeLabel(date = new Date()){
   return date.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
@@ -2130,38 +2216,182 @@ workspaceSearch?.addEventListener("input", function(){
   if(companyChatItem) companyChatItem.style.display = (!q || company.includes(q) || preview.includes(q)) ? "flex" : "none";
 });
 
-/* Shopping-app style pull-down spinner */
+/* Smooth iPhone-style pull to refresh */
+function resetPullRefresh(){
+  if(workspaceChatList){
+    workspaceChatList.style.transition = "transform .22s cubic-bezier(.2,.8,.2,1)";
+    workspaceChatList.style.transform = "translate3d(0,0,0)";
+  }
+  if(pullRefresh){
+    pullRefresh.classList.remove("show","loading");
+    pullRefresh.style.transform = "translate3d(-50%,-30px,0) scale(.82)";
+    pullRefresh.style.opacity = "0";
+  }
+}
+
 workspaceMain?.addEventListener("touchstart", function(e){
+  if(refreshing || companyChatScreen?.classList.contains("show")) return;
   if(workspaceMain.scrollTop <= 0 && e.touches?.length === 1){
     pullStartY = e.touches[0].clientY;
     pulling = true;
+    if(workspaceChatList) workspaceChatList.style.transition = "none";
+    if(pullRefresh) pullRefresh.style.transition = "none";
   }
 },{passive:true});
 
 workspaceMain?.addEventListener("touchmove", function(e){
-  if(!pulling) return;
-  const distance = Math.max(0, Math.min(90, e.touches[0].clientY - pullStartY));
-  if(distance > 6){
-    pullRefresh.style.height = Math.min(52, distance * .65) + "px";
+  if(!pulling || refreshing || !e.touches?.length) return;
+
+  const rawDistance = e.touches[0].clientY - pullStartY;
+  if(rawDistance <= 0){
+    resetPullRefresh();
+    return;
   }
-},{passive:true});
+
+  e.preventDefault();
+
+  const pull = Math.min(66, rawDistance * .48);
+
+  if(workspaceChatList){
+    workspaceChatList.style.transform = `translate3d(0,${pull}px,0)`;
+  }
+
+  if(pullRefresh){
+    const spinnerY = Math.min(18, -18 + pull * .55);
+    const scale = Math.min(1, .78 + pull / 180);
+    pullRefresh.classList.add("show");
+    pullRefresh.style.opacity = String(Math.min(1, pull / 34));
+    pullRefresh.style.transform = `translate3d(-50%,${spinnerY}px,0) scale(${scale})`;
+
+    const spinner = pullRefresh.querySelector(".pull-spinner");
+    if(spinner) spinner.style.transform = `rotate(${Math.min(280,rawDistance * 2.2)}deg)`;
+  }
+},{passive:false});
 
 workspaceMain?.addEventListener("touchend", function(){
   if(!pulling) return;
   pulling = false;
-  const h = parseFloat(pullRefresh.style.height || "0");
-  if(h >= 42){
-    pullRefresh.classList.add("show","loading");
-    pullRefresh.style.height = "52px";
+
+  const transform = workspaceChatList?.style.transform || "";
+  const match = transform.match(/translate3d\(0,\s*([0-9.]+)px/i);
+  const pull = match ? parseFloat(match[1]) : 0;
+
+  if(pull >= 44){
+    refreshing = true;
+
+    if(workspaceChatList){
+      workspaceChatList.style.transition = "transform .22s cubic-bezier(.2,.8,.2,1)";
+      workspaceChatList.style.transform = "translate3d(0,54px,0)";
+    }
+
+    if(pullRefresh){
+      pullRefresh.style.transition = "opacity .18s ease,transform .22s cubic-bezier(.2,.8,.2,1)";
+      pullRefresh.classList.add("show","loading");
+      pullRefresh.style.opacity = "1";
+      pullRefresh.style.transform = "translate3d(-50%,10px,0) scale(1)";
+      const spinner = pullRefresh.querySelector(".pull-spinner");
+      if(spinner) spinner.style.transform = "";
+    }
+
     setTimeout(()=>{
       renderCompanyMessages();
-      pullRefresh.classList.remove("loading","show");
-      pullRefresh.style.height = "0px";
-    },850);
+      refreshing = false;
+      resetPullRefresh();
+    },700);
   }else{
-    pullRefresh.style.height = "0px";
+    resetPullRefresh();
   }
 });
+
+workspaceMain?.addEventListener("touchcancel", function(){
+  pulling = false;
+  if(!refreshing) resetPullRefresh();
+});
+
+/* Back swipe from BOTH screen edges */
+companyChatScreen?.addEventListener("touchstart", function(e){
+  if(!companyChatScreen.classList.contains("show") || e.touches?.length !== 1) return;
+
+  const touch = e.touches[0];
+  const edge = 26;
+
+  if(touch.clientX <= edge){
+    edgeSwipeActive = true;
+    edgeSwipeSide = "left";
+  }else if(touch.clientX >= window.innerWidth - edge){
+    edgeSwipeActive = true;
+    edgeSwipeSide = "right";
+  }else{
+    edgeSwipeActive = false;
+    return;
+  }
+
+  edgeSwipeStartX = touch.clientX;
+  edgeSwipeStartY = touch.clientY;
+  edgeSwipeDistance = 0;
+  companyChatScreen.style.transition = "none";
+},{passive:true});
+
+companyChatScreen?.addEventListener("touchmove", function(e){
+  if(!edgeSwipeActive || e.touches?.length !== 1) return;
+
+  const touch = e.touches[0];
+  const dx = touch.clientX - edgeSwipeStartX;
+  const dy = touch.clientY - edgeSwipeStartY;
+
+  if(Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 12){
+    edgeSwipeActive = false;
+    companyChatScreen.style.transition = "";
+    companyChatScreen.style.transform = "";
+    return;
+  }
+
+  let distance = 0;
+  if(edgeSwipeSide === "left") distance = Math.max(0, dx);
+  else distance = Math.max(0, -dx);
+
+  if(distance <= 0) return;
+
+  e.preventDefault();
+  edgeSwipeDistance = Math.min(window.innerWidth, distance);
+
+  const signed = edgeSwipeSide === "left" ? edgeSwipeDistance : -edgeSwipeDistance;
+  companyChatScreen.style.transform = `translate3d(${signed}px,0,0)`;
+},{passive:false});
+
+function finishEdgeSwipe(){
+  if(!edgeSwipeActive) return;
+
+  const shouldClose = edgeSwipeDistance > 72;
+  const side = edgeSwipeSide;
+
+  edgeSwipeActive = false;
+  edgeSwipeDistance = 0;
+
+  companyChatScreen.style.transition = "transform .24s cubic-bezier(.2,.8,.2,1)";
+
+  if(shouldClose){
+    const target = side === "left" ? "100%" : "-100%";
+    companyChatScreen.style.transform = `translate3d(${target},0,0)`;
+
+    setTimeout(()=>{
+      companyChatScreen.classList.remove("show");
+      companyChatScreen.setAttribute("aria-hidden","true");
+      companyChatScreen.style.transition = "";
+      companyChatScreen.style.transform = "";
+      chatMessageInput?.blur();
+    },240);
+  }else{
+    companyChatScreen.style.transform = "translate3d(0,0,0)";
+    setTimeout(()=>{
+      companyChatScreen.style.transition = "";
+      companyChatScreen.style.transform = "";
+    },240);
+  }
+}
+
+companyChatScreen?.addEventListener("touchend", finishEdgeSwipe, {passive:true});
+companyChatScreen?.addEventListener("touchcancel", finishEdgeSwipe, {passive:true});
 
 
 /* Restore already logged-in session on reload */
