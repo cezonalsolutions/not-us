@@ -2626,6 +2626,219 @@ body:has(.workspace-screen.show){
   height:6px!important;
 }
 
+
+
+/* =========================================================
+   MOBILE WORK REPORT
+   ========================================================= */
+.workspace-category-tabs{
+  grid-template-columns:repeat(3,1fr)!important;
+}
+.workspace-category-btn{
+  min-width:0;
+  padding-left:7px!important;
+  padding-right:7px!important;
+}
+.mobile-work-report-main{
+  min-height:100%;
+  padding:8px 13px calc(20px + env(safe-area-inset-bottom));
+}
+.mobile-work-report-main-head{
+  min-height:52px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:0 1px;
+  border-bottom:1px solid #e5ebe8;
+}
+.mobile-work-report-main-head b{
+  display:block;
+  font-family:"Outfit",sans-serif;
+  font-size:13px;
+  font-weight:600;
+  color:#202523;
+}
+.mobile-work-report-main-head span{
+  display:block;
+  margin-top:2px;
+  font-size:8px;
+  color:#8c9692;
+}
+.mobile-work-report-add{
+  height:34px;
+  padding:0 11px;
+  border:0;
+  border-radius:10px;
+  background:#171717;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-family:"Inter",sans-serif;
+  font-size:9px;
+  font-weight:700;
+}
+.mobile-work-report-list{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+}
+.mobile-work-report-item{
+  padding:14px 1px 13px;
+  border-bottom:1px solid #e5ebe8;
+}
+.mobile-work-report-item-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.mobile-work-report-title{
+  min-width:0;
+  flex:1;
+  font-family:"Outfit",sans-serif;
+  font-size:13.5px;
+  line-height:1.4;
+  font-weight:600;
+  color:#1d2320;
+}
+.mobile-work-report-date{
+  flex:0 0 auto;
+  font-size:7px;
+  font-weight:700;
+  color:#87918d;
+  white-space:nowrap;
+  padding-top:2px;
+}
+.mobile-work-report-desc{
+  margin-top:6px;
+  font-size:10px;
+  line-height:1.62;
+  color:#66706c;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.mobile-work-report-meta{
+  margin-top:8px;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:5px;
+  font-size:7px;
+  color:#949d99;
+}
+.mobile-work-report-meta b{color:#626c68}
+.mobile-work-report-empty{
+  min-height:250px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:30px;
+  color:#929b97;
+}
+.mobile-work-report-empty i{font-size:22px;margin-bottom:10px;color:#adb6b2}
+.mobile-work-report-empty b{font-size:10.5px;color:#3c433f}
+.mobile-work-report-empty span{font-size:8px;margin-top:5px}
+
+.mobile-work-report-overlay{
+  position:fixed;
+  inset:0;
+  z-index:790;
+  display:none;
+  align-items:flex-end;
+  background:rgba(17,24,39,.28);
+}
+.mobile-work-report-overlay.show{display:flex}
+.mobile-work-report-sheet{
+  width:100%;
+  max-height:92dvh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:#fff;
+  border-radius:22px 22px 0 0;
+}
+.mobile-work-report-sheet-head{
+  min-height:58px;
+  padding:0 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid #edf0ef;
+}
+.mobile-work-report-sheet-head h3{
+  font-family:"Outfit",sans-serif;
+  font-size:16px;
+  font-weight:600;
+  color:#171717;
+}
+.mobile-work-report-sheet-head button{
+  width:34px;
+  height:34px;
+  border:0;
+  border-radius:10px;
+  background:#f4f6f5;
+  color:#5f6965;
+}
+.mobile-work-report-form{
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:16px 16px calc(18px + env(safe-area-inset-bottom));
+}
+.mobile-work-report-field{margin-bottom:13px;position:relative}
+.mobile-work-report-field label{
+  display:block;
+  margin-bottom:6px;
+  font-size:9px;
+  font-weight:700;
+  color:#4b5551;
+}
+.mobile-work-report-field input,
+.mobile-work-report-field textarea{
+  width:100%;
+  border:1px solid #dfe5e2;
+  border-radius:11px;
+  outline:none;
+  background:#fff;
+  font-family:"Inter",sans-serif;
+  font-size:12px;
+  color:#202523;
+}
+.mobile-work-report-field input{
+  height:46px;
+  padding:0 12px;
+}
+.mobile-work-report-field textarea{
+  min-height:130px;
+  padding:12px 12px 28px;
+  resize:vertical;
+  line-height:1.55;
+}
+.mobile-work-report-field input:focus,
+.mobile-work-report-field textarea:focus{border-color:#0f766e}
+.mobile-work-report-count{
+  position:absolute;
+  right:10px;
+  bottom:8px;
+  font-size:7px;
+  color:#98a09d;
+}
+.mobile-work-report-submit{
+  width:100%;
+  height:47px;
+  border:0;
+  border-radius:12px;
+  background:#171717;
+  color:#fff;
+  font-family:"Inter",sans-serif;
+  font-size:11px;
+  font-weight:700;
+}
+.mobile-work-report-submit:disabled{opacity:.55}
+
 </style>
 
 <style>
@@ -3384,6 +3597,10 @@ html,body{
         <i class="fa-regular fa-calendar"></i>
         Meetings
       </button>
+      <button class="workspace-category-btn" id="workspaceTabWorkReport" type="button">
+        <i class="fa-regular fa-clipboard"></i>
+        Work Report
+      </button>
     </div>
   </div>
 
@@ -3407,6 +3624,28 @@ html,body{
             <i class="fa-regular fa-calendar"></i>
             <b>No upcoming meetings</b>
             <span>Your scheduled meetings will appear here.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="workspace-main-panel" id="workspaceWorkReportPanel">
+      <div class="mobile-work-report-main">
+        <div class="mobile-work-report-main-head">
+          <div>
+            <b>Work Report</b>
+            <span>Daily work updates</span>
+          </div>
+          <button class="mobile-work-report-add" id="mobileWorkReportAdd" type="button">
+            <i class="fa-solid fa-plus"></i>
+            Add
+          </button>
+        </div>
+        <div class="mobile-work-report-list" id="mobileWorkReportList">
+          <div class="mobile-work-report-empty">
+            <i class="fa-regular fa-clipboard"></i>
+            <b>No work reports</b>
+            <span>Your submitted reports will appear here.</span>
           </div>
         </div>
       </div>
@@ -3448,6 +3687,40 @@ html,body{
 
 
 
+
+
+<div class="mobile-work-report-overlay" id="mobileWorkReportOverlay">
+  <div class="mobile-work-report-sheet">
+    <div class="mobile-work-report-sheet-head">
+      <h3>New Work Report</h3>
+      <button id="mobileWorkReportClose" type="button" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <form class="mobile-work-report-form" id="mobileWorkReportForm">
+      <div class="mobile-work-report-field">
+        <label for="mobileWorkReportDate">Date</label>
+        <input id="mobileWorkReportDate" type="date">
+      </div>
+
+      <div class="mobile-work-report-field">
+        <label for="mobileWorkReportTitle">Title</label>
+        <input id="mobileWorkReportTitle" maxlength="140" placeholder="What did you work on?">
+      </div>
+
+      <div class="mobile-work-report-field">
+        <label for="mobileWorkReportDescription">Work Description</label>
+        <textarea id="mobileWorkReportDescription" maxlength="3000" placeholder="Describe completed work, progress, blockers or updates..."></textarea>
+        <div class="mobile-work-report-count" id="mobileWorkReportCount">0 / 3000</div>
+      </div>
+
+      <button class="mobile-work-report-submit" id="mobileWorkReportSubmit" type="submit">
+        Submit Report
+      </button>
+    </form>
+  </div>
+</div>
 
 <section class="mobile-announcements-screen" id="mobileAnnouncementsScreen" aria-hidden="true">
   <header class="mobile-announcements-head">
@@ -7971,6 +8244,264 @@ window.openOutsideApp = function(rawUrl){
       loadMobileAnnouncements();
     }
   });
+})();
+</script>
+
+
+<script>
+/* =========================================================
+   MOBILE WORK REPORT — ALL ROLES
+   ========================================================= */
+(function(){
+  const tabChat=document.getElementById("workspaceTabChat");
+  const tabMeetings=document.getElementById("workspaceTabMeetings");
+  const tabWork=document.getElementById("workspaceTabWorkReport");
+  const panelChat=document.getElementById("workspaceChatPanel");
+  const panelMeetings=document.getElementById("workspaceMeetingsPanel");
+  const panelWork=document.getElementById("workspaceWorkReportPanel");
+
+  const addBtn=document.getElementById("mobileWorkReportAdd");
+  const overlay=document.getElementById("mobileWorkReportOverlay");
+  const closeBtn=document.getElementById("mobileWorkReportClose");
+  const form=document.getElementById("mobileWorkReportForm");
+  const list=document.getElementById("mobileWorkReportList");
+
+  let rows=[];
+  let channel=null;
+
+  function s(){
+    try{
+      return window.notusSession ||
+        JSON.parse(localStorage.getItem("notus_company_session")||"null") ||
+        null;
+    }catch(_){return window.notusSession||null}
+  }
+
+  function actor(){
+    const x=s()||{};
+    let type=String(x.user_type||x.login_type||"").toLowerCase();
+    if(type==="hr_member") type="hr";
+    if(type==="teamlead") type="team_lead";
+    if(!type) type="employee";
+
+    let id="";
+    if(type==="admin"||type==="company_admin") id=String(x.company_id||"");
+    else if(type==="hr") id=String(x.hr_id||"");
+    else id=String(x.employee_id||"");
+
+    return {
+      type,
+      id,
+      name:String(x.full_name||x.name||x.company_name||"User"),
+      role:String(x.role||x.employee_role||(
+        type==="admin"||type==="company_admin"?"Administrator":
+        type==="team_lead"?"Team Lead":
+        type==="it_admin"?"IT Supporter":
+        type==="technical_supporter"?"Technical Supporter":
+        type.charAt(0).toUpperCase()+type.slice(1)
+      )),
+      branch_id:x.branch_id||null
+    };
+  }
+
+  function esc(v){
+    return String(v??"").replace(/[&<>"']/g,c=>({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[c]));
+  }
+
+  function dateText(v){
+    if(!v) return "";
+    const d=new Date(String(v).slice(0,10)+"T00:00:00");
+    if(Number.isNaN(d.getTime())) return String(v);
+    return d.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+  }
+
+  function timeText(v){
+    if(!v) return "";
+    const d=new Date(v);
+    if(Number.isNaN(d.getTime())) return "";
+    return d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+  }
+
+  function showPanel(which){
+    [tabChat,tabMeetings,tabWork].forEach(x=>x?.classList.remove("active"));
+    [panelChat,panelMeetings,panelWork].forEach(x=>x?.classList.remove("active"));
+
+    if(which==="work"){
+      tabWork?.classList.add("active");
+      panelWork?.classList.add("active");
+      load();
+      return;
+    }
+
+    if(which==="meetings"){
+      tabMeetings?.classList.add("active");
+      panelMeetings?.classList.add("active");
+      return;
+    }
+
+    tabChat?.classList.add("active");
+    panelChat?.classList.add("active");
+  }
+
+  /* Capture existing Chat/Meetings clicks late so all 3 stay in sync. */
+  tabChat?.addEventListener("click",()=>showPanel("chat"));
+  tabMeetings?.addEventListener("click",()=>showPanel("meetings"));
+  tabWork?.addEventListener("click",()=>showPanel("work"));
+
+  function render(){
+    if(!list) return;
+
+    if(!rows.length){
+      list.innerHTML=`
+        <div class="mobile-work-report-empty">
+          <i class="fa-regular fa-clipboard"></i>
+          <b>No work reports</b>
+          <span>Your submitted reports will appear here.</span>
+        </div>
+      `;
+      return;
+    }
+
+    const a=actor();
+    const adminView=["admin","company_admin"].includes(a.type);
+
+    list.innerHTML=rows.map(r=>`
+      <article class="mobile-work-report-item">
+        <div class="mobile-work-report-item-top">
+          <div class="mobile-work-report-title">${esc(r.title||"Work Report")}</div>
+          <span class="mobile-work-report-date">${esc(dateText(r.report_date))}</span>
+        </div>
+        <div class="mobile-work-report-desc">${esc(r.description||"")}</div>
+        <div class="mobile-work-report-meta">
+          ${adminView?`<b>${esc(r.member_name||"Member")}</b><span>·</span><span>${esc(r.member_role||r.member_type||"")}</span><span>·</span>`:""}
+          <span>${esc(timeText(r.created_at))}</span>
+        </div>
+      </article>
+    `).join("");
+  }
+
+  async function load(){
+    const x=s();
+    if(!x?.company_id || typeof db==="undefined") return;
+
+    try{
+      const a=actor();
+      const {data,error}=await db.rpc("notus_list_work_reports",{
+        p_company_id:x.company_id,
+        p_viewer_type:a.type,
+        p_viewer_id:a.id
+      });
+      if(error) throw error;
+      rows=Array.isArray(data)?data:[];
+      render();
+    }catch(err){
+      console.error("Mobile work reports:",err);
+      if(list){
+        list.innerHTML=`
+          <div class="mobile-work-report-empty">
+            <i class="fa-regular fa-clipboard"></i>
+            <b>Unable to load reports</b>
+            <span>${esc(err?.message||"Please try again.")}</span>
+          </div>
+        `;
+      }
+    }
+  }
+  window.loadMobileWorkReports=load;
+
+  function openSheet(){
+    const date=document.getElementById("mobileWorkReportDate");
+    const title=document.getElementById("mobileWorkReportTitle");
+    const desc=document.getElementById("mobileWorkReportDescription");
+    const count=document.getElementById("mobileWorkReportCount");
+
+    const today=new Date().toLocaleDateString("en-CA");
+    if(date){date.max=today;date.value=today}
+    if(title) title.value="";
+    if(desc) desc.value="";
+    if(count) count.textContent="0 / 3000";
+
+    overlay?.classList.add("show");
+    setTimeout(()=>title?.focus(),80);
+  }
+
+  function closeSheet(){overlay?.classList.remove("show")}
+
+  addBtn?.addEventListener("click",openSheet);
+  closeBtn?.addEventListener("click",closeSheet);
+  overlay?.addEventListener("click",e=>{if(e.target===overlay)closeSheet()});
+
+  document.getElementById("mobileWorkReportDescription")?.addEventListener("input",e=>{
+    const c=document.getElementById("mobileWorkReportCount");
+    if(c) c.textContent=`${e.target.value.length} / 3000`;
+  });
+
+  form?.addEventListener("submit",async e=>{
+    e.preventDefault();
+
+    const x=s();
+    const a=actor();
+    const date=document.getElementById("mobileWorkReportDate")?.value||"";
+    const title=document.getElementById("mobileWorkReportTitle")?.value.trim()||"";
+    const description=document.getElementById("mobileWorkReportDescription")?.value.trim()||"";
+    const btn=document.getElementById("mobileWorkReportSubmit");
+
+    if(!date) return alert("Select report date.");
+    if(!title) return alert("Enter report title.");
+    if(!description) return alert("Enter work description.");
+
+    if(btn) btn.disabled=true;
+
+    try{
+      const {error}=await db.rpc("notus_submit_work_report",{
+        p_company_id:x.company_id,
+        p_member_type:a.type,
+        p_member_id:a.id,
+        p_member_name:a.name,
+        p_member_role:a.role,
+        p_branch_id:a.branch_id||null,
+        p_report_date:date,
+        p_title:title,
+        p_description:description
+      });
+      if(error) throw error;
+
+      closeSheet();
+      await load();
+    }catch(err){
+      console.error("Submit mobile work report:",err);
+      alert(err?.message||"Could not submit work report.");
+    }finally{
+      if(btn) btn.disabled=false;
+    }
+  });
+
+  function realtime(){
+    const x=s();
+    if(!x?.company_id || typeof db==="undefined") return;
+
+    if(channel){
+      try{db.removeChannel(channel)}catch(_){}
+      channel=null;
+    }
+
+    channel=db.channel(
+      `notus-mobile-work-report-${x.company_id}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`
+    ).on(
+      "postgres_changes",
+      {event:"*",schema:"public",table:"notus_work_reports",filter:`company_id=eq.${x.company_id}`},
+      ()=>load()
+    ).subscribe();
+  }
+
+  setTimeout(()=>{
+    if(s()?.company_id){
+      load();
+      realtime();
+    }
+  },1200);
 })();
 </script>
 
