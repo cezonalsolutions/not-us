@@ -2382,14 +2382,17 @@ async function saveMyWorkspaceStatus(status){
   }
 }
 
-workspaceStatusBtn?.addEventListener("click",async function(e){
+workspaceStatusBtn?.addEventListener("click",function(e){
   e.stopPropagation();
 
   const opening = !workspaceStatusMenu?.classList.contains("show");
   workspaceStatusMenu?.classList.toggle("show",opening);
   workspaceStatusWrap?.classList.toggle("open",opening);
 
-  if(opening) await loadMyWorkspaceStatus();
+  /* Menu opens instantly. Refresh status silently in background. */
+  if(opening){
+    loadMyWorkspaceStatus().catch(()=>{});
+  }
 });
 
 document.querySelectorAll(".workspace-status-option").forEach(btn=>{
@@ -2399,13 +2402,21 @@ document.querySelectorAll(".workspace-status-option").forEach(btn=>{
     workspaceStatusMenu?.classList.remove("show");
     workspaceStatusWrap?.classList.remove("open");
 
-    /* Optimistic paint, then save to SAME existing attendance backend */
+    /* Update ONLY the status control.
+       Do NOT reload/re-render the full chat list after status change. */
     paintWorkspaceStatus(status,statusLabels[status]);
-    await saveMyWorkspaceStatus(status);
 
-    if(typeof refreshChatPreviewOnly === "function"){
-      refreshChatPreviewOnly();
+    const saved = await saveMyWorkspaceStatus(status);
+
+    if(!saved){
+      /* saveMyWorkspaceStatus already restores the real DB status on failure */
+      return;
     }
+
+    /* Keep local session/cache in sync without touching the chat DOM. */
+    try{
+      localStorage.setItem("notus_workspace_status",status);
+    }catch(_e){}
   });
 });
 
