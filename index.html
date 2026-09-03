@@ -1197,17 +1197,17 @@ body{
   margin-top:5px;
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:7px;
   min-width:0;
 }
 .chat-item-preview-row .chat-item-preview{
   margin-top:0;
-  flex:1;
   min-width:0;
+  flex:1;
 }
 .chat-unread-badge{
-  min-width:15px;
-  height:15px;
+  min-width:14px;
+  height:14px;
   padding:0 4px;
   border-radius:999px;
   background:#171717;
@@ -1216,10 +1216,9 @@ body{
   align-items:center;
   justify-content:center;
   flex:0 0 auto;
-  font-family:"Inter",sans-serif;
-  font-size:7px;
-  line-height:1;
+  font-size:6.5px;
   font-weight:800;
+  line-height:1;
 }
 .chat-unread-badge[hidden]{display:none!important;}
 
@@ -2328,28 +2327,30 @@ function getCurrentMobileAttendanceMember(session){
   if(session.hr_id || type === "hr" || type === "hr_member"){
     return {
       member_type:"hr",
-      member_id:session.hr_id || session.member_id || session.id
+      member_id:String(session.hr_id || session.member_id || session.id || "")
     };
   }
 
-  /* All employee-side roles/designations use the same employee attendance RPC. */
+  /* Every employee-side role/designation uses employee_id. */
   if(session.employee_id || [
     "employee","team_lead","teamlead","manager","recruiter",
     "it_admin","technical_supporter"
   ].includes(type)){
     return {
       member_type:"employee",
-      member_id:
+      member_id:String(
         session.employee_id ||
         session.team_lead_id ||
         session.member_id ||
-        session.id
+        session.id ||
+        ""
+      )
     };
   }
 
   return {
     member_type:"admin",
-    member_id:session.company_id
+    member_id:String(session.company_id)
   };
 }
 
@@ -2381,31 +2382,82 @@ async function loadMyWorkspaceStatus(){
   }
 }
 
-let notusWorkspaceStatusSyncBusy = false;
-let notusWorkspaceStatusTimer = null;
+let notusStatusLiveChannel = null;
+let notusStatusPollTimer = null;
+let notusStatusSyncBusy = false;
 
 async function syncMyWorkspaceStatusLive(){
-  if(notusWorkspaceStatusSyncBusy) return;
-  notusWorkspaceStatusSyncBusy = true;
+  if(notusStatusSyncBusy) return;
+  notusStatusSyncBusy = true;
   try{
     await loadMyWorkspaceStatus();
   }finally{
-    notusWorkspaceStatusSyncBusy = false;
+    notusStatusSyncBusy = false;
   }
 }
 
-function startMyWorkspaceStatusLive(){
-  if(notusWorkspaceStatusTimer){
-    clearInterval(notusWorkspaceStatusTimer);
+function stopWorkspaceStatusLive(){
+  if(notusStatusPollTimer){
+    clearInterval(notusStatusPollTimer);
+    notusStatusPollTimer = null;
+  }
+  try{
+    if(notusStatusLiveChannel && typeof db !== "undefined"){
+      db.removeChannel(notusStatusLiveChannel);
+    }
+  }catch(_e){}
+  notusStatusLiveChannel = null;
+}
+
+function startWorkspaceStatusLive(){
+  const session = window.notusSession || getNotusSession?.() || {};
+  if(!session?.company_id || typeof db === "undefined") return;
+
+  stopWorkspaceStatusLive();
+
+  const mine = getCurrentMobileAttendanceMember(session);
+
+  /* Realtime path */
+  try{
+    notusStatusLiveChannel = db
+      .channel("notus-member-status-" + session.company_id + "-" + Date.now())
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"notus_member_status",
+          filter:`company_id=eq.${session.company_id}`
+        },
+        async payload=>{
+          const row = payload.new || payload.old || {};
+          if(
+            mine &&
+            String(row.member_type || "") === String(mine.member_type) &&
+            String(row.member_id || "") === String(mine.member_id)
+          ){
+            const status = normalizeWorkspaceStatus(row.current_status || "available");
+            paintWorkspaceStatus(status,statusLabels[status]);
+          }
+
+          /* Update visible teammate statuses too. */
+          if(!companyChatScreen?.classList.contains("show")){
+            await refreshVisiblePeopleStatuses();
+          }
+        }
+      )
+      .subscribe();
+  }catch(err){
+    console.warn("Status realtime subscribe failed:",err);
   }
 
-  syncMyWorkspaceStatusLive();
+  /* Poll fallback, so it STILL updates even if realtime publication is delayed/missing. */
+  notusStatusPollTimer = setInterval(async()=>{
+    if(document.visibilityState !== "visible") return;
+    await syncMyWorkspaceStatusLive();
 
-  /* If status changes from another device/session,
-     this screen updates automatically without page refresh. */
-  notusWorkspaceStatusTimer = setInterval(()=>{
-    if(document.visibilityState === "visible"){
-      syncMyWorkspaceStatusLive();
+    if(!companyChatScreen?.classList.contains("show")){
+      await refreshVisiblePeopleStatuses();
     }
   },2000);
 }
@@ -2429,8 +2481,8 @@ async function saveMyWorkspaceStatus(status){
 
     paintWorkspaceStatus(status,statusLabels[status]);
 
-    /* Verify DB value shortly after save; no page refresh. */
-    setTimeout(syncMyWorkspaceStatusLive,250);
+    /* DB save verify without browser refresh. */
+    setTimeout(syncMyWorkspaceStatusLive,200);
     return true;
   }catch(err){
     console.error("Workspace status save failed:",err);
@@ -3431,39 +3483,64 @@ async function enrichPeopleAttendance(items){
   return list;
 }
 
+function visiblePeerFromButton(btn){
+  if(!btn) return null;
+  const key = btn.dataset.peerKey || "";
+  return key ? {key} : null;
+}
+
+async function refreshVisiblePeopleStatuses(){
+  if(!workspaceChatList || companyChatScreen?.classList.contains("show")) return;
+
+  const buttons = [...workspaceChatList.querySelectorAll(".chat-item[data-peer-key]")];
+  if(!buttons.length) return;
+
+  await Promise.all(buttons.map(async btn=>{
+    try{
+      const raw = btn.dataset.peerJson;
+      if(!raw) return;
+      const peer = JSON.parse(decodeURIComponent(raw));
+      await loadPeerAttendanceStatus(peer);
+
+      const dot = btn.querySelector(".chat-person-status-dot");
+      const txt = btn.querySelector(".chat-person-status span:last-child");
+      const st = normalizeWorkspaceStatus(peer.live_status || "offline");
+
+      if(dot) dot.style.background = statusColors[st] || statusColors.offline;
+      if(txt) txt.textContent = peer.live_status_label || statusLabels[st] || "Offline";
+    }catch(_e){}
+  }));
+}
+
 function directUnreadCount(row){
   if(!row) return 0;
 
   const me = currentChatIdentity();
 
-  /* Current open chat is being read now — never show unread 1 here. */
+  /* Current open conversation is already being read. */
   if(activeDirectPeer){
-    const pair = canonicalPair(me,activeDirectPeer);
+    const cp = canonicalPair(me,activeDirectPeer);
     if(
-      row.user_a_key === pair.user_a_key &&
-      row.user_b_key === pair.user_b_key
+      row.user_a_key === cp.user_a_key &&
+      row.user_b_key === cp.user_b_key
     ){
       return 0;
     }
   }
 
-  const raw = row.user_a_key === me.key
-    ? row.user_a_unread
-    : row.user_b_key === me.key
-      ? row.user_b_unread
-      : 0;
+  const value =
+    row.user_a_key === me.key ? row.user_a_unread :
+    row.user_b_key === me.key ? row.user_b_unread : 0;
 
-  const n = Number(raw || 0);
+  const n = Number(value || 0);
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
 }
 
-function setDirectUnreadZeroLocal(row){
+function zeroMyUnreadLocal(row){
   if(!row) return row;
   const me = currentChatIdentity();
-
   if(row.user_a_key === me.key) row.user_a_unread = 0;
   if(row.user_b_key === me.key) row.user_b_unread = 0;
-
   return row;
 }
 
@@ -3474,8 +3551,7 @@ async function markDirectChatRead(row){
   const me = currentChatIdentity(session);
 
   try{
-    /* Remove badge immediately. DB reset follows. */
-    setDirectUnreadZeroLocal(row);
+    zeroMyUnreadLocal(row);
 
     const {data,error} = await db.rpc("notus_mark_direct_chat_read",{
       p_company_id:session.company_id,
@@ -3485,11 +3561,9 @@ async function markDirectChatRead(row){
     });
 
     if(error) throw error;
-
-    const fresh = Array.isArray(data) ? data[0] : data;
-    return fresh || row;
+    return (Array.isArray(data) ? data[0] : data) || row;
   }catch(err){
-    console.warn("Mark direct chat read failed:",err);
+    console.warn("Mark read failed:",err);
     return row;
   }
 }
@@ -3520,6 +3594,10 @@ function renderPeopleList(people, mode="search"){
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "chat-item";
+    btn.dataset.peerKey = safeText(peer.key || "");
+    try{
+      btn.dataset.peerJson = encodeURIComponent(JSON.stringify(peer));
+    }catch(_e){}
 
     btn.appendChild(buildPersonAvatar(peer));
 
@@ -3848,7 +3926,7 @@ async function refreshDirectPeerIdentities(items){
   return items;
 }
 
-async function loadRecentDirectChats(){
+async function loadRecentDirectChats(silent=false){
   const session = directChatSession || window.notusSession || {};
   const me = currentChatIdentity(session);
 
@@ -3857,7 +3935,7 @@ async function loadRecentDirectChats(){
     return;
   }
 
-  if(workspaceChatList){
+  if(workspaceChatList && !silent){
     workspaceChatList.innerHTML = '<div class="chat-load-state">Loading chats...</div>';
   }
 
@@ -4139,9 +4217,10 @@ async function openDirectChat(peer){
 
     if(activeDirectChat){
       const me = currentChatIdentity();
-      const rawUnread = activeDirectChat.user_a_key === me.key
-        ? Number(activeDirectChat.user_a_unread || 0)
-        : Number(activeDirectChat.user_b_unread || 0);
+      const rawUnread =
+        activeDirectChat.user_a_key === me.key
+          ? Number(activeDirectChat.user_a_unread || 0)
+          : Number(activeDirectChat.user_b_unread || 0);
 
       if(rawUnread > 0){
         activeDirectChat = await markDirectChatRead(activeDirectChat);
@@ -4255,7 +4334,7 @@ async function sendCompanyMessage(){
       renderDirectMessages(row);
     }
 
-    /* Realtime will update the list; avoid full chat-list refresh here. */
+    loadRecentDirectChats();
   }catch(err){
     console.error("Send message failed:",err);
     alert("Message not sent. Please check chat SQL / policies.");
@@ -4347,6 +4426,20 @@ async function refreshChatPreviewOnly(){
   }
 }
 
+let notusChatPollTimer = null;
+
+function startDirectChatFallbackPolling(){
+  if(notusChatPollTimer) clearInterval(notusChatPollTimer);
+
+  notusChatPollTimer = setInterval(()=>{
+    if(document.visibilityState !== "visible") return;
+    if(companyChatScreen?.classList.contains("show")) return;
+    if(safeText(workspaceSearch?.value)) return;
+
+    loadRecentDirectChats(true).catch(()=>{});
+  },2000);
+}
+
 function startDirectChatRealtime(){
   const session = directChatSession || window.notusSession || {};
   const me = currentChatIdentity(session);
@@ -4382,14 +4475,13 @@ function startDirectChatRealtime(){
               row.user_b_key === pair.user_b_key &&
               payload.new
             ){
-              const rawUnread = row.user_a_key === me.key
-                ? Number(row.user_a_unread || 0)
-                : Number(row.user_b_unread || 0);
+              const rawUnread =
+                row.user_a_key === me.key
+                  ? Number(row.user_a_unread || 0)
+                  : Number(row.user_b_unread || 0);
 
               activeDirectChat = payload.new;
-
-              /* Chat is already open. Show message instantly and do not flash unread 1. */
-              setDirectUnreadZeroLocal(activeDirectChat);
+              zeroMyUnreadLocal(activeDirectChat);
               renderDirectMessages(activeDirectChat);
 
               if(rawUnread > 0){
@@ -4399,10 +4491,9 @@ function startDirectChatRealtime(){
             }
           }
 
-          /* Closed chat: refresh recent list so persistent DB unread badge
-             (1,2,3...100) appears automatically. */
+          /* Inactive chat: show DB unread count immediately. */
           if(!safeText(workspaceSearch?.value)){
-            loadRecentDirectChats();
+            loadRecentDirectChats(true);
           }
         }
       )
@@ -4425,18 +4516,25 @@ async function initDirectChatForSession(session){
   ]);
 
   startDirectChatRealtime();
-  startMyWorkspaceStatusLive();
+  startDirectChatFallbackPolling();
+  startWorkspaceStatusLive();
 }
 
 
 
 window.addEventListener("focus",()=>{
-  syncMyWorkspaceStatusLive();
+  syncMyWorkspaceStatusLive().catch(()=>{});
+  if(!companyChatScreen?.classList.contains("show") && !safeText(workspaceSearch?.value)){
+    loadRecentDirectChats(true).catch(()=>{});
+  }
 });
 
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState === "visible"){
-    syncMyWorkspaceStatusLive();
+    syncMyWorkspaceStatusLive().catch(()=>{});
+    if(!companyChatScreen?.classList.contains("show") && !safeText(workspaceSearch?.value)){
+      loadRecentDirectChats(true).catch(()=>{});
+    }
   }
 });
 
