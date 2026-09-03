@@ -3128,6 +3128,36 @@ body:has(.workspace-screen.show){
   width:100%!important;
 }
 
+
+
+/* =========================================================
+   WORK REPORT — TODAY EDIT ONLY
+   ========================================================= */
+.mobile-work-report-edit{
+  margin-top:9px!important;
+  height:30px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  color:#0f766e!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  font-family:"Inter",sans-serif!important;
+  font-size:8.5px!important;
+  font-weight:700!important;
+}
+.mobile-work-report-edit i{
+  font-size:8px!important;
+}
+.mobile-work-report-edit:active{
+  opacity:.62!important;
+}
+
+.mobile-work-report-item.locked .mobile-work-report-edit{
+  display:none!important;
+}
+
 </style>
 
 <style>
@@ -8556,6 +8586,7 @@ window.openOutsideApp = function(rawUrl){
 
   let rows=[];
   let channel=null;
+  let editingReportId=null;
 
   function s(){
     try{
@@ -8612,6 +8643,25 @@ window.openOutsideApp = function(rawUrl){
     return d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
   }
 
+  function localToday(){
+    return new Date().toLocaleDateString("en-CA");
+  }
+
+  function canEditReport(r){
+    const a=actor();
+    const reportDate=String(r?.report_date||"").slice(0,10);
+    if(reportDate!==localToday()) return false;
+
+    const sameId=String(r?.member_id||"")===String(a.id||"");
+    if(!sameId) return false;
+
+    const rowType=String(r?.member_type||"").toLowerCase();
+    if(rowType===String(a.type||"").toLowerCase()) return true;
+
+    return ["manager","team_lead","recruiter","it_admin","technical_supporter"].includes(a.type)
+      && rowType==="employee";
+  }
+
   function showPanel(which){
     [tabChat,tabMeetings,tabWork].forEach(x=>x?.classList.remove("active"));
     [panelChat,panelMeetings,panelWork].forEach(x=>x?.classList.remove("active"));
@@ -8656,7 +8706,7 @@ window.openOutsideApp = function(rawUrl){
     const adminView=["admin","company_admin"].includes(a.type);
 
     list.innerHTML=rows.map(r=>`
-      <article class="mobile-work-report-item">
+      <article class="mobile-work-report-item ${canEditReport(r)?"editable":"locked"}">
         <div class="mobile-work-report-item-top">
           <div class="mobile-work-report-title">${esc(r.title||"Work Report")}</div>
         </div>
@@ -8667,6 +8717,12 @@ window.openOutsideApp = function(rawUrl){
           <span>·</span>
           <span>${esc(timeText(r.created_at))}</span>
         </div>
+        ${canEditReport(r)?`
+          <button class="mobile-work-report-edit" type="button" data-work-report-edit="${esc(r.id)}">
+            <i class="fa-regular fa-pen-to-square"></i>
+            Edit
+          </button>
+        `:""}
       </article>
     `).join("");
   }
@@ -8700,27 +8756,66 @@ window.openOutsideApp = function(rawUrl){
   }
   window.loadMobileWorkReports=load;
 
-  function openSheet(){
+  function openSheet(report=null){
     const date=document.getElementById("mobileWorkReportDate");
     const title=document.getElementById("mobileWorkReportTitle");
     const desc=document.getElementById("mobileWorkReportDescription");
     const count=document.getElementById("mobileWorkReportCount");
+    const heading=overlay?.querySelector(".mobile-work-report-sheet-head h3");
+    const submit=document.getElementById("mobileWorkReportSubmit");
 
-    const today=new Date().toLocaleDateString("en-CA");
-    if(date){date.max=today;date.value=today}
-    if(title) title.value="";
-    if(desc) desc.value="";
-    if(count) count.textContent="0 / 3000";
+    const today=localToday();
+
+    if(report){
+      editingReportId=String(report.id);
+      if(date){
+        date.max=today;
+        date.value=String(report.report_date||today).slice(0,10);
+        date.disabled=true;
+      }
+      if(title) title.value=report.title||"";
+      if(desc) desc.value=report.description||"";
+      if(count) count.textContent=`${String(report.description||"").length} / 3000`;
+      if(heading) heading.textContent="Edit Work Report";
+      if(submit) submit.textContent="Save Changes";
+    }else{
+      editingReportId=null;
+      if(date){
+        date.disabled=false;
+        date.max=today;
+        date.value=today;
+      }
+      if(title) title.value="";
+      if(desc) desc.value="";
+      if(count) count.textContent="0 / 3000";
+      if(heading) heading.textContent="New Work Report";
+      if(submit) submit.textContent="Submit Report";
+    }
 
     overlay?.classList.add("show");
     setTimeout(()=>title?.focus(),80);
   }
 
-  function closeSheet(){overlay?.classList.remove("show")}
+  function closeSheet(){
+    overlay?.classList.remove("show");
+    editingReportId=null;
+    const date=document.getElementById("mobileWorkReportDate");
+    if(date) date.disabled=false;
+  }
 
-  addBtn?.addEventListener("click",openSheet);
+  addBtn?.addEventListener("click",()=>openSheet());
   closeBtn?.addEventListener("click",closeSheet);
   overlay?.addEventListener("click",e=>{if(e.target===overlay)closeSheet()});
+
+  list?.addEventListener("click",e=>{
+    const btn=e.target.closest("[data-work-report-edit]");
+    if(!btn) return;
+
+    const report=rows.find(r=>String(r.id)===String(btn.dataset.workReportEdit));
+    if(!report || !canEditReport(report)) return;
+
+    openSheet(report);
+  });
 
   document.getElementById("mobileWorkReportDescription")?.addEventListener("input",e=>{
     const c=document.getElementById("mobileWorkReportCount");
@@ -8744,23 +8839,37 @@ window.openOutsideApp = function(rawUrl){
     if(btn) btn.disabled=true;
 
     try{
-      const {error}=await db.rpc("notus_submit_work_report",{
-        p_company_id:x.company_id,
-        p_member_type:a.type,
-        p_member_id:a.id,
-        p_member_name:a.name,
-        p_member_role:a.role,
-        p_branch_id:a.branch_id||null,
-        p_report_date:date,
-        p_title:title,
-        p_description:description
-      });
-      if(error) throw error;
+      let result;
+
+      if(editingReportId){
+        result=await db.rpc("notus_update_work_report",{
+          p_company_id:x.company_id,
+          p_report_id:editingReportId,
+          p_member_type:a.type,
+          p_member_id:a.id,
+          p_title:title,
+          p_description:description
+        });
+      }else{
+        result=await db.rpc("notus_submit_work_report",{
+          p_company_id:x.company_id,
+          p_member_type:a.type,
+          p_member_id:a.id,
+          p_member_name:a.name,
+          p_member_role:a.role,
+          p_branch_id:a.branch_id||null,
+          p_report_date:date,
+          p_title:title,
+          p_description:description
+        });
+      }
+
+      if(result.error) throw result.error;
 
       closeSheet();
       await load();
     }catch(err){
-      console.error("Submit mobile work report:",err);
+      console.error(editingReportId?"Update mobile work report:":"Submit mobile work report:",err);
       alert(err?.message||"Could not submit work report.");
     }finally{
       if(btn) btn.disabled=false;
