@@ -2562,6 +2562,70 @@ body:has(.workspace-screen.show){
   color:#929a97!important;
 }
 
+
+
+/* ===== ANNOUNCEMENTS — FINAL COMPACT CONTINUOUS VIEW ===== */
+.mobile-announcements-head-copy{
+  padding-bottom:6px!important;
+}
+.mobile-announcements-head-copy p{
+  display:none!important;
+}
+
+.mobile-announcements-body{
+  background:#f5f7f8!important;
+  padding:8px 12px calc(18px + env(safe-area-inset-bottom))!important;
+}
+
+.mobile-announcements-list{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:5px!important;
+}
+
+.mobile-announcement-row{
+  width:100%!important;
+  margin:0!important;
+  padding:13px 14px 12px!important;
+  border:1px solid #e8ecea!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+
+.mobile-announcement-row:last-child{
+  border-bottom:1px solid #e8ecea!important;
+}
+
+.mobile-announcement-title{
+  font-size:13.5px!important;
+  line-height:1.35!important;
+  font-weight:600!important;
+}
+
+.mobile-announcement-description{
+  margin-top:5px!important;
+  font-size:10.2px!important;
+  line-height:1.58!important;
+  color:#646d69!important;
+}
+
+.mobile-announcement-meta{
+  margin-top:7px!important;
+}
+
+.mobile-announcement-meta .announcement-date-only{
+  font-size:7.2px!important;
+  color:#9aa29f!important;
+}
+
+.mobile-announcement-unread-dot{
+  top:10px!important;
+  right:10px!important;
+  width:6px!important;
+  height:6px!important;
+}
+
 </style>
 
 <style>
@@ -3392,7 +3456,6 @@ html,body{
     </button>
     <div class="mobile-announcements-head-copy">
       <h2>Announcements</h2>
-      <p>Company updates shared with you</p>
     </div>
   </header>
 
