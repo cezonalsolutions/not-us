@@ -3641,6 +3641,69 @@ html,body{
 }
 </style>
 
+
+<style id="notus-mobile-own-attendance-css">
+/* =========================================================
+   MOBILE — MY DAILY ATTENDANCE
+   Uses the SAME public.notus_attendance_logs table as desktop.
+   ========================================================= */
+.mobile-attendance-screen{
+  position:fixed;inset:0;z-index:735;display:flex;flex-direction:column;
+  background:#f7f9f8;transform:translateX(100%);visibility:hidden;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s ease;
+}
+.mobile-attendance-screen.show{transform:translateX(0);visibility:visible}
+.mobile-attendance-head{
+  flex:0 0 auto;min-height:94px;padding:max(18px,env(safe-area-inset-top)) 15px 13px;
+  display:flex;align-items:flex-end;gap:10px;background:#fff;border-bottom:1px solid #e9eeec;
+}
+.mobile-attendance-back{
+  width:38px;height:38px;flex:0 0 38px;border:0;border-radius:11px;background:transparent;
+  color:#303634;display:grid;place-items:center;font-size:17px;
+}
+.mobile-attendance-back:active{background:#f1f4f3}
+.mobile-attendance-head-copy{min-width:0;flex:1;padding-bottom:3px}
+.mobile-attendance-head-copy h2{margin:0;font-family:"Outfit",sans-serif;font-size:18px;font-weight:600;color:#171717}
+.mobile-attendance-head-copy p{margin:3px 0 0;font-size:9px;color:#8a9390}
+.mobile-attendance-refresh{
+  width:38px;height:38px;border:0;border-radius:11px;background:#f3f6f5;color:#57615d;
+  display:grid;place-items:center;font-size:13px;
+}
+.mobile-attendance-body{
+  flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px 14px calc(24px + env(safe-area-inset-bottom));
+}
+.mobile-attendance-today{
+  display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px;
+}
+.mobile-attendance-stat{
+  min-width:0;background:#fff;border:1px solid #e7ebe9;border-radius:13px;padding:13px;
+}
+.mobile-attendance-stat span{display:block;font-size:7.5px;font-weight:700;color:#969f9b;text-transform:uppercase;letter-spacing:.35px}
+.mobile-attendance-stat b{display:block;margin-top:6px;font-family:"Outfit",sans-serif;font-size:13px;font-weight:600;color:#1e2422;word-break:break-word}
+.mobile-attendance-card{background:#fff;border:1px solid #e7ebe9;border-radius:14px;overflow:hidden}
+.mobile-attendance-card-head{min-height:49px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #eef1ef}
+.mobile-attendance-card-head b{font-size:11px;color:#202523}
+.mobile-attendance-card-head span{font-size:7.5px;color:#919995;text-align:right}
+.mobile-attendance-list{width:100%}
+.mobile-attendance-row{padding:14px;border-bottom:1px solid #eef1ef}
+.mobile-attendance-row:last-child{border-bottom:0}
+.mobile-attendance-row-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.mobile-attendance-date{font-size:11px;font-weight:700;color:#202523}
+.mobile-attendance-pill{flex:0 0 auto;display:inline-flex;align-items:center;min-height:20px;padding:0 7px;border-radius:999px;font-size:6.5px;font-weight:800;text-transform:uppercase}
+.mobile-attendance-pill.active{background:#eef7f0;color:#3f7750}
+.mobile-attendance-pill.completed{background:#f2f4f5;color:#626d68}
+.mobile-attendance-meta{margin-top:11px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.mobile-attendance-meta div{min-width:0;background:#fafbfb;border:1px solid #edf0ef;border-radius:10px;padding:9px}
+.mobile-attendance-meta span{display:block;font-size:6.7px;color:#969e9a;margin-bottom:4px}
+.mobile-attendance-meta b{display:block;font-size:8.5px;color:#333936;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mobile-attendance-empty{min-height:210px;padding:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#929a97}
+.mobile-attendance-empty i{font-size:22px;margin-bottom:10px;color:#aeb6b2}
+.mobile-attendance-empty b{font-size:11px;color:#3b423f}
+.mobile-attendance-empty span{font-size:8.5px;margin-top:5px;line-height:1.5}
+@media(max-width:380px){.mobile-attendance-meta{grid-template-columns:1fr 1fr}.mobile-attendance-meta div:last-child{grid-column:1/-1}}
+</style>
+
 </head>
 
 <body>
@@ -4153,6 +4216,46 @@ html,body{
 </section>
 
 
+
+<section class="mobile-attendance-screen" id="mobileAttendanceScreen" aria-hidden="true">
+  <header class="mobile-attendance-head">
+    <button class="mobile-attendance-back" id="mobileAttendanceBack" type="button" aria-label="Back">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <div class="mobile-attendance-head-copy">
+      <h2>Attendance</h2>
+      <p>Your daily login &amp; logout attendance</p>
+    </div>
+    <button class="mobile-attendance-refresh" id="mobileAttendanceRefresh" type="button" aria-label="Refresh attendance">
+      <i class="fa-solid fa-rotate-right"></i>
+    </button>
+  </header>
+
+  <div class="mobile-attendance-body">
+    <div class="mobile-attendance-today">
+      <div class="mobile-attendance-stat"><span>Today</span><b id="mobileAttendanceTodayDate">—</b></div>
+      <div class="mobile-attendance-stat"><span>Total Time</span><b id="mobileAttendanceTodayHours">00h 00m</b></div>
+      <div class="mobile-attendance-stat"><span>First Login</span><b id="mobileAttendanceTodayLogin">—</b></div>
+      <div class="mobile-attendance-stat"><span>Last Logout</span><b id="mobileAttendanceTodayLogout">—</b></div>
+    </div>
+
+    <div class="mobile-attendance-card">
+      <div class="mobile-attendance-card-head">
+        <b>My Attendance</b>
+        <span id="mobileAttendanceOwnSub">Your attendance only</span>
+      </div>
+      <div class="mobile-attendance-list" id="mobileAttendanceList">
+        <div class="mobile-attendance-empty">
+          <i class="fa-regular fa-calendar-check"></i>
+          <b>No attendance yet</b>
+          <span>Your login and logout history will appear here.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
 <div class="leave-cancel-overlay" id="leaveCancelOverlay" aria-hidden="true">
   <div class="leave-cancel-sheet" role="dialog" aria-modal="true" aria-labelledby="leaveCancelTitle">
     <div class="leave-cancel-grab"></div>
@@ -4243,6 +4346,13 @@ html,body{
     <button class="profile-quick-item" type="button" data-profile-action="leave">
       <span class="profile-quick-icon"><i class="fa-regular fa-calendar-check"></i></span>
       <span class="profile-quick-text">Leave</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
+
+    <button class="profile-quick-item" type="button" data-profile-action="attendance">
+      <span class="profile-quick-icon"><i class="fa-regular fa-clock"></i></span>
+      <span class="profile-quick-text">Attendance</span>
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
     </button>
 
@@ -4481,6 +4591,15 @@ form.addEventListener("submit", async function(e){
 
     localStorage.setItem("notus_company_session", JSON.stringify(session));
     window.notusSession = session;
+
+    /* SAME attendance engine as desktop: create one exact login session row. */
+    try{
+      if(typeof window.notusAttendanceRecordLogin === "function") {
+        await window.notusAttendanceRecordLogin();
+      }
+    }catch(attErr){
+      console.warn("Mobile attendance login save:",attErr);
+    }
 
     showStatus("Login successful", "success");
 
@@ -5455,7 +5574,20 @@ function fillProfilePanel(session){
 }
 function openProfilePanel(){const s=window.notusSession||getNotusSession()||{};fillProfilePanel(s);loadProfileMobileNumber(s);if(typeof loadCurrentUserProfilePhoto==="function")loadCurrentUserProfilePhoto();workspaceProfilePanel?.classList.add("show");workspaceProfileOverlay?.classList.add("show");workspaceProfilePanel?.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}
 function closeProfilePanel(){workspaceProfilePanel?.classList.remove("show");workspaceProfileOverlay?.classList.remove("show");workspaceProfilePanel?.setAttribute("aria-hidden","true");document.body.style.overflow=""}
-workspaceProfileBtn?.addEventListener("click",e=>{e.stopPropagation();openProfilePanel()});profilePanelClose?.addEventListener("click",closeProfilePanel);workspaceProfileOverlay?.addEventListener("click",closeProfilePanel);profileLogoutBtn?.addEventListener("click",()=>{try{localStorage.removeItem("notus_company_session");localStorage.removeItem("notus_workspace_status")}catch(e){}window.notusSession=null;closeProfilePanel();document.getElementById("workspaceScreen")?.classList.remove("show");const loginPage=document.querySelector(".page");if(loginPage)loginPage.style.display="flex";if(email)email.value="";if(password)password.value="";hideStatus()});
+workspaceProfileBtn?.addEventListener("click",e=>{e.stopPropagation();openProfilePanel()});profilePanelClose?.addEventListener("click",closeProfilePanel);workspaceProfileOverlay?.addEventListener("click",closeProfilePanel);profileLogoutBtn?.addEventListener("click",async()=>{
+  /* Close ONLY this logged-in user's open attendance row before clearing identity. */
+  try{
+    if(typeof window.notusAttendanceRecordLogout === "function") {
+      await window.notusAttendanceRecordLogout();
+    }
+  }catch(attErr){
+    console.warn("Mobile attendance logout save:",attErr);
+  }
+  try{localStorage.removeItem("notus_company_session");localStorage.removeItem("notus_workspace_status")}catch(e){}
+  window.notusSession=null;closeProfilePanel();document.getElementById("workspaceScreen")?.classList.remove("show");
+  const loginPage=document.querySelector(".page");if(loginPage)loginPage.style.display="flex";
+  if(email)email.value="";if(password)password.value="";hideStatus();
+});
 
 
 document.querySelectorAll("[data-profile-action]").forEach(btn=>{
@@ -5464,6 +5596,7 @@ document.querySelectorAll("[data-profile-action]").forEach(btn=>{
     window.dispatchEvent(new CustomEvent("notusProfileAction",{detail:{action,session:window.notusSession||null}}));
 
     if(action==="leave"){ closeProfilePanel(); openMobileLeaveScreen(); }
+    else if(action==="attendance"){ closeProfilePanel(); window.openMobileAttendanceScreen?.(); }
     else if(action==="payslip") alert("Pay Slip");
     else if(action==="meetings"){ closeProfilePanel(); openMobileMeetingsScreen(); }
     else if(action==="help") alert("Help & Support");
@@ -9013,6 +9146,195 @@ window.openOutsideApp = function(rawUrl){
       realtime();
     }
   },1200);
+})();
+</script>
+
+
+<script id="notus-mobile-own-daily-attendance-js">
+/* ============================================================
+   MOBILE — MY DAILY ATTENDANCE
+   SAME DATABASE CONTRACT AS DESKTOP:
+     public.notus_attendance_logs
+   - actual login => inserts one attendance session row
+   - profile Logout => closes this browser's exact open row
+   - refresh / pageshow NEVER creates a duplicate login row
+   - page shows ONLY the current logged-in member
+   - multiple sessions in one day are summed
+   ============================================================ */
+(function(){
+  const TABLE="notus_attendance_logs";
+  const SESSION_ROW_KEY="notus_attendance_session_id";
+  let attendanceTicker=null;
+  let loading=false;
+
+  const $=id=>document.getElementById(id);
+  function getSession(){
+    try{return window.notusSession||JSON.parse(localStorage.getItem("notus_company_session")||"null")||null}catch(_){return window.notusSession||null}
+  }
+  function norm(v){return String(v??"").trim().toLowerCase()}
+  function currentMember(){
+    const s=getSession();
+    if(!s?.company_id) return null;
+    const type=norm(s.user_type||s.login_type);
+    if(type==="hr"||type==="hr_member"){
+      return {company_id:String(s.company_id),member_type:"hr",member_id:String(s.hr_id||s.member_id||""),name:s.full_name||"HR",role:s.role||"HR"};
+    }
+    if(type==="company_admin"||type==="admin"||type==="administrator"||type==="company"){
+      return {company_id:String(s.company_id),member_type:"admin",member_id:String(s.company_id),name:s.full_name||s.company_name||"Administrator",role:s.role||"Administrator"};
+    }
+    return {company_id:String(s.company_id),member_type:"employee",member_id:String(s.employee_id||s.member_id||s.team_lead_id||""),name:s.full_name||"Employee",role:s.role||s.designation||"Employee"};
+  }
+  function localDateKey(d=new Date()){
+    const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  }
+  function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+  function fmtTime(v){if(!v)return "—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",hour12:true})}
+  function fmtDate(v){if(!v)return "—";const d=new Date(v+"T00:00:00");return Number.isNaN(d.getTime())?v:d.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}
+  function durationMs(row,now=Date.now()){
+    const a=new Date(row.login_time).getTime(); if(!Number.isFinite(a))return 0;
+    const b=row.logout_time?new Date(row.logout_time).getTime():now;
+    return Math.max(0,(Number.isFinite(b)?b:now)-a);
+  }
+  function fmtDuration(ms){const mins=Math.max(0,Math.floor(ms/60000));return `${String(Math.floor(mins/60)).padStart(2,"0")}h ${String(mins%60).padStart(2,"0")}m`}
+
+  /* Desktop + mobile deliberately expose the SAME function names. */
+  window.notusAttendanceRecordLogin=async function(){
+    const m=currentMember();
+    if(!m?.member_id||typeof db==="undefined") return;
+
+    /* Same browser/session already owns an open row => no duplicate. */
+    const existingId=localStorage.getItem(SESSION_ROW_KEY);
+    if(existingId){
+      try{
+        const r=await db.from(TABLE).select("id,logout_time")
+          .eq("id",existingId).eq("company_id",m.company_id)
+          .eq("member_type",m.member_type).eq("member_id",m.member_id).maybeSingle();
+        if(!r.error&&r.data&&!r.data.logout_time) return;
+      }catch(_e){}
+      localStorage.removeItem(SESSION_ROW_KEY);
+    }
+
+    const now=new Date();
+    const payload={
+      company_id:m.company_id,member_type:m.member_type,member_id:m.member_id,
+      member_name:m.name||null,member_role:m.role||null,
+      attendance_date:localDateKey(now),login_time:now.toISOString(),logout_time:null
+    };
+    const {data,error}=await db.from(TABLE).insert(payload).select("id").single();
+    if(error){console.warn("Mobile attendance login save:",error);return}
+    if(data?.id)localStorage.setItem(SESSION_ROW_KEY,String(data.id));
+  };
+
+  window.notusAttendanceRecordLogout=async function(){
+    const m=currentMember();
+    if(!m?.member_id||typeof db==="undefined") return;
+    const rowId=localStorage.getItem(SESSION_ROW_KEY);
+
+    let q=db.from(TABLE).update({logout_time:new Date().toISOString()})
+      .eq("company_id",m.company_id).eq("member_type",m.member_type)
+      .eq("member_id",m.member_id).is("logout_time",null);
+    if(rowId) q=q.eq("id",rowId);
+    const {error}=await q;
+    if(error){console.warn("Mobile attendance logout save:",error);return}
+    localStorage.removeItem(SESSION_ROW_KEY);
+  };
+
+  async function fetchRows(){
+    const m=currentMember();
+    if(!m?.member_id||typeof db==="undefined") return [];
+    const since=new Date(); since.setDate(since.getDate()-62);
+    const {data,error}=await db.from(TABLE)
+      .select("id,attendance_date,login_time,logout_time")
+      .eq("company_id",m.company_id).eq("member_type",m.member_type).eq("member_id",m.member_id)
+      .gte("attendance_date",localDateKey(since))
+      .order("attendance_date",{ascending:false}).order("login_time",{ascending:true});
+    if(error)throw error;
+    return Array.isArray(data)?data:[];
+  }
+
+  function groupDaily(rows){
+    const map=new Map(),now=Date.now();
+    rows.forEach(r=>{
+      const key=r.attendance_date||localDateKey(new Date(r.login_time));
+      if(!map.has(key))map.set(key,{date:key,first:null,last:null,total:0,active:false,sessions:0});
+      const g=map.get(key);g.sessions++;
+      const li=new Date(r.login_time).getTime();
+      if(Number.isFinite(li)&&(!g.first||li<new Date(g.first).getTime()))g.first=r.login_time;
+      if(r.logout_time){
+        const lo=new Date(r.logout_time).getTime();
+        if(Number.isFinite(lo)&&(!g.last||lo>new Date(g.last).getTime()))g.last=r.logout_time;
+      }else g.active=true;
+      g.total+=durationMs(r,now);
+    });
+    return [...map.values()].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  }
+
+  function paint(groups){
+    const list=$("mobileAttendanceList"); if(!list)return;
+    const today=localDateKey(),tg=groups.find(g=>g.date===today);
+    const set=(id,v)=>{const el=$(id);if(el)el.textContent=v};
+    set("mobileAttendanceTodayDate",fmtDate(today));
+    set("mobileAttendanceTodayLogin",tg?fmtTime(tg.first):"—");
+    set("mobileAttendanceTodayLogout",tg?(tg.active?"Active":fmtTime(tg.last)):"—");
+    set("mobileAttendanceTodayHours",tg?fmtDuration(tg.total):"00h 00m");
+    const m=currentMember();
+    set("mobileAttendanceOwnSub",`${m?.name||"Your"} attendance only • ${groups.length} days`);
+
+    if(!groups.length){
+      list.innerHTML='<div class="mobile-attendance-empty"><i class="fa-regular fa-calendar-check"></i><b>No attendance yet</b><span>Your login and logout history will appear here.</span></div>';
+      return;
+    }
+    list.innerHTML=groups.map(g=>`
+      <div class="mobile-attendance-row">
+        <div class="mobile-attendance-row-top">
+          <div class="mobile-attendance-date">${esc(fmtDate(g.date))}</div>
+          <span class="mobile-attendance-pill ${g.active?"active":"completed"}">${g.active?"Working":"Completed"}</span>
+        </div>
+        <div class="mobile-attendance-meta">
+          <div><span>First Login</span><b>${esc(fmtTime(g.first))}</b></div>
+          <div><span>Last Logout</span><b>${esc(g.active?"Active":fmtTime(g.last))}</b></div>
+          <div><span>Total Time</span><b>${esc(fmtDuration(g.total))}</b></div>
+        </div>
+      </div>`).join("");
+  }
+
+  window.loadMobileDailyAttendance=async function(){
+    if(loading)return; loading=true;
+    const list=$("mobileAttendanceList");
+    if(list)list.innerHTML='<div class="mobile-attendance-empty"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading attendance</b><span>Please wait...</span></div>';
+    try{paint(groupDaily(await fetchRows()))}
+    catch(err){
+      console.error("Mobile attendance load:",err);
+      if(list)list.innerHTML='<div class="mobile-attendance-empty"><i class="fa-solid fa-triangle-exclamation"></i><b>Attendance database is not ready</b><span>Run the same NOT US attendance SQL once in Supabase.</span></div>';
+    }finally{loading=false}
+  };
+
+  window.openMobileAttendanceScreen=function(){
+    const screen=$("mobileAttendanceScreen");
+    screen?.classList.add("show");screen?.setAttribute("aria-hidden","false");
+    window.loadMobileDailyAttendance();
+  };
+  window.closeMobileAttendanceScreen=function(){
+    const screen=$("mobileAttendanceScreen");
+    screen?.classList.remove("show");screen?.setAttribute("aria-hidden","true");
+  };
+
+  $("mobileAttendanceBack")?.addEventListener("click",window.closeMobileAttendanceScreen);
+  $("mobileAttendanceRefresh")?.addEventListener("click",()=>window.loadMobileDailyAttendance());
+
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible"&&$("mobileAttendanceScreen")?.classList.contains("show")){
+      window.loadMobileDailyAttendance();
+    }
+  });
+  window.addEventListener("focus",()=>{
+    if($("mobileAttendanceScreen")?.classList.contains("show"))window.loadMobileDailyAttendance();
+  });
+
+  attendanceTicker=setInterval(()=>{
+    if($("mobileAttendanceScreen")?.classList.contains("show"))window.loadMobileDailyAttendance();
+  },60000);
 })();
 </script>
 
