@@ -1198,7 +1198,7 @@ body{
 ========================= */
 .chat-screen{
   position:fixed;
-  top:0;
+  top:var(--chat-viewport-top,0px);
   left:0;
   right:0;
   bottom:auto;
@@ -1329,7 +1329,7 @@ body{
 }
 .chat-compose textarea{
   width:100%;max-height:88px;resize:none;border:0;outline:none;background:transparent;
-  font-family:"Inter",sans-serif;font-size:12px;line-height:1.4;color:#171717;padding:12px 0;
+  font-family:"Inter",sans-serif;font-size:16px;line-height:1.4;color:#171717;padding:11px 0;
 }
 .chat-send{
   width:44px;height:44px;flex:0 0 44px;border:0;border-radius:50%;
@@ -2221,12 +2221,20 @@ function syncCompanyChatIdentity(session){
 }
 
 let chatBodyPreviousOverflow = "";
+let chatBodyPreviousPosition = "";
+let chatBodyPreviousTop = "";
+let chatBodyPreviousWidth = "";
+let chatLockedScrollY = 0;
 
 function updateChatViewportHeight(){
   if(!companyChatScreen) return;
+
   const vv = window.visualViewport;
   const height = vv ? vv.height : window.innerHeight;
+  const top = vv ? vv.offsetTop : 0;
+
   companyChatScreen.style.setProperty("--chat-viewport-height", Math.round(height) + "px");
+  companyChatScreen.style.setProperty("--chat-viewport-top", Math.round(top) + "px");
 
   if(companyChatScreen.classList.contains("show")){
     requestAnimationFrame(()=>{
@@ -2240,26 +2248,56 @@ window.visualViewport?.addEventListener("scroll", updateChatViewportHeight);
 window.addEventListener("resize", updateChatViewportHeight);
 updateChatViewportHeight();
 
-function openCompanyChat(){
-  renderCompanyMessages();
-  updateChatViewportHeight();
+function lockPageBehindChat(){
+  chatLockedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
 
   chatBodyPreviousOverflow = document.body.style.overflow;
+  chatBodyPreviousPosition = document.body.style.position;
+  chatBodyPreviousTop = document.body.style.top;
+  chatBodyPreviousWidth = document.body.style.width;
+
+  document.documentElement.style.overflow = "hidden";
   document.body.style.overflow = "hidden";
+  document.body.style.position = "fixed";
+  document.body.style.top = `-${chatLockedScrollY}px`;
+  document.body.style.width = "100%";
+}
+
+function unlockPageBehindChat(){
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = chatBodyPreviousOverflow || "";
+  document.body.style.position = chatBodyPreviousPosition || "";
+  document.body.style.top = chatBodyPreviousTop || "";
+  document.body.style.width = chatBodyPreviousWidth || "";
+
+  window.scrollTo(0, chatLockedScrollY);
+}
+
+function openCompanyChat(){
+  renderCompanyMessages();
+
+  lockPageBehindChat();
+  updateChatViewportHeight();
 
   companyChatScreen?.classList.add("show");
   companyChatScreen?.setAttribute("aria-hidden","false");
 
   requestAnimationFrame(()=>{
+    updateChatViewportHeight();
     if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
   });
 }
 
 function closeCompanyChat(){
+  chatMessageInput?.blur();
+
   companyChatScreen?.classList.remove("show");
   companyChatScreen?.setAttribute("aria-hidden","true");
-  chatMessageInput?.blur();
-  document.body.style.overflow = chatBodyPreviousOverflow || "";
+
+  companyChatScreen?.style.setProperty("--chat-viewport-top","0px");
+  companyChatScreen?.style.setProperty("--chat-viewport-height","100dvh");
+
+  unlockPageBehindChat();
 }
 companyChatItem?.addEventListener("click", openCompanyChat);
 chatBackBtn?.addEventListener("click", closeCompanyChat);
@@ -2291,14 +2329,20 @@ chatMessageInput?.addEventListener("input", function(){
 
 chatMessageInput?.addEventListener("focus", function(){
   updateChatViewportHeight();
+
+  [40,100,180,300,450].forEach(delay=>{
+    setTimeout(()=>{
+      updateChatViewportHeight();
+      if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+    },delay);
+  });
+});
+
+chatMessageInput?.addEventListener("blur", function(){
   setTimeout(()=>{
     updateChatViewportHeight();
     if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
   },80);
-  setTimeout(()=>{
-    updateChatViewportHeight();
-    if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
-  },300);
 });
 
 workspaceSearch?.addEventListener("input", function(){
@@ -2472,7 +2516,9 @@ function finishEdgeSwipe(){
       companyChatScreen.style.transition = "";
       companyChatScreen.style.transform = "";
       chatMessageInput?.blur();
-      document.body.style.overflow = chatBodyPreviousOverflow || "";
+      companyChatScreen?.style.setProperty("--chat-viewport-top","0px");
+      companyChatScreen?.style.setProperty("--chat-viewport-height","100dvh");
+      unlockPageBehindChat();
     },240);
   }else{
     companyChatScreen.style.transform = "translate3d(0,0,0)";
