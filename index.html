@@ -1490,6 +1490,32 @@ body{
   transform:translateZ(0);
 }
 
+
+/* FINAL PROFILE + DIRECT CHAT IMAGE FIX */
+#topUserProfileImg,
+#sideUserProfileImg,
+.chat-avatar img.person-avatar,
+#chatHeaderLogo{
+  object-fit:cover!important;
+  object-position:center!important;
+  -webkit-user-drag:none;
+  backface-visibility:hidden;
+  transform:translateZ(0);
+}
+
+.chat-avatar img.person-avatar{
+  width:100%!important;
+  height:100%!important;
+  display:none;
+  border-radius:50%;
+}
+
+#chatHeaderLogo{
+  width:100%!important;
+  height:100%!important;
+  border-radius:50%;
+}
+
 </style>
 </head>
 
@@ -2354,11 +2380,115 @@ function getLoggedInProfileSource(s){
     };
   }
 
+  if(type === "hr" || type === "hr_member"){
+    return {
+      kind:"hr",
+      table:"hr_members",
+      column:"profile_image_url"
+    };
+  }
+
   return {
     kind:"employee",
     table:"employees",
     column:"profile_image_url"
   };
+}
+
+
+function normalizeProfileImageUrl(value){
+  let raw = String(value || "").trim();
+  if(!raw) return "";
+
+  raw = raw.replace(/^["']|["']$/g,"").trim();
+
+  if(/^https?:\/\//i.test(raw)) return raw;
+
+  if(raw.startsWith("/storage/")){
+    return SUPABASE_URL.replace(/\/$/,"") + raw;
+  }
+
+  if(raw.startsWith("storage/")){
+    return SUPABASE_URL.replace(/\/$/,"") + "/" + raw;
+  }
+
+  raw = raw.replace(/^\/+/,"");
+
+  if(raw.startsWith("profile-images/")){
+    raw = raw.slice("profile-images/".length);
+  }
+
+  return (
+    SUPABASE_URL.replace(/\/$/,"") +
+    "/storage/v1/object/public/profile-images/" +
+    raw.split("/").map(part=>{
+      try{return encodeURIComponent(decodeURIComponent(part))}
+      catch(e){return encodeURIComponent(part)}
+    }).join("/")
+  );
+}
+
+function retryImageUrl(url){
+  const clean = String(url || "").trim();
+  if(!clean) return "";
+
+  try{
+    const u = new URL(clean, window.location.href);
+    u.searchParams.set("v", Date.now().toString());
+    return u.href;
+  }catch(e){
+    return clean + (clean.includes("?") ? "&" : "?") + "v=" + Date.now();
+  }
+}
+
+function loadProfileImageInto(img, rawUrl, onSuccess, onFail){
+  if(!img){
+    if(onFail) onFail();
+    return;
+  }
+
+  const first = normalizeProfileImageUrl(rawUrl);
+  const urls = [...new Set([first, retryImageUrl(first)].filter(Boolean))];
+
+  if(!urls.length){
+    if(onFail) onFail();
+    return;
+  }
+
+  let i = 0;
+
+  const tryNext = ()=>{
+    if(i >= urls.length){
+      if(onFail) onFail();
+      return;
+    }
+
+    const url = urls[i++];
+
+    img.onload = ()=>{
+      img.onload = null;
+      img.onerror = null;
+      img.dataset.lastGoodUrl = url;
+      if(onSuccess) onSuccess(url);
+    };
+
+    img.onerror = ()=>{
+      img.onload = null;
+      img.onerror = null;
+      setTimeout(tryNext,80);
+    };
+
+    img.src = url;
+
+    if(img.complete && img.naturalWidth > 0){
+      img.onload = null;
+      img.onerror = null;
+      img.dataset.lastGoodUrl = url;
+      if(onSuccess) onSuccess(url);
+    }
+  };
+
+  tryNext();
 }
 
 async function fetchCompanyLogoForProfile(companyId){
@@ -2428,7 +2558,7 @@ function paintFallback(el, companyLogo, session, top){
 
 function showProfilePhoto(profileUrl, companyLogo){
   const session = getNotusSession() || {};
-  const url = String(profileUrl || "").trim();
+  const url = normalizeProfileImageUrl(profileUrl);
   const logo = String(companyLogo || notusCompanyLogoCache || "").trim();
 
   const topImg = document.getElementById("topUserProfileImg");
@@ -2441,30 +2571,46 @@ function showProfilePhoto(profileUrl, companyLogo){
 
     if(!url){
       img.style.display = "none";
-      img.removeAttribute("src");
       fallback.style.display = "grid";
-      paintFallback(fallback, logo, session, isTop);
+      paintFallback(fallback,logo,session,isTop);
       return;
     }
 
-    img.onload = function(){
-      img.style.display = "block";
-      fallback.style.display = "none";
-    };
+    const oldGood = String(img.dataset.lastGoodUrl || "").trim();
 
-    img.onerror = function(){
-      img.style.display = "none";
-      fallback.style.display = "grid";
-      paintFallback(fallback, logo, session, isTop);
-    };
-
-    /* Use the saved public URL exactly as stored.
-       Saved URLs may already contain ?v=... */
-    img.src = url;
+    loadProfileImageInto(
+      img,
+      url,
+      ()=>{
+        img.style.display = "block";
+        fallback.style.display = "none";
+      },
+      ()=>{
+        if(oldGood){
+          loadProfileImageInto(
+            img,
+            oldGood,
+            ()=>{
+              img.style.display = "block";
+              fallback.style.display = "none";
+            },
+            ()=>{
+              img.style.display = "none";
+              fallback.style.display = "grid";
+              paintFallback(fallback,logo,session,isTop);
+            }
+          );
+        }else{
+          img.style.display = "none";
+          fallback.style.display = "grid";
+          paintFallback(fallback,logo,session,isTop);
+        }
+      }
+    );
   }
 
-  apply(topImg, topFallback, true);
-  apply(sideImg, sideFallback, false);
+  apply(topImg,topFallback,true);
+  apply(sideImg,sideFallback,false);
 }
 
 async function loadCurrentUserProfilePhoto(){
@@ -2504,18 +2650,50 @@ async function loadCurrentUserProfilePhoto(){
       profileUrl = String(data?.admin_profile_url || "").trim();
     }
 
-    /* ALL STAFF:
-       employees.company_id + email
-       picture column = profile_image_url
+    /* HR */
+    else if(source.kind === "hr"){
+      const loginEmail = String(
+        session.email || session.gmail || session.employee_email || ""
+      ).trim().toLowerCase();
 
-       Email lookup is intentional: custom login sessions can have no employee_id.
-    */
+      const hrId = String(
+        session.hr_id || session.member_id || session.id || ""
+      ).trim();
+
+      const {data,error} = await db
+        .from("hr_members")
+        .select("*")
+        .eq("company_id",session.company_id)
+        .limit(200);
+
+      if(error) throw error;
+
+      const rows = Array.isArray(data) ? data : [];
+      let row = null;
+
+      if(hrId){
+        row = rows.find(r=>String(r.id || "").trim() === hrId) || null;
+      }
+
+      if(!row && loginEmail){
+        row = rows.find(r=>
+          String(r.email || r.gmail || "").trim().toLowerCase() === loginEmail
+        ) || null;
+      }
+
+      profileUrl = String(
+        row?.profile_image_url ||
+        session.profile_image_url ||
+        ""
+      ).trim();
+
+      if(row?.id) session.hr_id = row.id;
+    }
+
+    /* EMPLOYEE / MANAGER / TEAM LEAD / RECRUITER / IT / SUPPORT */
     else{
       const loginEmail = String(
-        session.email ||
-        session.gmail ||
-        session.employee_email ||
-        ""
+        session.email || session.gmail || session.employee_email || ""
       ).trim().toLowerCase();
 
       const employeeId = String(
@@ -2527,48 +2705,45 @@ async function loadCurrentUserProfilePhoto(){
       ).trim();
 
       const loginName = String(
-        session.full_name ||
-        session.name ||
-        ""
+        session.full_name || session.name || ""
       ).trim().toLowerCase();
 
-      /* Load company employees once, then match robustly.
-         This avoids session-id differences between custom login RPCs. */
       const staffRes = await db
         .from("employees")
         .select("id,email,full_name,profile_image_url")
-        .eq("company_id", session.company_id);
+        .eq("company_id",session.company_id)
+        .limit(500);
 
       if(staffRes.error) throw staffRes.error;
 
       const rows = Array.isArray(staffRes.data) ? staffRes.data : [];
-
       let row = null;
 
       if(employeeId){
-        row = rows.find(r => String(r.id || "").trim() === employeeId) || null;
+        row = rows.find(r=>String(r.id || "").trim() === employeeId) || null;
       }
 
       if(!row && loginEmail){
-        row = rows.find(r =>
+        row = rows.find(r=>
           String(r.email || "").trim().toLowerCase() === loginEmail
         ) || null;
       }
 
       if(!row && loginName){
-        row = rows.find(r =>
+        row = rows.find(r=>
           String(r.full_name || "").trim().toLowerCase() === loginName
         ) || null;
       }
 
-      profileUrl = String(row?.profile_image_url || session.profile_image_url || "").trim();
+      profileUrl = String(
+        row?.profile_image_url ||
+        session.profile_image_url ||
+        ""
+      ).trim();
 
       if(row?.id){
         session.employee_id = row.id;
-      }
-
-      if(row?.email && !session.gmail){
-        session.gmail = row.email;
+        session.team_lead_id = session.team_lead_id || row.id;
       }
     }
 
@@ -3025,13 +3200,11 @@ function buildPersonAvatar(person){
 
   const initial = document.createElement("span");
   initial.textContent = personInitial(person);
-  initial.style.width = "100%";
-  initial.style.height = "100%";
-  initial.style.display = "grid";
-  initial.style.placeItems = "center";
+  initial.style.cssText = "width:100%;height:100%;display:grid;place-items:center";
   avatar.appendChild(initial);
 
-  const url = safeText(person?.profile_image_url);
+  const url = normalizeProfileImageUrl(person?.profile_image_url);
+
   if(url){
     const img = document.createElement("img");
     img.className = "person-avatar";
@@ -3039,26 +3212,20 @@ function buildPersonAvatar(person){
     img.decoding = "async";
     img.loading = "eager";
     img.style.display = "none";
-
-    img.onload = ()=>{
-      img.style.display = "block";
-      initial.style.display = "none";
-    };
-
-    img.onerror = ()=>{
-      img.style.display = "none";
-      initial.style.display = "grid";
-    };
-
-    /* Keep the exact saved public URL, including existing ?v=... */
-    img.src = url;
-
     avatar.appendChild(img);
 
-    if(img.complete && img.naturalWidth > 0){
-      img.style.display = "block";
-      initial.style.display = "none";
-    }
+    loadProfileImageInto(
+      img,
+      url,
+      ()=>{
+        img.style.display = "block";
+        initial.style.display = "none";
+      },
+      ()=>{
+        img.style.display = "none";
+        initial.style.display = "grid";
+      }
+    );
   }
 
   return avatar;
@@ -3242,7 +3409,7 @@ async function fetchSameCompanyPeople(query){
       email:safeText(row.email),
       role:safeText(row.role) || "Employee",
       designation:safeText(row.designation),
-      profile_image_url:safeText(row.profile_image_url)
+      profile_image_url:normalizeProfileImageUrl(row.profile_image_url)
     })));
   }catch(err){
     console.warn("Employee search failed:",err);
@@ -3266,7 +3433,7 @@ async function fetchSameCompanyPeople(query){
         email:safeText(row.email || row.gmail),
         role:safeText(row.role) || "HR",
         designation:safeText(row.designation),
-        profile_image_url:safeText(row.profile_image_url)
+        profile_image_url:normalizeProfileImageUrl(row.profile_image_url)
       })));
     }
   }catch(e){}
@@ -3289,7 +3456,7 @@ async function fetchSameCompanyPeople(query){
         email:safeText(data.gmail || data.email || data.admin_email),
         role:"Company Admin",
         designation:"",
-        profile_image_url:safeText(data.admin_profile_url)
+        profile_image_url:normalizeProfileImageUrl(data.admin_profile_url)
       });
     }
   }catch(e){}
@@ -3433,28 +3600,22 @@ function paintDirectChatHeader(peer){
 
   if(img){
     img.style.display = "none";
-    img.removeAttribute("src");
 
-    const url = safeText(peer?.profile_image_url);
+    const url = normalizeProfileImageUrl(peer?.profile_image_url);
+
     if(url){
-      img.decoding = "async";
-
-      img.onload = ()=>{
-        img.style.display = "block";
-        if(fallback) fallback.style.display = "none";
-      };
-
-      img.onerror = ()=>{
-        img.style.display = "none";
-        if(fallback) fallback.style.display = "grid";
-      };
-
-      img.src = url;
-
-      if(img.complete && img.naturalWidth > 0){
-        img.style.display = "block";
-        if(fallback) fallback.style.display = "none";
-      }
+      loadProfileImageInto(
+        img,
+        url,
+        ()=>{
+          img.style.display = "block";
+          if(fallback) fallback.style.display = "none";
+        },
+        ()=>{
+          img.style.display = "none";
+          if(fallback) fallback.style.display = "grid";
+        }
+      );
     }
   }
 }
@@ -3479,7 +3640,7 @@ async function refreshPeerBeforeOpen(peer){
         peer.email = safeText(data.email) || peer.email;
         peer.role = safeText(data.role) || peer.role;
         peer.designation = safeText(data.designation) || peer.designation;
-        peer.profile_image_url = safeText(data.profile_image_url) || peer.profile_image_url;
+        peer.profile_image_url = normalizeProfileImageUrl(data.profile_image_url) || peer.profile_image_url;
       }
     }else if(peer.type === "hr"){
       const {data,error} = await db
@@ -3493,7 +3654,7 @@ async function refreshPeerBeforeOpen(peer){
         peer.name = safeText(data.full_name || data.name) || peer.name;
         peer.role = safeText(data.role) || peer.role;
         peer.designation = safeText(data.designation) || peer.designation;
-        peer.profile_image_url = safeText(data.profile_image_url) || peer.profile_image_url;
+        peer.profile_image_url = normalizeProfileImageUrl(data.profile_image_url) || peer.profile_image_url;
       }
     }else if(peer.type === "company_admin"){
       const {data,error} = await db
@@ -3503,7 +3664,7 @@ async function refreshPeerBeforeOpen(peer){
         .maybeSingle();
 
       if(!error && data){
-        peer.profile_image_url = safeText(data.admin_profile_url) || peer.profile_image_url;
+        peer.profile_image_url = normalizeProfileImageUrl(data.admin_profile_url) || peer.profile_image_url;
       }
     }
   }catch(err){
