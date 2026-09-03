@@ -1966,12 +1966,12 @@ body:has(.workspace-screen.show){
 /* Main workspace bottom upcoming meeting — hidden when there is no meeting */
 .workspace-upcoming-wrap{
   display:none;
-  margin:5px 16px 14px;
-  padding:0 1px;
+  margin:4px 16px 14px;
+  padding:0;
 }
 .workspace-upcoming-wrap.show{display:block}
 .workspace-upcoming-label{
-  margin-bottom:8px;
+  margin-bottom:6px;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -1983,25 +1983,31 @@ body:has(.workspace-screen.show){
   font-weight:600;
   color:#252a28;
 }
-.workspace-upcoming-label button{
-  border:0;
-  background:transparent;
-  color:#0f766e;
+.workspace-upcoming-count{
   font-size:8px;
   font-weight:700;
+  color:#8a9490;
 }
-.workspace-upcoming-line{
-  width:100%;
-  border:0;
+.workspace-upcoming-list{
+  max-height:176px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
   border-top:1px solid #dfe6e3;
   border-bottom:1px solid #dfe6e3;
+}
+.workspace-upcoming-item{
+  width:100%;
+  min-height:66px;
+  border:0;
+  border-bottom:1px solid #edf1ef;
   background:transparent;
-  padding:12px 0;
+  padding:10px 0;
   display:flex;
   align-items:center;
   gap:11px;
   text-align:left;
 }
+.workspace-upcoming-item:last-child{border-bottom:0}
 .workspace-upcoming-date{
   width:42px;
   flex:0 0 42px;
@@ -2801,20 +2807,10 @@ html,body{
 
     <div class="workspace-upcoming-wrap" id="workspaceUpcomingMeeting">
       <div class="workspace-upcoming-label">
-        <b>Upcoming Meeting</b>
-        <button type="button" id="workspaceUpcomingViewAll">View all</button>
+        <b>Upcoming Meetings</b>
+        <span class="workspace-upcoming-count" id="workspaceUpcomingCount">0</span>
       </div>
-      <button class="workspace-upcoming-line" id="workspaceUpcomingLine" type="button">
-        <div class="workspace-upcoming-date">
-          <strong id="workspaceUpcomingDay">--</strong>
-          <span id="workspaceUpcomingMonth">---</span>
-        </div>
-        <div class="workspace-upcoming-info">
-          <div class="workspace-upcoming-title" id="workspaceUpcomingTitle">Meeting</div>
-          <div class="workspace-upcoming-meta" id="workspaceUpcomingMeta">--</div>
-        </div>
-        <i class="fa-solid fa-chevron-right workspace-upcoming-arrow"></i>
-      </button>
+      <div class="workspace-upcoming-list" id="workspaceUpcomingList"></div>
     </div>
   </main>
 </div>
@@ -6526,27 +6522,50 @@ function hideStatus(){
 
   function paintWorkspaceUpcoming(rows){
     const wrap=$("workspaceUpcomingMeeting");
-    if(!wrap) return;
+    const list=$("workspaceUpcomingList");
+    const count=$("workspaceUpcomingCount");
+    if(!wrap || !list) return;
 
-    const row=rows?.[0];
-    if(!row){
+    const items=Array.isArray(rows)?rows:[];
+
+    if(!items.length){
       wrap.classList.remove("show");
+      list.innerHTML="";
+      if(count) count.textContent="0";
       return;
     }
 
-    const d=new Date(`${String(row.meeting_date||"").slice(0,10)}T00:00:00`);
+    if(count) count.textContent=String(items.length);
 
-    $("workspaceUpcomingDay").textContent=
-      Number.isFinite(d.getTime()) ? String(d.getDate()).padStart(2,"0") : "--";
-
-    $("workspaceUpcomingMonth").textContent=
-      Number.isFinite(d.getTime())
+    list.innerHTML=items.map((row,i)=>{
+      const d=new Date(`${String(row.meeting_date||"").slice(0,10)}T00:00:00`);
+      const day=Number.isFinite(d.getTime()) ? String(d.getDate()).padStart(2,"0") : "--";
+      const month=Number.isFinite(d.getTime())
         ? d.toLocaleDateString(undefined,{month:"short"})
         : "---";
 
-    $("workspaceUpcomingTitle").textContent=row.title||"Meeting";
-    $("workspaceUpcomingMeta").textContent=
-      `${meetingDateLabel(row.meeting_date)} · ${meetingTimeLabel(row.meeting_time)}`;
+      return `
+        <button class="workspace-upcoming-item" type="button" data-workspace-meeting-index="${i}">
+          <div class="workspace-upcoming-date">
+            <strong>${escMeeting(day)}</strong>
+            <span>${escMeeting(month)}</span>
+          </div>
+          <div class="workspace-upcoming-info">
+            <div class="workspace-upcoming-title">${escMeeting(row.title||"Meeting")}</div>
+            <div class="workspace-upcoming-meta">
+              ${escMeeting(meetingDateLabel(row.meeting_date))} · ${escMeeting(meetingTimeLabel(row.meeting_time))}
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right workspace-upcoming-arrow"></i>
+        </button>
+      `;
+    }).join("");
+
+    list.querySelectorAll("[data-workspace-meeting-index]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        openMobileMeetingsScreen();
+      });
+    });
 
     wrap.classList.add("show");
   }
@@ -6629,8 +6648,6 @@ function hideStatus(){
   }
 
   $("mobileMeetingsBack")?.addEventListener("click",closeMobileMeetingsScreen);
-  $("workspaceUpcomingViewAll")?.addEventListener("click",openMobileMeetingsScreen);
-  $("workspaceUpcomingLine")?.addEventListener("click",openMobileMeetingsScreen);
 
   window.openMobileMeetingsScreen=openMobileMeetingsScreen;
   window.loadMobileMeetings=loadMobileMeetings;
