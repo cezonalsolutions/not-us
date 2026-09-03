@@ -2503,6 +2503,65 @@ body:has(.workspace-screen.show){
   font-size:7.5px;
 }
 
+
+
+/* ===== ANNOUNCEMENTS — FINAL CLEAN CARD VIEW ===== */
+.mobile-announcements-body{
+  background:#f5f7f8!important;
+  padding:12px 13px calc(24px + env(safe-area-inset-bottom))!important;
+}
+.mobile-announcements-list{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:12px!important;
+}
+.mobile-announcement-row{
+  width:100%!important;
+  margin:0!important;
+  padding:15px 15px 14px!important;
+  border:1px solid #e8ecea!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  box-shadow:0 2px 8px rgba(20,40,34,.035)!important;
+}
+.mobile-announcement-row:last-child{
+  border-bottom:1px solid #e8ecea!important;
+}
+.mobile-announcement-row-top{
+  display:block!important;
+  padding-right:14px!important;
+}
+.mobile-announcement-title{
+  font-family:"Outfit",sans-serif!important;
+  font-size:14px!important;
+  line-height:1.4!important;
+  font-weight:600!important;
+  color:#1b1f1d!important;
+}
+.mobile-announcement-audience{
+  display:none!important;
+}
+.mobile-announcement-description{
+  margin-top:8px!important;
+  font-family:"Inter",sans-serif!important;
+  font-size:10.5px!important;
+  line-height:1.7!important;
+  color:#646d69!important;
+  white-space:pre-wrap!important;
+  word-break:break-word!important;
+  overflow-wrap:anywhere!important;
+}
+.mobile-announcement-meta{
+  margin-top:11px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:0!important;
+}
+.mobile-announcement-meta .announcement-date-only{
+  font-size:7.5px!important;
+  color:#929a97!important;
+}
+
 </style>
 
 <style>
@@ -7538,9 +7597,6 @@ window.openOutsideApp = function(rawUrl){
             <div class="mobile-announcement-title">
               ${escAnnouncement(row.title||"Announcement")}
             </div>
-            <span class="mobile-announcement-audience">
-              ${escAnnouncement(announcementAudienceLabel(row))}
-            </span>
           </div>
 
           <div class="mobile-announcement-description">
