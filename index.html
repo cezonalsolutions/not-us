@@ -1198,12 +1198,13 @@ body{
 ========================= */
 .chat-screen{
   position:fixed;
-  top:var(--chat-viewport-top,0px);
+  top:0;
   left:0;
   right:0;
   bottom:auto;
   width:100%;
   height:var(--chat-viewport-height,100dvh);
+  transform:translate3d(100%,var(--chat-viewport-top,0px),0);
   z-index:500;
   background:#efeae2;
   display:flex;
@@ -1214,7 +1215,10 @@ body{
   will-change:transform;
   touch-action:pan-y;
 }
-.chat-screen.show{transform:translateX(0);visibility:visible}
+.chat-screen.show{
+  transform:translate3d(0,var(--chat-viewport-top,0px),0);
+  visibility:visible;
+}
 .chat-header{
   flex:0 0 auto;
   position:relative;
@@ -1310,7 +1314,7 @@ body{
   position:relative;
   z-index:6;
   background:#efeae2;
-  padding:7px 9px calc(7px + env(safe-area-inset-bottom));
+  padding:7px 9px calc(7px + var(--chat-safe-bottom, env(safe-area-inset-bottom)));
   display:flex;
   align-items:flex-end;
   gap:7px;
@@ -2221,20 +2225,21 @@ function syncCompanyChatIdentity(session){
 }
 
 let chatBodyPreviousOverflow = "";
-let chatBodyPreviousPosition = "";
-let chatBodyPreviousTop = "";
-let chatBodyPreviousWidth = "";
+let chatHtmlPreviousOverflow = "";
 let chatLockedScrollY = 0;
 
 function updateChatViewportHeight(){
   if(!companyChatScreen) return;
 
   const vv = window.visualViewport;
-  const height = vv ? vv.height : window.innerHeight;
-  const top = vv ? vv.offsetTop : 0;
+  const height = Math.round(vv ? vv.height : window.innerHeight);
+  const top = Math.round(vv ? vv.offsetTop : 0);
+  const layoutHeight = Math.round(window.innerHeight || height);
+  const keyboardOpen = (layoutHeight - height) > 120;
 
-  companyChatScreen.style.setProperty("--chat-viewport-height", Math.round(height) + "px");
-  companyChatScreen.style.setProperty("--chat-viewport-top", Math.round(top) + "px");
+  companyChatScreen.style.setProperty("--chat-viewport-height", height + "px");
+  companyChatScreen.style.setProperty("--chat-viewport-top", top + "px");
+  companyChatScreen.style.setProperty("--chat-safe-bottom", keyboardOpen ? "0px" : "env(safe-area-inset-bottom)");
 
   if(companyChatScreen.classList.contains("show")){
     requestAnimationFrame(()=>{
@@ -2250,27 +2255,20 @@ updateChatViewportHeight();
 
 function lockPageBehindChat(){
   chatLockedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
-
   chatBodyPreviousOverflow = document.body.style.overflow;
-  chatBodyPreviousPosition = document.body.style.position;
-  chatBodyPreviousTop = document.body.style.top;
-  chatBodyPreviousWidth = document.body.style.width;
+  chatHtmlPreviousOverflow = document.documentElement.style.overflow;
 
   document.documentElement.style.overflow = "hidden";
   document.body.style.overflow = "hidden";
-  document.body.style.position = "fixed";
-  document.body.style.top = `-${chatLockedScrollY}px`;
-  document.body.style.width = "100%";
 }
 
 function unlockPageBehindChat(){
-  document.documentElement.style.overflow = "";
+  document.documentElement.style.overflow = chatHtmlPreviousOverflow || "";
   document.body.style.overflow = chatBodyPreviousOverflow || "";
-  document.body.style.position = chatBodyPreviousPosition || "";
-  document.body.style.top = chatBodyPreviousTop || "";
-  document.body.style.width = chatBodyPreviousWidth || "";
 
-  window.scrollTo(0, chatLockedScrollY);
+  requestAnimationFrame(()=>{
+    window.scrollTo(0, chatLockedScrollY);
+  });
 }
 
 function openCompanyChat(){
@@ -2296,6 +2294,7 @@ function closeCompanyChat(){
 
   companyChatScreen?.style.setProperty("--chat-viewport-top","0px");
   companyChatScreen?.style.setProperty("--chat-viewport-height","100dvh");
+  companyChatScreen?.style.setProperty("--chat-safe-bottom","env(safe-area-inset-bottom)");
 
   unlockPageBehindChat();
 }
@@ -2492,7 +2491,8 @@ companyChatScreen?.addEventListener("touchmove", function(e){
   edgeSwipeDistance = Math.min(window.innerWidth, distance);
 
   const signed = edgeSwipeSide === "left" ? edgeSwipeDistance : -edgeSwipeDistance;
-  companyChatScreen.style.transform = `translate3d(${signed}px,0,0)`;
+  const visualTop = parseFloat(getComputedStyle(companyChatScreen).getPropertyValue("--chat-viewport-top")) || 0;
+  companyChatScreen.style.transform = `translate3d(${signed}px,${visualTop}px,0)`;
 },{passive:false});
 
 function finishEdgeSwipe(){
@@ -2508,7 +2508,8 @@ function finishEdgeSwipe(){
 
   if(shouldClose){
     const target = side === "left" ? "100%" : "-100%";
-    companyChatScreen.style.transform = `translate3d(${target},0,0)`;
+    const visualTop = parseFloat(getComputedStyle(companyChatScreen).getPropertyValue("--chat-viewport-top")) || 0;
+    companyChatScreen.style.transform = `translate3d(${target},${visualTop}px,0)`;
 
     setTimeout(()=>{
       companyChatScreen.classList.remove("show");
@@ -2518,10 +2519,12 @@ function finishEdgeSwipe(){
       chatMessageInput?.blur();
       companyChatScreen?.style.setProperty("--chat-viewport-top","0px");
       companyChatScreen?.style.setProperty("--chat-viewport-height","100dvh");
+      companyChatScreen?.style.setProperty("--chat-safe-bottom","env(safe-area-inset-bottom)");
       unlockPageBehindChat();
     },240);
   }else{
-    companyChatScreen.style.transform = "translate3d(0,0,0)";
+    const visualTop = parseFloat(getComputedStyle(companyChatScreen).getPropertyValue("--chat-viewport-top")) || 0;
+    companyChatScreen.style.transform = `translate3d(0,${visualTop}px,0)`;
     setTimeout(()=>{
       companyChatScreen.style.transition = "";
       companyChatScreen.style.transform = "";
