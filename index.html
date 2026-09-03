@@ -1343,6 +1343,17 @@ body{
 }
 .chat-send:active{transform:scale(.94)}
 
+
+/* LOGGED-IN USER PROFILE IMAGE */
+.workspace-profile-btn{width:38px!important;height:38px!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;overflow:hidden!important;display:grid!important;place-items:center!important}
+.workspace-profile-btn .top-user-profile-img{width:31px;height:31px;border-radius:50%;object-fit:cover;display:none}
+.workspace-profile-btn .top-user-profile-fallback{width:31px;height:31px;border-radius:50%;overflow:hidden;display:grid;place-items:center;color:#444b51;font-size:22px}
+.workspace-profile-btn .top-user-profile-fallback img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-user-avatar{overflow:hidden;padding:0!important}
+.profile-user-avatar .side-user-profile-img{width:100%;height:100%;object-fit:cover;display:none;border-radius:inherit}
+.profile-user-avatar .side-user-profile-fallback{width:100%;height:100%;display:grid;place-items:center;overflow:hidden;border-radius:inherit}
+.profile-user-avatar .side-user-profile-fallback img{width:100%;height:100%;object-fit:cover;display:block}
+
 </style>
 </head>
 
@@ -1622,7 +1633,8 @@ body{
         </div>
       </div>
 <button class="workspace-profile-btn" id="workspaceProfileBtn" type="button" aria-label="Profile">
-        <i class="fa-solid fa-circle-user"></i>
+        <img class="top-user-profile-img" id="topUserProfileImg" alt="Profile">
+        <span class="top-user-profile-fallback" id="topUserProfileFallback"><i class="fa-solid fa-circle-user"></i></span>
       </button>
     </div>
   </header>
@@ -1695,7 +1707,7 @@ body{
 <div class="workspace-profile-overlay" id="workspaceProfileOverlay"></div>
 <aside class="workspace-profile-panel" id="workspaceProfilePanel" aria-hidden="true">
   <div class="profile-panel-top"><div class="profile-panel-head"><div class="profile-panel-title">Profile</div><button class="profile-panel-close" id="profilePanelClose" type="button" aria-label="Close profile"><i class="fa-solid fa-xmark"></i></button></div></div>
-  <div class="profile-user-card"><div class="profile-user-avatar" id="profileUserAvatar">U</div><div class="profile-user-info"><div class="profile-user-name" id="profileUserName">User</div><div class="profile-user-role" id="profileUserRole">Employee</div></div></div>
+  <div class="profile-user-card"><div class="profile-user-avatar" id="profileUserAvatar"><img class="side-user-profile-img" id="sideUserProfileImg" alt="Profile"><span class="side-user-profile-fallback" id="sideUserProfileFallback">U</span></div><div class="profile-user-info"><div class="profile-user-name" id="profileUserName">User</div><div class="profile-user-role" id="profileUserRole">Employee</div></div></div>
   <div class="profile-details">
     <div class="profile-detail-item"><div class="profile-detail-icon"><i class="fa-solid fa-building"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Company</div><div class="profile-detail-value" id="profileCompanyName">—</div></div></div>
     <div class="profile-detail-item"><div class="profile-detail-icon"><i class="fa-solid fa-envelope"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Gmail</div><div class="profile-detail-value" id="profileUserGmail">—</div></div></div>
@@ -2036,8 +2048,8 @@ try{
 /* PROFILE SIDE NAV */
 const workspaceProfileBtn=document.getElementById("workspaceProfileBtn");const workspaceProfilePanel=document.getElementById("workspaceProfilePanel");const workspaceProfileOverlay=document.getElementById("workspaceProfileOverlay");const profilePanelClose=document.getElementById("profilePanelClose");const profileLogoutBtn=document.getElementById("profileLogoutBtn");
 function roleDisplayName(session){const directRole=String(session?.role||"").trim();if(directRole)return directRole;const map={company_admin:"Company Admin",hr:"HR",team_lead:"Team Lead",manager:"Manager",recruiter:"Recruiter",it_admin:"IT Administrator",technical_supporter:"Technical Supporter",employee:"Employee"};return map[session?.user_type]||"Employee"}
-function fillProfilePanel(session){const fullName=String(session?.full_name||session?.name||(session?.user_type==="company_admin"?"Company Admin":"User")).trim();const companyName=formatCompanyName(session?.company_name||"Company");const roleName=roleDisplayName(session);const gmail=String(session?.gmail||"—");const branch=String(session?.branch_name||session?.branch_location||"—");document.getElementById("profileUserName").textContent=fullName;document.getElementById("profileUserRole").textContent=roleName;document.getElementById("profileCompanyName").textContent=companyName;document.getElementById("profileUserGmail").textContent=gmail;document.getElementById("profileBranchName").textContent=branch;const avatar=document.getElementById("profileUserAvatar");if(avatar)avatar.textContent=(fullName[0]||companyName[0]||"U").toUpperCase();const branchRow=document.getElementById("profileBranchRow");if(branchRow)branchRow.style.display=session?.branch_name||session?.branch_location?"flex":"none"}
-function openProfilePanel(){fillProfilePanel(window.notusSession||{});workspaceProfilePanel?.classList.add("show");workspaceProfileOverlay?.classList.add("show");workspaceProfilePanel?.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}
+function fillProfilePanel(session){const fullName=String(session?.full_name||session?.name||(session?.user_type==="company_admin"?"Company Admin":"User")).trim();const companyName=formatCompanyName(session?.company_name||"Company");const roleName=roleDisplayName(session);const gmail=String(session?.gmail||"—");const branch=String(session?.branch_name||session?.branch_location||"—");document.getElementById("profileUserName").textContent=fullName;document.getElementById("profileUserRole").textContent=roleName;document.getElementById("profileCompanyName").textContent=companyName;document.getElementById("profileUserGmail").textContent=gmail;document.getElementById("profileBranchName").textContent=branch;const avatarFallback=document.getElementById("sideUserProfileFallback");if(avatarFallback&&!avatarFallback.querySelector("img"))avatarFallback.textContent=(fullName[0]||companyName[0]||"U").toUpperCase();const branchRow=document.getElementById("profileBranchRow");if(branchRow)branchRow.style.display=session?.branch_name||session?.branch_location?"flex":"none"}
+function openProfilePanel(){fillProfilePanel(window.notusSession||{});loadLoggedInUserProfilePhoto();workspaceProfilePanel?.classList.add("show");workspaceProfileOverlay?.classList.add("show");workspaceProfilePanel?.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}
 function closeProfilePanel(){workspaceProfilePanel?.classList.remove("show");workspaceProfileOverlay?.classList.remove("show");workspaceProfilePanel?.setAttribute("aria-hidden","true");document.body.style.overflow=""}
 workspaceProfileBtn?.addEventListener("click",e=>{e.stopPropagation();openProfilePanel()});profilePanelClose?.addEventListener("click",closeProfilePanel);workspaceProfileOverlay?.addEventListener("click",closeProfilePanel);profileLogoutBtn?.addEventListener("click",()=>{try{localStorage.removeItem("notus_company_session");localStorage.removeItem("notus_workspace_status")}catch(e){}window.notusSession=null;closeProfilePanel();document.getElementById("workspaceScreen")?.classList.remove("show");const loginPage=document.querySelector(".page");if(loginPage)loginPage.style.display="flex";if(email)email.value="";if(password)password.value="";hideStatus()});
 
@@ -2085,6 +2097,7 @@ async function loadWorkspaceCompanyLogo(companyId){
     img.onload = function(){
       img.style.display = "block";
       fallback.style.display = "none";
+      cachedCompanyLogoForProfile = logo;
 
       const chatLogo = document.getElementById("companyChatLogo");
       const chatFallback = document.getElementById("companyChatFallback");
