@@ -1198,7 +1198,12 @@ body{
 ========================= */
 .chat-screen{
   position:fixed;
-  inset:0;
+  top:0;
+  left:0;
+  right:0;
+  bottom:auto;
+  width:100%;
+  height:var(--chat-viewport-height,100dvh);
   z-index:500;
   background:#efeae2;
   display:flex;
@@ -1211,6 +1216,8 @@ body{
 }
 .chat-screen.show{transform:translateX(0);visibility:visible}
 .chat-header{
+  flex:0 0 auto;
+  position:relative;
   padding:max(12px,env(safe-area-inset-top)) 12px 10px;
   min-height:76px;
   background:#ffffff;
@@ -1224,15 +1231,29 @@ body{
   display:grid;place-items:center;font-size:18px;cursor:pointer;
 }
 .chat-header-avatar{
-  width:40px;height:40px;border-radius:50%;background:#e9f5f2;color:#0f766e;
+  width:40px;height:40px;flex:0 0 40px;border-radius:50%;background:#e9f5f2;color:#0f766e;
   display:grid;place-items:center;font-family:"Outfit",sans-serif;font-size:15px;font-weight:700;
   box-shadow:0 1px 3px rgba(20,50,42,.07);
+  overflow:hidden;
+}
+.chat-header-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:none;
+}
+.chat-header-avatar span{
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
 }
 .chat-header-info{min-width:0;flex:1;padding-bottom:2px}
 .chat-header-name{font-family:"Outfit",sans-serif;font-size:14px;font-weight:600;color:#171717;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chat-header-sub{margin-top:2px;font-size:9px;color:#71807b}
 .chat-messages{
-  flex:1;
+  flex:1 1 auto;
+  min-height:0;
   overflow-y:auto;
   padding:18px 11px 14px;
   display:flex;
@@ -1285,6 +1306,9 @@ body{
   color:#7f8c87;
 }
 .chat-compose-wrap{
+  flex:0 0 auto;
+  position:relative;
+  z-index:6;
   background:#efeae2;
   padding:7px 9px calc(7px + env(safe-area-inset-bottom));
   display:flex;
@@ -1640,7 +1664,10 @@ body{
     <button class="chat-back" id="chatBackBtn" type="button" aria-label="Back">
       <i class="fa-solid fa-arrow-left"></i>
     </button>
-    <div class="chat-header-avatar" id="chatHeaderAvatar">C</div>
+    <div class="chat-header-avatar" id="chatHeaderAvatar">
+      <img id="chatHeaderLogo" alt="Company logo">
+      <span id="chatHeaderFallback">C</span>
+    </div>
     <div class="chat-header-info">
       <div class="chat-header-name" id="chatHeaderName">Company</div>
       <div class="chat-header-sub">Company chat</div>
@@ -2054,14 +2081,34 @@ async function loadWorkspaceCompanyLogo(companyId){
     img.onload = function(){
       img.style.display = "block";
       fallback.style.display = "none";
+
       const chatLogo = document.getElementById("companyChatLogo");
       const chatFallback = document.getElementById("companyChatFallback");
+      const chatHeaderLogo = document.getElementById("chatHeaderLogo");
+      const chatHeaderFallback = document.getElementById("chatHeaderFallback");
+
       if(chatLogo){
         chatLogo.onload = function(){
           chatLogo.style.display = "block";
           if(chatFallback) chatFallback.style.display = "none";
         };
+        chatLogo.onerror = function(){
+          chatLogo.style.display = "none";
+          if(chatFallback) chatFallback.style.display = "grid";
+        };
         chatLogo.src = logo;
+      }
+
+      if(chatHeaderLogo){
+        chatHeaderLogo.onload = function(){
+          chatHeaderLogo.style.display = "block";
+          if(chatHeaderFallback) chatHeaderFallback.style.display = "none";
+        };
+        chatHeaderLogo.onerror = function(){
+          chatHeaderLogo.style.display = "none";
+          if(chatHeaderFallback) chatHeaderFallback.style.display = "grid";
+        };
+        chatHeaderLogo.src = logo;
       }
     };
     img.onerror = function(){
@@ -2165,24 +2212,54 @@ function syncCompanyChatIdentity(session){
   const listName = document.getElementById("companyChatName");
   const fallback = document.getElementById("companyChatFallback");
   const headerName = document.getElementById("chatHeaderName");
-  const headerAvatar = document.getElementById("chatHeaderAvatar");
+  const headerFallback = document.getElementById("chatHeaderFallback");
   if(listName) listName.textContent = company;
   if(fallback) fallback.textContent = first;
   if(headerName) headerName.textContent = company;
-  if(headerAvatar) headerAvatar.textContent = first;
+  if(headerFallback) headerFallback.textContent = first;
   renderCompanyMessages();
 }
 
+let chatBodyPreviousOverflow = "";
+
+function updateChatViewportHeight(){
+  if(!companyChatScreen) return;
+  const vv = window.visualViewport;
+  const height = vv ? vv.height : window.innerHeight;
+  companyChatScreen.style.setProperty("--chat-viewport-height", Math.round(height) + "px");
+
+  if(companyChatScreen.classList.contains("show")){
+    requestAnimationFrame(()=>{
+      if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+  }
+}
+
+window.visualViewport?.addEventListener("resize", updateChatViewportHeight);
+window.visualViewport?.addEventListener("scroll", updateChatViewportHeight);
+window.addEventListener("resize", updateChatViewportHeight);
+updateChatViewportHeight();
+
 function openCompanyChat(){
   renderCompanyMessages();
+  updateChatViewportHeight();
+
+  chatBodyPreviousOverflow = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+
   companyChatScreen?.classList.add("show");
   companyChatScreen?.setAttribute("aria-hidden","false");
-  setTimeout(()=>chatMessageInput?.focus(),180);
+
+  requestAnimationFrame(()=>{
+    if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
 }
+
 function closeCompanyChat(){
   companyChatScreen?.classList.remove("show");
   companyChatScreen?.setAttribute("aria-hidden","true");
   chatMessageInput?.blur();
+  document.body.style.overflow = chatBodyPreviousOverflow || "";
 }
 companyChatItem?.addEventListener("click", openCompanyChat);
 chatBackBtn?.addEventListener("click", closeCompanyChat);
@@ -2207,6 +2284,21 @@ chatMessageInput?.addEventListener("keydown", function(e){
 chatMessageInput?.addEventListener("input", function(){
   this.style.height = "auto";
   this.style.height = Math.min(this.scrollHeight,88) + "px";
+  requestAnimationFrame(()=>{
+    if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+});
+
+chatMessageInput?.addEventListener("focus", function(){
+  updateChatViewportHeight();
+  setTimeout(()=>{
+    updateChatViewportHeight();
+    if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+  },80);
+  setTimeout(()=>{
+    updateChatViewportHeight();
+    if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+  },300);
 });
 
 workspaceSearch?.addEventListener("input", function(){
@@ -2380,6 +2472,7 @@ function finishEdgeSwipe(){
       companyChatScreen.style.transition = "";
       companyChatScreen.style.transform = "";
       chatMessageInput?.blur();
+      document.body.style.overflow = chatBodyPreviousOverflow || "";
     },240);
   }else{
     companyChatScreen.style.transform = "translate3d(0,0,0)";
