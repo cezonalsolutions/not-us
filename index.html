@@ -2454,6 +2454,55 @@ body:has(.workspace-screen.show){
   font-size:9px;
 }
 
+
+
+/* ===== ANNOUNCEMENTS — CARD STYLE + UNREAD STATE ===== */
+.mobile-announcements-body{
+  padding:12px 13px calc(24px + env(safe-area-inset-bottom))!important;
+}
+.mobile-announcements-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.mobile-announcement-row{
+  width:100%;
+  padding:14px 14px 13px!important;
+  border:1px solid #e6ebe9!important;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(20,40,34,.035);
+  position:relative;
+}
+.mobile-announcement-row:last-child{border-bottom:1px solid #e6ebe9!important}
+.mobile-announcement-row.unread{
+  border-color:#d6e6e1!important;
+  box-shadow:0 3px 12px rgba(15,118,110,.055);
+}
+.mobile-announcement-unread-dot{
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#0f766e;
+}
+.mobile-announcement-row.read .mobile-announcement-unread-dot{display:none}
+.mobile-announcement-row-top{
+  padding-right:12px;
+}
+.mobile-announcement-audience{
+  margin-right:8px;
+}
+.mobile-announcement-meta{
+  margin-top:10px!important;
+}
+.mobile-announcement-meta .announcement-date-only{
+  color:#8f9995;
+  font-size:7.5px;
+}
+
 </style>
 
 <style>
@@ -7364,7 +7413,7 @@ window.openOutsideApp = function(rawUrl){
 
 <script>
 /* =========================================================
-   MOBILE ANNOUNCEMENTS — LIVE + TARGETED + BACK SWIPE
+   MOBILE ANNOUNCEMENTS — TARGETED + PERSISTENT UNREAD + CARDS
    ========================================================= */
 (function(){
   const announcementScreen=document.getElementById("mobileAnnouncementsScreen");
@@ -7374,8 +7423,10 @@ window.openOutsideApp = function(rawUrl){
   const announcementList=document.getElementById("mobileAnnouncementsList");
 
   let announcementRows=[];
+  let announcementReadIds=new Set();
   let announcementChannel=null;
   let announcementLoadPromise=null;
+  let announcementObserver=null;
 
   function escAnnouncement(v){
     return String(v??"")
@@ -7402,79 +7453,31 @@ window.openOutsideApp = function(rawUrl){
     const role=String(s.role||s.employee_role||"").trim();
 
     if(t==="hr"||t==="hr_member"){
-      return {
-        type:"hr",
-        id:String(s.hr_id||""),
-        branch_id:s.branch_id||null,
-        role:role||"HR"
-      };
+      return {type:"hr",id:String(s.hr_id||""),branch_id:s.branch_id||null,role:role||"HR"};
     }
-
     if(t==="manager"){
-      return {
-        type:"manager",
-        id:String(s.employee_id||""),
-        branch_id:s.branch_id||null,
-        role:role||"Manager"
-      };
+      return {type:"manager",id:String(s.employee_id||""),branch_id:s.branch_id||null,role:role||"Manager"};
     }
-
     if(t==="team_lead"||t==="teamlead"){
-      return {
-        type:"team_lead",
-        id:String(s.employee_id||""),
-        branch_id:s.branch_id||null,
-        role:role||"Team Lead"
-      };
+      return {type:"team_lead",id:String(s.employee_id||""),branch_id:s.branch_id||null,role:role||"Team Lead"};
     }
-
     if(t==="recruiter"){
-      return {
-        type:"recruiter",
-        id:String(s.employee_id||""),
-        branch_id:s.branch_id||null,
-        role:role||"Recruiter"
-      };
+      return {type:"recruiter",id:String(s.employee_id||""),branch_id:s.branch_id||null,role:role||"Recruiter"};
     }
-
     if(t==="it_admin"){
-      return {
-        type:"it_admin",
-        id:String(s.employee_id||""),
-        branch_id:s.branch_id||null,
-        role:role||"IT Supporter"
-      };
+      return {type:"it_admin",id:String(s.employee_id||""),branch_id:s.branch_id||null,role:role||"IT Supporter"};
     }
-
     if(t==="technical_supporter"){
-      return {
-        type:"technical_supporter",
-        id:String(s.employee_id||""),
-        branch_id:s.branch_id||null,
-        role:role||"Technical Supporter"
-      };
+      return {type:"technical_supporter",id:String(s.employee_id||""),branch_id:s.branch_id||null,role:role||"Technical Supporter"};
     }
-
     if(t==="employee"){
-      return {
-        type:"employee",
-        id:String(s.employee_id||""),
-        branch_id:s.branch_id||null,
-        role:role||"Employee"
-      };
+      return {type:"employee",id:String(s.employee_id||""),branch_id:s.branch_id||null,role:role||"Employee"};
     }
-
-    return {
-      type:"admin",
-      id:String(s.company_id||""),
-      branch_id:null,
-      role:"Administrator"
-    };
+    return {type:"admin",id:String(s.company_id||""),branch_id:null,role:"Administrator"};
   }
 
   function announcementAudienceLabel(row){
     if(row?.audience_label) return String(row.audience_label);
-
     const type=String(row?.audience_type||"company").toLowerCase();
     if(type==="company") return "Entire Company";
     if(type==="branch") return row?.target_name?`Branch · ${row.target_name}`:"Entire Branch";
@@ -7496,9 +7499,13 @@ window.openOutsideApp = function(rawUrl){
     });
   }
 
+  function unreadCount(){
+    return announcementRows.reduce((n,row)=>n+(announcementReadIds.has(String(row.id))?0:1),0);
+  }
+
   function paintAnnouncementBadge(){
     if(!announcementBadge) return;
-    const n=announcementRows.length;
+    const n=unreadCount();
     announcementBadge.textContent=n>99?"99+":String(n);
     announcementBadge.hidden=n<=0;
   }
@@ -7518,30 +7525,138 @@ window.openOutsideApp = function(rawUrl){
       return;
     }
 
-    announcementList.innerHTML=announcementRows.map(row=>`
-      <article class="mobile-announcement-row">
-        <div class="mobile-announcement-row-top">
-          <div class="mobile-announcement-title">
-            ${escAnnouncement(row.title||"Announcement")}
+    announcementList.innerHTML=announcementRows.map(row=>{
+      const isRead=announcementReadIds.has(String(row.id));
+      return `
+        <article
+          class="mobile-announcement-row ${isRead?"read":"unread"}"
+          data-announcement-id="${escAnnouncement(row.id)}"
+        >
+          <span class="mobile-announcement-unread-dot" aria-hidden="true"></span>
+
+          <div class="mobile-announcement-row-top">
+            <div class="mobile-announcement-title">
+              ${escAnnouncement(row.title||"Announcement")}
+            </div>
+            <span class="mobile-announcement-audience">
+              ${escAnnouncement(announcementAudienceLabel(row))}
+            </span>
           </div>
-          <span class="mobile-announcement-audience">
-            ${escAnnouncement(announcementAudienceLabel(row))}
-          </span>
-        </div>
 
-        <div class="mobile-announcement-description">
-          ${escAnnouncement(row.description||"")}
-        </div>
+          <div class="mobile-announcement-description">
+            ${escAnnouncement(row.description||"")}
+          </div>
 
-        <div class="mobile-announcement-meta">
-          <b>${escAnnouncement(row.creator_name||"Company")}</b>
-          <span>·</span>
-          <span>${escAnnouncement(announcementTime(row.created_at))}</span>
-        </div>
-      </article>
-    `).join("");
+          <div class="mobile-announcement-meta">
+            <span class="announcement-date-only">
+              ${escAnnouncement(announcementTime(row.created_at))}
+            </span>
+          </div>
+        </article>
+      `;
+    }).join("");
 
     paintAnnouncementBadge();
+    setupAnnouncementReadObserver();
+  }
+
+  async function loadAnnouncementReads(){
+    const s=getAnnouncementSession();
+    if(!s?.company_id || typeof db==="undefined") return;
+
+    const member=announcementMember();
+    if(!member.id) return;
+
+    try{
+      const {data,error}=await db.rpc("notus_list_my_announcement_reads",{
+        p_company_id:s.company_id,
+        p_member_type:member.type,
+        p_member_id:member.id
+      });
+      if(error) throw error;
+
+      announcementReadIds=new Set(
+        (Array.isArray(data)?data:[])
+          .map(x=>String(x.announcement_id||""))
+          .filter(Boolean)
+      );
+    }catch(err){
+      console.warn("Announcement reads load failed:",err);
+    }
+  }
+
+  async function markAnnouncementRead(id){
+    const key=String(id||"");
+    if(!key || announcementReadIds.has(key)) return;
+
+    const s=getAnnouncementSession();
+    if(!s?.company_id || typeof db==="undefined") return;
+
+    const member=announcementMember();
+    if(!member.id) return;
+
+    /* Optimistic UI: count reduces immediately when user actually sees the card. */
+    announcementReadIds.add(key);
+    const card=announcementList?.querySelector(`[data-announcement-id="${CSS.escape(key)}"]`);
+    if(card){
+      card.classList.remove("unread");
+      card.classList.add("read");
+    }
+    paintAnnouncementBadge();
+
+    try{
+      const {error}=await db.rpc("notus_mark_announcement_read",{
+        p_company_id:s.company_id,
+        p_announcement_id:key,
+        p_member_type:member.type,
+        p_member_id:member.id
+      });
+      if(error) throw error;
+    }catch(err){
+      /* Roll back if DB save fails so unread state stays truthful. */
+      announcementReadIds.delete(key);
+      if(card){
+        card.classList.remove("read");
+        card.classList.add("unread");
+      }
+      paintAnnouncementBadge();
+      console.error("Mark announcement read:",err);
+    }
+  }
+
+  function setupAnnouncementReadObserver(){
+    if(announcementObserver){
+      announcementObserver.disconnect();
+      announcementObserver=null;
+    }
+
+    if(!announcementScreen?.classList.contains("show")) return;
+
+    announcementObserver=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(!entry.isIntersecting || entry.intersectionRatio<0.65) return;
+        const id=entry.target?.dataset?.announcementId;
+        if(id && !announcementReadIds.has(String(id))){
+          /* Short delay prevents accidental fast scroll from counting as read. */
+          const el=entry.target;
+          clearTimeout(el.__readTimer);
+          el.__readTimer=setTimeout(()=>{
+            const rect=el.getBoundingClientRect();
+            const visible=Math.min(rect.bottom,window.innerHeight)-Math.max(rect.top,0);
+            if(visible >= Math.min(rect.height*.65,110)){
+              markAnnouncementRead(id);
+            }
+          },450);
+        }
+      });
+    },{
+      root:document.getElementById("mobileAnnouncementsBody"),
+      threshold:[0.65]
+    });
+
+    announcementList?.querySelectorAll(".mobile-announcement-row.unread").forEach(el=>{
+      announcementObserver.observe(el);
+    });
   }
 
   async function loadMobileAnnouncements(){
@@ -7558,13 +7673,16 @@ window.openOutsideApp = function(rawUrl){
         const member=announcementMember();
         if(!member.id) return [];
 
-        const {data,error}=await db.rpc("notus_list_my_announcements",{
-          p_company_id:s.company_id,
-          p_member_type:member.type,
-          p_member_id:member.id,
-          p_branch_id:member.branch_id||null,
-          p_role:member.role||""
-        });
+        const [{data,error}]=await Promise.all([
+          db.rpc("notus_list_my_announcements",{
+            p_company_id:s.company_id,
+            p_member_type:member.type,
+            p_member_id:member.id,
+            p_branch_id:member.branch_id||null,
+            p_role:member.role||""
+          }),
+          loadAnnouncementReads()
+        ]);
 
         if(error) throw error;
 
@@ -7594,17 +7712,25 @@ window.openOutsideApp = function(rawUrl){
   }
   window.loadMobileAnnouncements=loadMobileAnnouncements;
 
-  function openMobileAnnouncements(){
+  async function openMobileAnnouncements(){
     if(!announcementScreen) return;
-    closeProfilePanel?.();
+    try{
+      if(typeof closeProfilePanel==="function") closeProfilePanel();
+    }catch(_){}
+
     announcementScreen.classList.add("show");
     announcementScreen.setAttribute("aria-hidden","false");
-    loadMobileAnnouncements();
+    await loadMobileAnnouncements();
+    setupAnnouncementReadObserver();
   }
   window.openMobileAnnouncements=openMobileAnnouncements;
 
   function closeMobileAnnouncements(){
     if(!announcementScreen) return;
+    if(announcementObserver){
+      announcementObserver.disconnect();
+      announcementObserver=null;
+    }
     announcementScreen.style.transition="";
     announcementScreen.style.transform="";
     announcementScreen.classList.remove("show");
@@ -7697,10 +7823,7 @@ window.openOutsideApp = function(rawUrl){
     if(shouldClose){
       announcementScreen.style.transform="translate3d(100%,0,0)";
       setTimeout(()=>{
-        announcementScreen.classList.remove("show");
-        announcementScreen.setAttribute("aria-hidden","true");
-        announcementScreen.style.transition="";
-        announcementScreen.style.transform="";
+        closeMobileAnnouncements();
       },245);
     }else{
       announcementScreen.style.transform="translate3d(0,0,0)";
@@ -7716,7 +7839,6 @@ window.openOutsideApp = function(rawUrl){
   announcementScreen?.addEventListener("touchend",finishAnnouncementSwipe,{passive:true});
   announcementScreen?.addEventListener("touchcancel",finishAnnouncementSwipe,{passive:true});
 
-  /* Initial load after login/session restore. */
   setTimeout(()=>{
     const s=getAnnouncementSession();
     if(s?.company_id){
