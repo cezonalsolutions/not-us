@@ -1193,6 +1193,35 @@ body{
 .chat-item-name{font-family:"Outfit",sans-serif;font-size:15px;font-weight:600;color:#171717;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chat-item-time{font-size:9px;color:#8f9895;flex:0 0 auto}
 .chat-item-preview{margin-top:5px;font-size:11px;color:#7e8784;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-item-preview-row{
+  margin-top:5px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.chat-item-preview-row .chat-item-preview{
+  margin-top:0;
+  flex:1;
+  min-width:0;
+}
+.chat-unread-badge{
+  min-width:15px;
+  height:15px;
+  padding:0 4px;
+  border-radius:999px;
+  background:#171717;
+  color:#fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  font-family:"Inter",sans-serif;
+  font-size:7px;
+  line-height:1;
+  font-weight:800;
+}
+.chat-unread-badge[hidden]{display:none!important;}
 
 /* =========================
    CHAT SCREEN — WHATSAPP-LIKE
@@ -2296,22 +2325,18 @@ function getCurrentMobileAttendanceMember(session){
 
   const type = String(session.user_type || "").toLowerCase().trim();
 
-  if(type === "hr" || type === "hr_member"){
+  if(session.hr_id || type === "hr" || type === "hr_member"){
     return {
       member_type:"hr",
       member_id:session.hr_id || session.member_id || session.id
     };
   }
 
-  if(
-    type === "employee" ||
-    type === "team_lead" ||
-    type === "teamlead" ||
-    type === "manager" ||
-    type === "recruiter" ||
-    type === "it_admin" ||
-    type === "technical_supporter"
-  ){
+  /* All employee-side roles/designations use the same employee attendance RPC. */
+  if(session.employee_id || [
+    "employee","team_lead","teamlead","manager","recruiter",
+    "it_admin","technical_supporter"
+  ].includes(type)){
     return {
       member_type:"employee",
       member_id:
@@ -2356,6 +2381,35 @@ async function loadMyWorkspaceStatus(){
   }
 }
 
+let notusWorkspaceStatusSyncBusy = false;
+let notusWorkspaceStatusTimer = null;
+
+async function syncMyWorkspaceStatusLive(){
+  if(notusWorkspaceStatusSyncBusy) return;
+  notusWorkspaceStatusSyncBusy = true;
+  try{
+    await loadMyWorkspaceStatus();
+  }finally{
+    notusWorkspaceStatusSyncBusy = false;
+  }
+}
+
+function startMyWorkspaceStatusLive(){
+  if(notusWorkspaceStatusTimer){
+    clearInterval(notusWorkspaceStatusTimer);
+  }
+
+  syncMyWorkspaceStatusLive();
+
+  /* If status changes from another device/session,
+     this screen updates automatically without page refresh. */
+  notusWorkspaceStatusTimer = setInterval(()=>{
+    if(document.visibilityState === "visible"){
+      syncMyWorkspaceStatusLive();
+    }
+  },2000);
+}
+
 async function saveMyWorkspaceStatus(status){
   const session = window.notusSession || getNotusSession?.() || {};
   const member = getCurrentMobileAttendanceMember(session);
@@ -2374,6 +2428,9 @@ async function saveMyWorkspaceStatus(status){
     if(error) throw error;
 
     paintWorkspaceStatus(status,statusLabels[status]);
+
+    /* Verify DB value shortly after save; no page refresh. */
+    setTimeout(syncMyWorkspaceStatusLive,250);
     return true;
   }catch(err){
     console.error("Workspace status save failed:",err);
@@ -3374,6 +3431,69 @@ async function enrichPeopleAttendance(items){
   return list;
 }
 
+function directUnreadCount(row){
+  if(!row) return 0;
+
+  const me = currentChatIdentity();
+
+  /* Current open chat is being read now — never show unread 1 here. */
+  if(activeDirectPeer){
+    const pair = canonicalPair(me,activeDirectPeer);
+    if(
+      row.user_a_key === pair.user_a_key &&
+      row.user_b_key === pair.user_b_key
+    ){
+      return 0;
+    }
+  }
+
+  const raw = row.user_a_key === me.key
+    ? row.user_a_unread
+    : row.user_b_key === me.key
+      ? row.user_b_unread
+      : 0;
+
+  const n = Number(raw || 0);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+}
+
+function setDirectUnreadZeroLocal(row){
+  if(!row) return row;
+  const me = currentChatIdentity();
+
+  if(row.user_a_key === me.key) row.user_a_unread = 0;
+  if(row.user_b_key === me.key) row.user_b_unread = 0;
+
+  return row;
+}
+
+async function markDirectChatRead(row){
+  if(!row) return row;
+
+  const session = directChatSession || window.notusSession || {};
+  const me = currentChatIdentity(session);
+
+  try{
+    /* Remove badge immediately. DB reset follows. */
+    setDirectUnreadZeroLocal(row);
+
+    const {data,error} = await db.rpc("notus_mark_direct_chat_read",{
+      p_company_id:session.company_id,
+      p_user_a_key:row.user_a_key,
+      p_user_b_key:row.user_b_key,
+      p_reader_key:me.key
+    });
+
+    if(error) throw error;
+
+    const fresh = Array.isArray(data) ? data[0] : data;
+    return fresh || row;
+  }catch(err){
+    console.warn("Mark direct chat read failed:",err);
+    return row;
+  }
+}
+
 function renderPeopleList(people, mode="search"){
   if(!workspaceChatList) return;
   workspaceChatList.innerHTML = "";
@@ -3452,7 +3572,25 @@ function renderPeopleList(people, mode="search"){
     statusLine.appendChild(statusText);
 
     body.appendChild(top);
-    body.appendChild(preview);
+
+    if(mode === "recent"){
+      const previewRow = document.createElement("div");
+      previewRow.className = "chat-item-preview-row";
+      previewRow.appendChild(preview);
+
+      const unread = directUnreadCount(item);
+      if(unread > 0){
+        const badge = document.createElement("span");
+        badge.className = "chat-unread-badge";
+        badge.textContent = String(unread);
+        previewRow.appendChild(badge);
+      }
+
+      body.appendChild(previewRow);
+    }else{
+      body.appendChild(preview);
+    }
+
     body.appendChild(statusLine);
     btn.appendChild(body);
 
@@ -3998,6 +4136,17 @@ async function openDirectChat(peer){
   try{
     activeDirectChat = await findConversation(peer);
     renderDirectMessages(activeDirectChat);
+
+    if(activeDirectChat){
+      const me = currentChatIdentity();
+      const rawUnread = activeDirectChat.user_a_key === me.key
+        ? Number(activeDirectChat.user_a_unread || 0)
+        : Number(activeDirectChat.user_b_unread || 0);
+
+      if(rawUnread > 0){
+        activeDirectChat = await markDirectChatRead(activeDirectChat);
+      }
+    }
   }catch(err){
     console.error("Open chat failed:",err);
     if(chatMessages){
@@ -4106,7 +4255,7 @@ async function sendCompanyMessage(){
       renderDirectMessages(row);
     }
 
-    loadRecentDirectChats();
+    /* Realtime will update the list; avoid full chat-list refresh here. */
   }catch(err){
     console.error("Send message failed:",err);
     alert("Message not sent. Please check chat SQL / policies.");
@@ -4220,21 +4369,38 @@ function startDirectChatRealtime(){
           table:"notus_direct_chats",
           filter:`company_id=eq.${session.company_id}`
         },
-        payload=>{
+        async payload=>{
           const row = payload.new || payload.old || {};
           const involvesMe = row.user_a_key === me.key || row.user_b_key === me.key;
           if(!involvesMe) return;
 
           if(activeDirectPeer){
             const pair = canonicalPair(me,activeDirectPeer);
-            if(row.user_a_key === pair.user_a_key && row.user_b_key === pair.user_b_key){
-              if(payload.new){
-                activeDirectChat = payload.new;
-                renderDirectMessages(payload.new);
+
+            if(
+              row.user_a_key === pair.user_a_key &&
+              row.user_b_key === pair.user_b_key &&
+              payload.new
+            ){
+              const rawUnread = row.user_a_key === me.key
+                ? Number(row.user_a_unread || 0)
+                : Number(row.user_b_unread || 0);
+
+              activeDirectChat = payload.new;
+
+              /* Chat is already open. Show message instantly and do not flash unread 1. */
+              setDirectUnreadZeroLocal(activeDirectChat);
+              renderDirectMessages(activeDirectChat);
+
+              if(rawUnread > 0){
+                activeDirectChat = await markDirectChatRead(payload.new);
               }
+              return;
             }
           }
 
+          /* Closed chat: refresh recent list so persistent DB unread badge
+             (1,2,3...100) appears automatically. */
           if(!safeText(workspaceSearch?.value)){
             loadRecentDirectChats();
           }
@@ -4259,8 +4425,20 @@ async function initDirectChatForSession(session){
   ]);
 
   startDirectChatRealtime();
+  startMyWorkspaceStatusLive();
 }
 
+
+
+window.addEventListener("focus",()=>{
+  syncMyWorkspaceStatusLive();
+});
+
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState === "visible"){
+    syncMyWorkspaceStatusLive();
+  }
+});
 
 /* Smooth iPhone-style pull to refresh */
 function resetPullRefresh(){
