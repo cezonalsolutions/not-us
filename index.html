@@ -1786,6 +1786,205 @@ body:has(.workspace-screen.show){
 .mobile-leave-submit:disabled{opacity:.55}
 
 </style>
+
+<style>
+/* =========================================================
+   FINAL MOBILE LEAVE UI — CLEAN + NO HORIZONTAL SCROLL
+   ========================================================= */
+html,body{
+  max-width:100%!important;
+  overflow-x:hidden!important;
+}
+
+.mobile-leave-screen{
+  width:100%!important;
+  max-width:100vw!important;
+  overflow:hidden!important;
+  background:#f6f8f7!important;
+  overscroll-behavior-x:none!important;
+  touch-action:pan-y!important;
+}
+
+.mobile-leave-head{
+  width:100%!important;
+  min-width:0!important;
+  padding:max(16px,env(safe-area-inset-top)) 14px 13px!important;
+  background:#fff!important;
+  box-shadow:0 2px 10px rgba(20,40,34,.035)!important;
+}
+
+.mobile-leave-back{
+  flex:0 0 38px!important;
+  border-radius:11px!important;
+}
+.mobile-leave-back:active{background:#f1f4f3!important}
+
+.mobile-leave-head-copy{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.mobile-leave-head-copy h2{
+  font-size:17px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.mobile-leave-head-copy p{
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+.mobile-leave-apply{
+  flex:0 0 auto!important;
+  max-width:125px!important;
+  padding:0 11px!important;
+  height:38px!important;
+  border-radius:11px!important;
+  white-space:nowrap!important;
+}
+
+.mobile-leave-body{
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:hidden!important;
+  padding:14px 12px calc(24px + env(safe-area-inset-bottom))!important;
+}
+
+.mobile-leave-card{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  border-radius:16px!important;
+  overflow:hidden!important;
+}
+
+.mobile-leave-card-head{
+  padding:0 13px!important;
+}
+
+.mobile-leave-item{
+  width:100%!important;
+  min-width:0!important;
+  overflow:hidden!important;
+  padding:14px 13px!important;
+}
+
+.mobile-leave-item-top,
+.mobile-leave-meta{
+  width:100%!important;
+  min-width:0!important;
+}
+
+.mobile-leave-date,
+.mobile-leave-time,
+.mobile-leave-meta-box,
+.mobile-leave-meta-box b,
+.mobile-leave-reason{
+  min-width:0!important;
+  max-width:100%!important;
+  overflow-wrap:anywhere!important;
+  word-break:break-word!important;
+}
+
+.mobile-leave-meta{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+}
+
+.mobile-leave-meta-box{
+  width:100%!important;
+}
+
+.mobile-leave-overlay{
+  width:100%!important;
+  max-width:100vw!important;
+  overflow:hidden!important;
+}
+
+.mobile-leave-sheet{
+  width:100%!important;
+  max-width:100vw!important;
+  border-radius:24px 24px 0 0!important;
+  overflow:hidden!important;
+}
+
+.mobile-leave-form{
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:hidden!important;
+  padding:17px 14px calc(20px + env(safe-area-inset-bottom))!important;
+}
+
+.mobile-leave-field,
+.mobile-leave-field input,
+.mobile-leave-field select,
+.mobile-leave-field textarea{
+  min-width:0!important;
+  max-width:100%!important;
+}
+
+.mobile-leave-field input,
+.mobile-leave-field select{
+  height:48px!important;
+  border-radius:12px!important;
+  background:#fbfcfc!important;
+}
+
+.mobile-leave-field textarea{
+  min-height:105px!important;
+  border-radius:12px!important;
+  background:#fbfcfc!important;
+}
+
+.mobile-leave-duration{
+  background:#f1f5f4!important;
+  color:#0f766e!important;
+  border-color:#dfe9e5!important;
+}
+
+.mobile-leave-submit{
+  height:49px!important;
+  border-radius:13px!important;
+  margin-top:4px!important;
+}
+
+/* swipe-back edge hint */
+.mobile-leave-screen::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:4px;
+  background:transparent;
+  z-index:2;
+  pointer-events:none;
+}
+
+@media(max-width:390px){
+  .mobile-leave-head{
+    gap:7px!important;
+    padding-left:10px!important;
+    padding-right:10px!important;
+  }
+  .mobile-leave-apply{
+    max-width:112px!important;
+    padding:0 9px!important;
+    font-size:9px!important;
+  }
+  .mobile-leave-head-copy h2{font-size:16px!important}
+  .mobile-leave-head-copy p{font-size:8px!important}
+}
+
+@media(max-width:345px){
+  .mobile-leave-head-copy p{display:none!important}
+  .mobile-leave-apply{
+    max-width:104px!important;
+    padding:0 8px!important;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -5388,6 +5587,112 @@ function hideStatus(){
       loadMobileLeaveRequests();
     }
   });
+})();
+</script>
+
+
+<script>
+/* =========================================================
+   MOBILE LEAVE — iOS/Android EDGE SWIPE BACK
+   Swipe from left edge toward right to close Leave.
+   ========================================================= */
+(function(){
+  const screen=document.getElementById("mobileLeaveScreen");
+  if(!screen) return;
+
+  let startX=0;
+  let startY=0;
+  let currentX=0;
+  let tracking=false;
+  let horizontal=false;
+
+  const EDGE=34;
+  const TRIGGER=78;
+
+  function closeLeaveBySwipe(){
+    screen.style.transition="";
+    screen.style.transform="";
+    screen.classList.remove("show");
+    screen.setAttribute("aria-hidden","true");
+  }
+
+  screen.addEventListener("touchstart",e=>{
+    if(!screen.classList.contains("show")) return;
+    if(!e.touches || e.touches.length!==1) return;
+
+    const t=e.touches[0];
+    if(t.clientX>EDGE) return;
+
+    startX=t.clientX;
+    startY=t.clientY;
+    currentX=startX;
+    tracking=true;
+    horizontal=false;
+  },{passive:true});
+
+  screen.addEventListener("touchmove",e=>{
+    if(!tracking || !e.touches || e.touches.length!==1) return;
+
+    const t=e.touches[0];
+    const dx=t.clientX-startX;
+    const dy=t.clientY-startY;
+
+    if(!horizontal){
+      if(Math.abs(dx)<8 && Math.abs(dy)<8) return;
+
+      if(Math.abs(dy)>Math.abs(dx)){
+        tracking=false;
+        return;
+      }
+
+      horizontal=true;
+    }
+
+    if(dx<=0) return;
+
+    currentX=t.clientX;
+
+    screen.style.transition="none";
+    screen.style.transform=`translate3d(${Math.min(dx,window.innerWidth)}px,0,0)`;
+  },{passive:true});
+
+  screen.addEventListener("touchend",()=>{
+    if(!tracking) return;
+
+    const dx=currentX-startX;
+
+    if(horizontal && dx>=TRIGGER){
+      closeLeaveBySwipe();
+    }else{
+      screen.style.transition="transform .22s cubic-bezier(.2,.8,.2,1)";
+      screen.style.transform="translate3d(0,0,0)";
+
+      setTimeout(()=>{
+        if(screen.classList.contains("show")){
+          screen.style.transition="";
+          screen.style.transform="";
+        }
+      },230);
+    }
+
+    tracking=false;
+    horizontal=false;
+  },{passive:true});
+
+  screen.addEventListener("touchcancel",()=>{
+    if(!tracking) return;
+
+    screen.style.transition="transform .22s cubic-bezier(.2,.8,.2,1)";
+    screen.style.transform="translate3d(0,0,0)";
+
+    setTimeout(()=>{
+      screen.style.transition="";
+      screen.style.transform="";
+    },230);
+
+    tracking=false;
+    horizontal=false;
+  },{passive:true});
 })();
 </script>
 
