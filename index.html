@@ -1384,6 +1384,15 @@ body{
   border-radius:50%!important;
 }
 
+
+/* PROFILE DETAIL + QUICK MENU */
+.profile-quick-menu{margin:10px 16px 0;border-top:1px solid #eef1f0}
+.profile-quick-item{width:100%;min-height:52px;display:flex;align-items:center;gap:12px;padding:0;border:0;border-bottom:1px solid #eef1f0;background:#fff;text-align:left;cursor:pointer}
+.profile-quick-item:active{background:#f7faf9}
+.profile-quick-icon{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:#f2f6f5;color:#0f766e;flex:0 0 34px;font-size:14px}
+.profile-quick-text{flex:1;font-family:"Inter",sans-serif;font-size:13px;font-weight:600;color:#202322}
+.profile-quick-arrow{font-size:11px;color:#a6aeab}
+
 </style>
 </head>
 
@@ -1741,9 +1750,17 @@ body{
   <div class="profile-details">
     <div class="profile-detail-item"><div class="profile-detail-icon"><i class="fa-solid fa-building"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Company</div><div class="profile-detail-value" id="profileCompanyName">—</div></div></div>
     <div class="profile-detail-item"><div class="profile-detail-icon"><i class="fa-solid fa-envelope"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Gmail</div><div class="profile-detail-value" id="profileUserGmail">—</div></div></div>
-    <div class="profile-detail-item" id="profileBranchRow"><div class="profile-detail-icon"><i class="fa-solid fa-location-dot"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Branch</div><div class="profile-detail-value" id="profileBranchName">—</div></div></div>
-    
+    <div class="profile-detail-item" id="profileBranchRow"><div class="profile-detail-icon"><i class="fa-solid fa-code-branch"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Branch</div><div class="profile-detail-value" id="profileBranchName">—</div></div></div>
+    <div class="profile-detail-item" id="profileLocationRow"><div class="profile-detail-icon"><i class="fa-solid fa-location-dot"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Location</div><div class="profile-detail-value" id="profileLocationName">—</div></div></div>
   </div>
+
+  <div class="profile-quick-menu">
+    <button class="profile-quick-item" type="button" data-profile-action="leave"><span class="profile-quick-icon"><i class="fa-regular fa-calendar-check"></i></span><span class="profile-quick-text">Leave</span><i class="fa-solid fa-chevron-right profile-quick-arrow"></i></button>
+    <button class="profile-quick-item" type="button" data-profile-action="payslip"><span class="profile-quick-icon"><i class="fa-regular fa-file-lines"></i></span><span class="profile-quick-text">Pay Slip</span><i class="fa-solid fa-chevron-right profile-quick-arrow"></i></button>
+    <button class="profile-quick-item" type="button" data-profile-action="meetings"><span class="profile-quick-icon"><i class="fa-solid fa-video"></i></span><span class="profile-quick-text">Upcoming Meetings</span><i class="fa-solid fa-chevron-right profile-quick-arrow"></i></button>
+    <button class="profile-quick-item" type="button" data-profile-action="help"><span class="profile-quick-icon"><i class="fa-regular fa-circle-question"></i></span><span class="profile-quick-text">Help &amp; Support</span><i class="fa-solid fa-chevron-right profile-quick-arrow"></i></button>
+  </div>
+
   <div class="profile-panel-footer"><button class="profile-logout-btn" id="profileLogoutBtn" type="button"><i class="fa-solid fa-arrow-right-from-bracket"></i>Logout</button></div>
 </aside>
 
@@ -2420,10 +2437,48 @@ document.addEventListener("visibilitychange", function(){
 /* PROFILE SIDE NAV */
 const workspaceProfileBtn=document.getElementById("workspaceProfileBtn");const workspaceProfilePanel=document.getElementById("workspaceProfilePanel");const workspaceProfileOverlay=document.getElementById("workspaceProfileOverlay");const profilePanelClose=document.getElementById("profilePanelClose");const profileLogoutBtn=document.getElementById("profileLogoutBtn");
 function roleDisplayName(session){const directRole=String(session?.role||"").trim();if(directRole)return directRole;const map={company_admin:"Company Admin",hr:"HR",team_lead:"Team Lead",manager:"Manager",recruiter:"Recruiter",it_admin:"IT Administrator",technical_supporter:"Technical Supporter",employee:"Employee"};return map[session?.user_type]||"Employee"}
-function fillProfilePanel(session){const fullName=String(session?.full_name||session?.name||(session?.user_type==="company_admin"?"Company Admin":"User")).trim();const companyName=formatCompanyName(session?.company_name||"Company");const roleName=roleDisplayName(session);const gmail=String(session?.gmail||"—");const branch=String(session?.branch_name||session?.branch_location||"—");document.getElementById("profileUserName").textContent=fullName;document.getElementById("profileUserRole").textContent=roleName;document.getElementById("profileCompanyName").textContent=companyName;document.getElementById("profileUserGmail").textContent=gmail;document.getElementById("profileBranchName").textContent=branch;const avatarFallback=document.getElementById("sideUserProfileFallback");if(avatarFallback&&!avatarFallback.querySelector("img"))avatarFallback.textContent=(fullName[0]||companyName[0]||"U").toUpperCase();const branchRow=document.getElementById("profileBranchRow");if(branchRow)branchRow.style.display=session?.branch_name||session?.branch_location?"flex":"none"}
+function fillProfilePanel(session){
+  const fullName=String(session?.full_name||session?.name||(session?.user_type==="company_admin"?"Company Admin":"User")).trim();
+  const companyName=formatCompanyName(session?.company_name||"Company");
+  const roleName=roleDisplayName(session);
+  const gmail=String(session?.gmail||session?.email||"—").trim();
+
+  const branch=String(session?.branch_name||session?.branch||session?.assigned_branch||"—").trim();
+  const location=String(session?.branch_location||session?.location||session?.city||session?.address||"—").trim();
+
+  document.getElementById("profileUserName").textContent=fullName;
+  document.getElementById("profileUserRole").textContent=roleName;
+  document.getElementById("profileCompanyName").textContent=companyName;
+  document.getElementById("profileUserGmail").textContent=gmail;
+  document.getElementById("profileBranchName").textContent=branch;
+  document.getElementById("profileLocationName").textContent=location;
+
+  const avatarFallback=document.getElementById("sideUserProfileFallback");
+  if(avatarFallback&&!avatarFallback.querySelector("img"))
+    avatarFallback.textContent=(fullName[0]||companyName[0]||"U").toUpperCase();
+
+  const branchRow=document.getElementById("profileBranchRow");
+  if(branchRow)branchRow.style.display=branch!=="—"?"flex":"none";
+
+  const locationRow=document.getElementById("profileLocationRow");
+  if(locationRow)locationRow.style.display=location!=="—"?"flex":"none";
+}
 function openProfilePanel(){fillProfilePanel(window.notusSession||{});if(typeof loadCurrentUserProfilePhoto==="function")loadCurrentUserProfilePhoto();workspaceProfilePanel?.classList.add("show");workspaceProfileOverlay?.classList.add("show");workspaceProfilePanel?.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}
 function closeProfilePanel(){workspaceProfilePanel?.classList.remove("show");workspaceProfileOverlay?.classList.remove("show");workspaceProfilePanel?.setAttribute("aria-hidden","true");document.body.style.overflow=""}
 workspaceProfileBtn?.addEventListener("click",e=>{e.stopPropagation();openProfilePanel()});profilePanelClose?.addEventListener("click",closeProfilePanel);workspaceProfileOverlay?.addEventListener("click",closeProfilePanel);profileLogoutBtn?.addEventListener("click",()=>{try{localStorage.removeItem("notus_company_session");localStorage.removeItem("notus_workspace_status")}catch(e){}window.notusSession=null;closeProfilePanel();document.getElementById("workspaceScreen")?.classList.remove("show");const loginPage=document.querySelector(".page");if(loginPage)loginPage.style.display="flex";if(email)email.value="";if(password)password.value="";hideStatus()});
+
+
+document.querySelectorAll("[data-profile-action]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const action=btn.dataset.profileAction;
+    window.dispatchEvent(new CustomEvent("notusProfileAction",{detail:{action,session:window.notusSession||null}}));
+
+    if(action==="leave") alert("Leave");
+    else if(action==="payslip") alert("Pay Slip");
+    else if(action==="meetings") alert("Upcoming Meetings");
+    else if(action==="help") alert("Help & Support");
+  });
+});
 
 /* ================================
    OPEN MAIN WORKSPACE
