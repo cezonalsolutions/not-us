@@ -1651,6 +1651,140 @@ body:has(.workspace-screen.show){
   }
 }
 
+
+/* =========================
+   MOBILE LEAVE SCREEN
+========================= */
+.mobile-leave-screen{
+  position:fixed;
+  inset:0;
+  z-index:700;
+  display:flex;
+  flex-direction:column;
+  background:#f5f7f8;
+  transform:translateX(100%);
+  visibility:hidden;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s ease;
+}
+.mobile-leave-screen.show{
+  transform:translateX(0);
+  visibility:visible;
+}
+.mobile-leave-head{
+  flex:0 0 auto;
+  min-height:94px;
+  padding:max(18px,env(safe-area-inset-top)) 16px 14px;
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+  background:#fff;
+  border-bottom:1px solid #e7ebe9;
+}
+.mobile-leave-back{
+  width:38px;height:38px;border:0;background:transparent;color:#303634;
+  display:grid;place-items:center;font-size:17px;
+}
+.mobile-leave-head-copy{min-width:0;flex:1;padding-bottom:4px}
+.mobile-leave-head-copy h2{
+  margin:0;font-family:"Outfit",sans-serif;font-size:18px;font-weight:600;color:#171717;
+}
+.mobile-leave-head-copy p{margin:3px 0 0;font-size:9px;color:#8a9390}
+.mobile-leave-apply{
+  height:38px;border:0;border-radius:11px;background:#171717;color:#fff;
+  padding:0 13px;display:flex;align-items:center;gap:7px;
+  font-family:"Inter",sans-serif;font-size:10px;font-weight:700;
+}
+.mobile-leave-body{
+  flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px 14px calc(22px + env(safe-area-inset-bottom));
+}
+.mobile-leave-card{
+  background:#fff;border:1px solid #e7ebe9;border-radius:14px;overflow:hidden;
+}
+.mobile-leave-card-head{
+  min-height:48px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid #eef1ef;
+}
+.mobile-leave-card-head b{font-size:11px;color:#202523}
+.mobile-leave-card-head span{font-size:8px;color:#919995}
+.mobile-leave-empty{
+  min-height:210px;padding:28px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;color:#929a97;
+}
+.mobile-leave-empty i{font-size:22px;margin-bottom:10px;color:#aeb6b2}
+.mobile-leave-empty b{font-size:11px;color:#3b423f}
+.mobile-leave-empty span{font-size:8.5px;margin-top:5px;line-height:1.5}
+
+.mobile-leave-item{
+  padding:14px;
+  border-bottom:1px solid #eef1ef;
+}
+.mobile-leave-item:last-child{border-bottom:0}
+.mobile-leave-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.mobile-leave-date{font-size:12px;font-weight:700;color:#1c211f}
+.mobile-leave-time{font-size:8.5px;color:#7d8783;margin-top:4px}
+.mobile-leave-status{
+  flex:0 0 auto;padding:5px 8px;border-radius:999px;font-size:7px;font-weight:800;text-transform:uppercase;
+}
+.mobile-leave-status.upcoming{background:#eef2ff;color:#5267c9}
+.mobile-leave-status.completed{background:#eef7f0;color:#4f765b}
+.mobile-leave-status.cancelled{background:#fff1f1;color:#b24b4b}
+.mobile-leave-meta{
+  margin-top:11px;display:grid;grid-template-columns:1fr 1fr;gap:8px;
+}
+.mobile-leave-meta-box{
+  min-width:0;border:1px solid #edf0ef;border-radius:10px;padding:10px;background:#fafbfb;
+}
+.mobile-leave-meta-box span{display:block;font-size:7px;color:#969e9a;margin-bottom:4px}
+.mobile-leave-meta-box b{display:block;font-size:9px;color:#333936;word-break:break-word}
+.mobile-leave-reason{margin-top:8px}
+.mobile-leave-cancel{
+  margin-top:11px;width:100%;height:37px;border:1px solid #eddede;border-radius:10px;
+  background:#fff7f7;color:#b04b4b;font-family:"Inter",sans-serif;font-size:9px;font-weight:700;
+}
+
+/* APPLY LEAVE SHEET */
+.mobile-leave-overlay{
+  position:fixed;inset:0;z-index:760;background:rgba(17,24,39,.28);
+  display:none;align-items:flex-end;
+}
+.mobile-leave-overlay.show{display:flex}
+.mobile-leave-sheet{
+  width:100%;max-height:92dvh;background:#fff;border-radius:22px 22px 0 0;
+  overflow:hidden;display:flex;flex-direction:column;
+}
+.mobile-leave-sheet-head{
+  flex:0 0 auto;min-height:57px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid #edf0ef;
+}
+.mobile-leave-sheet-head h3{font-family:"Outfit",sans-serif;font-size:16px;color:#171717}
+.mobile-leave-sheet-close{width:34px;height:34px;border:0;background:#f4f6f5;border-radius:10px;color:#5f6965}
+.mobile-leave-form{
+  overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(18px + env(safe-area-inset-bottom));
+}
+.mobile-leave-field{margin-bottom:13px}
+.mobile-leave-field label{display:block;margin-bottom:6px;font-size:9px;font-weight:700;color:#4b5551}
+.mobile-leave-field input,
+.mobile-leave-field select,
+.mobile-leave-field textarea{
+  width:100%;border:1px solid #dfe5e2;border-radius:11px;outline:none;background:#fff;
+  font-family:"Inter",sans-serif;font-size:12px;color:#202523;
+}
+.mobile-leave-field input,.mobile-leave-field select{height:46px;padding:0 12px}
+.mobile-leave-field textarea{min-height:96px;padding:12px;resize:vertical;line-height:1.5}
+.mobile-leave-field input:focus,
+.mobile-leave-field select:focus,
+.mobile-leave-field textarea:focus{border-color:#0f766e}
+.mobile-leave-note{margin-top:5px;font-size:8px;color:#98a09d;line-height:1.45}
+.mobile-leave-duration{
+  background:#f5f7f6!important;font-weight:700!important;color:#303633!important;
+}
+.mobile-leave-submit{
+  width:100%;height:47px;border:0;border-radius:12px;background:#171717;color:#fff;
+  font-family:"Inter",sans-serif;font-size:11px;font-weight:700;
+}
+.mobile-leave-submit:disabled{opacity:.55}
+
 </style>
 </head>
 
@@ -1994,6 +2128,95 @@ body:has(.workspace-screen.show){
     </button>
   </div>
 </section>
+
+
+<section class="mobile-leave-screen" id="mobileLeaveScreen" aria-hidden="true">
+  <header class="mobile-leave-head">
+    <button class="mobile-leave-back" id="mobileLeaveBack" type="button" aria-label="Back">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <div class="mobile-leave-head-copy">
+      <h2>Leave</h2>
+      <p>Manage your leave requests</p>
+    </div>
+    <button class="mobile-leave-apply" id="mobileApplyLeaveBtn" type="button">
+      <i class="fa-solid fa-plus"></i>
+      Apply Leave
+    </button>
+  </header>
+
+  <div class="mobile-leave-body">
+    <div class="mobile-leave-card">
+      <div class="mobile-leave-card-head">
+        <b>My Leave Requests</b>
+        <span id="mobileLeaveCount">0 requests</span>
+      </div>
+      <div id="mobileLeaveList">
+        <div class="mobile-leave-empty">
+          <i class="fa-regular fa-calendar-minus"></i>
+          <b>No leave requests yet</b>
+          <span>Tap Apply Leave to create your first request.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="mobile-leave-overlay" id="mobileLeaveOverlay" aria-hidden="true">
+  <div class="mobile-leave-sheet">
+    <div class="mobile-leave-sheet-head">
+      <h3>Apply Leave</h3>
+      <button class="mobile-leave-sheet-close" id="mobileLeaveSheetClose" type="button" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <form class="mobile-leave-form" id="mobileLeaveForm">
+      <div class="mobile-leave-field">
+        <label for="mobileLeaveFromDate">From Date</label>
+        <input id="mobileLeaveFromDate" type="date" required>
+        <div class="mobile-leave-note">Today or a future date only.</div>
+      </div>
+
+      <div class="mobile-leave-field">
+        <label for="mobileLeaveFromTime">From Time</label>
+        <input id="mobileLeaveFromTime" type="time" required>
+      </div>
+
+      <div class="mobile-leave-field">
+        <label for="mobileLeaveToDate">To Date</label>
+        <input id="mobileLeaveToDate" type="date" required>
+      </div>
+
+      <div class="mobile-leave-field">
+        <label for="mobileLeaveToTime">To Time</label>
+        <input id="mobileLeaveToTime" type="time" required>
+      </div>
+
+      <div class="mobile-leave-field">
+        <label for="mobileLeaveDuration">Leave Time</label>
+        <input class="mobile-leave-duration" id="mobileLeaveDuration" type="text" value="—" readonly>
+        <div class="mobile-leave-note">Automatically calculated from From Date/Time to To Date/Time.</div>
+      </div>
+
+      <div class="mobile-leave-field">
+        <label for="mobileLeaveType">Leave Type</label>
+        <select id="mobileLeaveType" required>
+          <option value="">Select leave type</option>
+          <option value="short_leave">Short Leave</option>
+          <option value="full_day">Full Day</option>
+        </select>
+      </div>
+
+      <div class="mobile-leave-field">
+        <label for="mobileLeaveReason">Reason</label>
+        <textarea id="mobileLeaveReason" maxlength="500" placeholder="Enter leave reason" required></textarea>
+      </div>
+
+      <button class="mobile-leave-submit" id="mobileLeaveSubmit" type="submit">Submit Leave</button>
+    </form>
+  </div>
+</div>
 
 <div class="workspace-profile-overlay" id="workspaceProfileOverlay"></div>
 <aside class="workspace-profile-panel" id="workspaceProfilePanel" aria-hidden="true">
@@ -3143,7 +3366,7 @@ document.querySelectorAll("[data-profile-action]").forEach(btn=>{
     const action=btn.dataset.profileAction;
     window.dispatchEvent(new CustomEvent("notusProfileAction",{detail:{action,session:window.notusSession||null}}));
 
-    if(action==="leave") alert("Leave");
+    if(action==="leave"){ closeProfilePanel(); openMobileLeaveScreen(); }
     else if(action==="payslip") alert("Pay Slip");
     else if(action==="meetings") alert("Upcoming Meetings");
     else if(action==="help") alert("Help & Support");
@@ -4783,6 +5006,389 @@ function hideStatus(){
   loginStatus.style.display = "none";
   loginStatus.textContent = "";
 }
+</script>
+
+
+<script>
+/* =========================================================
+   MOBILE LEAVE — SAME DATABASE / RPCs AS ADMIN WORKSPACE
+========================================================= */
+(function(){
+  const $=id=>document.getElementById(id);
+
+  const screen=$("mobileLeaveScreen");
+  const overlay=$("mobileLeaveOverlay");
+  const form=$("mobileLeaveForm");
+
+  const fromDate=$("mobileLeaveFromDate");
+  const fromTime=$("mobileLeaveFromTime");
+  const toDate=$("mobileLeaveToDate");
+  const toTime=$("mobileLeaveToTime");
+  const durationBox=$("mobileLeaveDuration");
+  const typeBox=$("mobileLeaveType");
+  const reasonBox=$("mobileLeaveReason");
+  const submitBtn=$("mobileLeaveSubmit");
+  const listBox=$("mobileLeaveList");
+  const countBox=$("mobileLeaveCount");
+
+  let leaveTimer=null;
+
+  function esc(v){
+    return String(v??"")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function getSession(){
+    return window.notusSession ||
+      (()=>{try{return JSON.parse(localStorage.getItem("notus_company_session")||"null")}catch(e){return null}})();
+  }
+
+  function requester(){
+    const s=getSession()||{};
+    const t=String(s.user_type||"").toLowerCase();
+
+    if(t==="hr" || t==="hr_member"){
+      return {
+        type:"hr",
+        id:String(s.hr_id||""),
+        name:s.full_name||s.name||"HR",
+        role:s.role||"HR"
+      };
+    }
+
+    if(s.employee_id){
+      return {
+        type:"employee",
+        id:String(s.employee_id),
+        name:s.full_name||s.name||"Employee",
+        role:s.role||s.designation||"Employee"
+      };
+    }
+
+    if(s.company_id){
+      return {
+        type:"admin",
+        id:String(s.company_id),
+        name:s.company_name||"Administrator",
+        role:"Administrator"
+      };
+    }
+
+    return null;
+  }
+
+  function today(){
+    const d=new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+
+  function timePlus(mins){
+    const d=new Date(Date.now()+mins*60000);
+    return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+  }
+
+  function localDateTime(date,time){
+    if(!date||!time) return null;
+    const d=new Date(`${date}T${time}:00`);
+    return Number.isNaN(d.getTime())?null:d;
+  }
+
+  function calcDuration(){
+    if(!fromDate?.value||!fromTime?.value||!toDate?.value||!toTime?.value){
+      if(durationBox) durationBox.value="—";
+      return null;
+    }
+
+    const start=localDateTime(fromDate.value,fromTime.value);
+    const end=localDateTime(toDate.value,toTime.value);
+
+    if(!start||!end||end<=start){
+      if(durationBox) durationBox.value="Select a later To Date / Time";
+      return null;
+    }
+
+    const mins=Math.round((end-start)/60000);
+    let value,unit,label;
+
+    if(mins%1440===0){
+      value=mins/1440;
+      unit="days";
+      label=`${value} ${value===1?"Day":"Days"}`;
+    }else if(mins<1440){
+      value=Math.round((mins/60)*100)/100;
+      unit="hours";
+      label=`${Number.isInteger(value)?value:value.toFixed(1)} ${value===1?"Hour":"Hours"}`;
+    }else{
+      value=Math.round((mins/1440)*100)/100;
+      unit="days";
+      label=`${Number.isInteger(value)?value:value.toFixed(1)} Days`;
+    }
+
+    durationBox.value=label;
+    return {start,end,value,unit,label};
+  }
+
+  function openSheet(){
+    const d=today();
+    fromDate.min=d;
+    toDate.min=d;
+    fromDate.value=d;
+    fromTime.value=timePlus(15);
+
+    toDate.value=d;
+
+    const start=localDateTime(fromDate.value,fromTime.value);
+    const end=new Date(start.getTime()+60*60*1000);
+    toTime.value=`${String(end.getHours()).padStart(2,"0")}:${String(end.getMinutes()).padStart(2,"0")}`;
+
+    typeBox.value="";
+    reasonBox.value="";
+    calcDuration();
+
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden","false");
+  }
+
+  function closeSheet(){
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden","true");
+  }
+
+  window.openMobileLeaveScreen=function(){
+    screen.classList.add("show");
+    screen.setAttribute("aria-hidden","false");
+    loadMobileLeaveRequests();
+  };
+
+  function closeScreen(){
+    screen.classList.remove("show");
+    screen.setAttribute("aria-hidden","true");
+  }
+
+  function prettyDate(v){
+    const d=new Date(v);
+    return Number.isNaN(d.getTime())?"—":d.toLocaleDateString([],{
+      day:"2-digit",month:"short",year:"numeric"
+    });
+  }
+
+  function prettyTime(v){
+    const d=new Date(v);
+    return Number.isNaN(d.getTime())?"—":d.toLocaleTimeString([],{
+      hour:"2-digit",minute:"2-digit"
+    });
+  }
+
+  function statusOf(row){
+    const raw=String(row.status||"upcoming").toLowerCase();
+    if(raw==="cancelled") return "cancelled";
+    if(raw==="completed") return "completed";
+    return new Date(row.leave_at).getTime()<=Date.now()?"completed":"upcoming";
+  }
+
+  function durationLabel(row){
+    const value=Number(row.leave_duration_value||0);
+    const unit=String(row.leave_duration_unit||"");
+    if(value>0&&unit==="hours") return `${value} ${value===1?"Hour":"Hours"}`;
+    if(value>0&&unit==="days") return `${value} ${value===1?"Day":"Days"}`;
+    return "—";
+  }
+
+  function typeLabel(v){
+    return v==="full_day"?"Full Day":"Short Leave";
+  }
+
+  function render(rows){
+    rows=Array.isArray(rows)?rows:[];
+    countBox.textContent=`${rows.length} request${rows.length===1?"":"s"}`;
+
+    if(!rows.length){
+      listBox.innerHTML=`
+        <div class="mobile-leave-empty">
+          <i class="fa-regular fa-calendar-minus"></i>
+          <b>No leave requests yet</b>
+          <span>Tap Apply Leave to create your first request.</span>
+        </div>`;
+      return;
+    }
+
+    listBox.innerHTML=rows.map(row=>{
+      const status=statusOf(row);
+      const canCancel=status==="upcoming"&&new Date(row.leave_at).getTime()>Date.now();
+
+      return `
+        <div class="mobile-leave-item">
+          <div class="mobile-leave-item-top">
+            <div>
+              <div class="mobile-leave-date">${esc(prettyDate(row.leave_at))}</div>
+              <div class="mobile-leave-time">${esc(prettyTime(row.leave_at))}</div>
+            </div>
+            <span class="mobile-leave-status ${esc(status)}">${esc(status)}</span>
+          </div>
+
+          <div class="mobile-leave-meta">
+            <div class="mobile-leave-meta-box">
+              <span>Leave Type</span>
+              <b>${esc(typeLabel(row.leave_type))}</b>
+            </div>
+            <div class="mobile-leave-meta-box">
+              <span>Leave Time</span>
+              <b>${esc(durationLabel(row))}</b>
+            </div>
+          </div>
+
+          <div class="mobile-leave-meta-box mobile-leave-reason">
+            <span>Reason</span>
+            <b>${esc(row.reason||"—")}</b>
+          </div>
+
+          ${canCancel?`<button class="mobile-leave-cancel" type="button" data-leave-cancel="${esc(row.id)}">Cancel Leave</button>`:""}
+        </div>`;
+    }).join("");
+
+    listBox.querySelectorAll("[data-leave-cancel]").forEach(btn=>{
+      btn.addEventListener("click",()=>cancelLeave(btn.dataset.leaveCancel));
+    });
+  }
+
+  window.loadMobileLeaveRequests=async function(){
+    const s=getSession();
+    const r=requester();
+    if(!s?.company_id||!r) return;
+
+    try{
+      const {data,error}=await db.rpc("notus_list_my_leave_requests",{
+        p_company_id:s.company_id,
+        p_requester_type:r.type,
+        p_requester_id:r.id
+      });
+      if(error) throw error;
+      render(data||[]);
+    }catch(err){
+      console.error("mobile leave list",err);
+      listBox.innerHTML=`
+        <div class="mobile-leave-empty">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <b>Unable to load leave requests</b>
+          <span>${esc(err?.message||"Please try again.")}</span>
+        </div>`;
+    }
+  };
+
+  async function cancelLeave(id){
+    const s=getSession();
+    const r=requester();
+    if(!s?.company_id||!r||!id) return;
+    if(!confirm("Cancel this leave request?")) return;
+
+    try{
+      const {error}=await db.rpc("notus_cancel_leave_request",{
+        p_company_id:s.company_id,
+        p_leave_id:id,
+        p_requester_type:r.type,
+        p_requester_id:r.id
+      });
+      if(error) throw error;
+      await loadMobileLeaveRequests();
+    }catch(err){
+      alert(err?.message||"Unable to cancel leave.");
+    }
+  }
+
+  async function submitLeave(e){
+    e.preventDefault();
+
+    const s=getSession();
+    const r=requester();
+    const duration=calcDuration();
+
+    if(!s?.company_id||!r){
+      alert("Unable to identify logged-in user.");
+      return;
+    }
+
+    if(!duration){
+      alert("Please select a valid From and To date/time.");
+      return;
+    }
+
+    if(duration.start<=new Date()){
+      alert("From date and time must be in the future.");
+      return;
+    }
+
+    if(!typeBox.value||!reasonBox.value.trim()){
+      alert("Please fill all leave details.");
+      return;
+    }
+
+    submitBtn.disabled=true;
+
+    try{
+      const {error}=await db.rpc("notus_apply_leave",{
+        p_company_id:s.company_id,
+        p_requester_type:r.type,
+        p_requester_id:r.id,
+        p_requester_name:r.name,
+        p_requester_role:r.role,
+        p_branch_id:s.branch_id||null,
+        p_leave_at:duration.start.toISOString(),
+        p_leave_end_at:duration.end.toISOString(),
+        p_leave_type:typeBox.value,
+        p_leave_duration_value:duration.value,
+        p_leave_duration_unit:duration.unit,
+        p_reason:reasonBox.value.trim()
+      });
+
+      if(error) throw error;
+
+      closeSheet();
+      await loadMobileLeaveRequests();
+    }catch(err){
+      console.error("mobile apply leave",err);
+      alert(err?.message||"Unable to submit leave.");
+    }finally{
+      submitBtn.disabled=false;
+    }
+  }
+
+  $("mobileLeaveBack")?.addEventListener("click",closeScreen);
+  $("mobileApplyLeaveBtn")?.addEventListener("click",openSheet);
+  $("mobileLeaveSheetClose")?.addEventListener("click",closeSheet);
+
+  overlay?.addEventListener("click",e=>{
+    if(e.target===overlay) closeSheet();
+  });
+
+  form?.addEventListener("submit",submitLeave);
+
+  [fromDate,fromTime,toDate,toTime].forEach(el=>{
+    el?.addEventListener("input",()=>{
+      if(fromDate.value){
+        toDate.min=fromDate.value;
+        if(toDate.value&&toDate.value<fromDate.value) toDate.value=fromDate.value;
+      }
+      calcDuration();
+    });
+    el?.addEventListener("change",calcDuration);
+  });
+
+  leaveTimer=setInterval(()=>{
+    if(screen?.classList.contains("show")&&document.visibilityState==="visible"){
+      loadMobileLeaveRequests();
+    }
+  },30000);
+
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible"&&screen?.classList.contains("show")){
+      loadMobileLeaveRequests();
+    }
+  });
+})();
 </script>
 
 </body>
