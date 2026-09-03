@@ -4228,6 +4228,7 @@ html,body{
   <div class="profile-details">
     <div class="profile-detail-item"><div class="profile-detail-icon"><i class="fa-solid fa-building"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Company</div><div class="profile-detail-value" id="profileCompanyName">—</div></div></div>
     <div class="profile-detail-item"><div class="profile-detail-icon"><i class="fa-solid fa-envelope"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Gmail</div><div class="profile-detail-value" id="profileUserGmail">—</div></div></div>
+    <div class="profile-detail-item" id="profileMobileRow"><div class="profile-detail-icon"><i class="fa-solid fa-phone"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Mobile Number</div><div class="profile-detail-value" id="profileMobileNumber">—</div></div></div>
     <div class="profile-detail-item" id="profileBranchRow"><div class="profile-detail-icon"><i class="fa-solid fa-code-branch"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Branch</div><div class="profile-detail-value" id="profileBranchName">—</div></div></div>
     <div class="profile-detail-item" id="profileLocationRow"><div class="profile-detail-icon"><i class="fa-solid fa-location-dot"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Location</div><div class="profile-detail-value" id="profileLocationName">—</div></div></div>
   </div>
@@ -5351,6 +5352,77 @@ function roleDisplayName(session){
   const map={company_admin:"Company Admin",hr:"HR",team_lead:"Team Lead",manager:"Manager",recruiter:"Recruiter",it_admin:"IT Administrator",technical_supporter:"Technical Supporter",employee:"Employee"};
   return map[session?.user_type]||"Employee";
 }
+function firstMobileValue(row){
+  if(!row) return "";
+  const keys=["mobile_number","mobile","phone_number","phone","contact_number","admin_mobile_number"];
+  for(const key of keys){
+    const v=String(row[key]??"").trim();
+    if(v) return v;
+  }
+  return "";
+}
+
+async function loadProfileMobileNumber(session){
+  session=session||getNotusSession()||{};
+  const el=document.getElementById("profileMobileNumber");
+  const row=document.getElementById("profileMobileRow");
+  if(!el||!row) return;
+
+  let mobile=firstMobileValue(session);
+  const type=String(session.user_type||"").toLowerCase().trim();
+  const companyId=session.company_id;
+  const email=String(session.gmail||session.email||"").trim().toLowerCase();
+
+  try{
+    if(typeof db!=="undefined" && companyId){
+      let result=null;
+
+      if(type==="company_admin" || type==="admin" || type==="administrator"){
+        /* Administrator: exact company/admin record first. */
+        const companyRes=await db.from("companies").select("*").eq("id",companyId).maybeSingle();
+        if(!companyRes.error) mobile=firstMobileValue(companyRes.data)||mobile;
+
+        /* Some installations keep Administrator as an employees row. */
+        if(!mobile && email){
+          const empRes=await db.from("employees").select("*").eq("company_id",companyId).ilike("email",email).maybeSingle();
+          if(!empRes.error) mobile=firstMobileValue(empRes.data)||mobile;
+        }
+      }else if(type==="hr" || type==="hr_member"){
+        if(session.hr_id){
+          result=await db.from("hr_members").select("*").eq("company_id",companyId).eq("id",session.hr_id).maybeSingle();
+        }
+        if((!result || result.error || !result.data) && email){
+          result=await db.from("hr_members").select("*").eq("company_id",companyId).ilike("gmail",email).maybeSingle();
+          if(result.error){
+            result=await db.from("hr_members").select("*").eq("company_id",companyId).ilike("email",email).maybeSingle();
+          }
+        }
+        if(result && !result.error) mobile=firstMobileValue(result.data)||mobile;
+      }else{
+        const employeeId=session.employee_id||session.team_lead_id||session.member_id;
+        if(employeeId){
+          result=await db.from("employees").select("*").eq("company_id",companyId).eq("id",employeeId).maybeSingle();
+        }
+        if((!result || result.error || !result.data) && email){
+          result=await db.from("employees").select("*").eq("company_id",companyId).ilike("email",email).maybeSingle();
+        }
+        if(result && !result.error) mobile=firstMobileValue(result.data)||mobile;
+      }
+    }
+  }catch(err){
+    console.warn("Profile mobile load failed:",err);
+  }
+
+  el.textContent=mobile||"—";
+  row.style.display="flex";
+
+  if(mobile){
+    session.mobile_number=mobile;
+    window.notusSession=session;
+    try{localStorage.setItem("notus_company_session",JSON.stringify(session));}catch(_e){}
+  }
+}
+
 function fillProfilePanel(session){
   const fullName=String(session?.full_name||session?.name||(session?.user_type==="company_admin"?"Company Admin":"User")).trim();
   const companyName=formatCompanyName(session?.company_name||"Company");
@@ -5364,6 +5436,7 @@ function fillProfilePanel(session){
   document.getElementById("profileUserRole").textContent=roleName;
   document.getElementById("profileCompanyName").textContent=companyName;
   document.getElementById("profileUserGmail").textContent=gmail;
+  document.getElementById("profileMobileNumber").textContent=firstMobileValue(session)||"—";
   document.getElementById("profileBranchName").textContent=branch;
   document.getElementById("profileLocationName").textContent=location;
 
@@ -5371,13 +5444,16 @@ function fillProfilePanel(session){
   if(avatarFallback&&!avatarFallback.querySelector("img"))
     avatarFallback.textContent=(fullName[0]||companyName[0]||"U").toUpperCase();
 
+  const mobileRow=document.getElementById("profileMobileRow");
+  if(mobileRow) mobileRow.style.display="flex";
+
   const branchRow=document.getElementById("profileBranchRow");
   if(branchRow)branchRow.style.display=branch!=="—"?"flex":"none";
 
   const locationRow=document.getElementById("profileLocationRow");
   if(locationRow)locationRow.style.display=location!=="—"?"flex":"none";
 }
-function openProfilePanel(){fillProfilePanel(window.notusSession||{});if(typeof loadCurrentUserProfilePhoto==="function")loadCurrentUserProfilePhoto();workspaceProfilePanel?.classList.add("show");workspaceProfileOverlay?.classList.add("show");workspaceProfilePanel?.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}
+function openProfilePanel(){const s=window.notusSession||getNotusSession()||{};fillProfilePanel(s);loadProfileMobileNumber(s);if(typeof loadCurrentUserProfilePhoto==="function")loadCurrentUserProfilePhoto();workspaceProfilePanel?.classList.add("show");workspaceProfileOverlay?.classList.add("show");workspaceProfilePanel?.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}
 function closeProfilePanel(){workspaceProfilePanel?.classList.remove("show");workspaceProfileOverlay?.classList.remove("show");workspaceProfilePanel?.setAttribute("aria-hidden","true");document.body.style.overflow=""}
 workspaceProfileBtn?.addEventListener("click",e=>{e.stopPropagation();openProfilePanel()});profilePanelClose?.addEventListener("click",closeProfilePanel);workspaceProfileOverlay?.addEventListener("click",closeProfilePanel);profileLogoutBtn?.addEventListener("click",()=>{try{localStorage.removeItem("notus_company_session");localStorage.removeItem("notus_workspace_status")}catch(e){}window.notusSession=null;closeProfilePanel();document.getElementById("workspaceScreen")?.classList.remove("show");const loginPage=document.querySelector(".page");if(loginPage)loginPage.style.display="flex";if(email)email.value="";if(password)password.value="";hideStatus()});
 
