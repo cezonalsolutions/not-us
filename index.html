@@ -4029,6 +4029,13 @@ html,body{
         <div class="pull-spinner"></div>
       </div>
 
+      <section class="mobile-group-stable-area" id="mobileGroupStableArea" hidden>
+        <div class="mobile-group-section-title">Groups</div>
+        <div id="mobileGroupStableList"></div>
+      </section>
+
+      <div class="mobile-conversations-title" id="mobileConversationsTitle">Conversations</div>
+
       <div class="chat-list" id="workspaceChatList">
         <div class="workspace-empty-chat" id="workspaceEmptyChat">
           Search a teammate to start chatting.
@@ -4600,11 +4607,19 @@ form.addEventListener("submit", async function(e){
 
     /* SAME attendance engine as desktop: create one exact login session row. */
     try{
-      if(typeof window.notusAttendanceRecordLogin === "function") {
+      if(typeof notusMobileStartAttendanceOnlyInsideShift === "function"){
+        await notusMobileStartAttendanceOnlyInsideShift();
+      }else if(typeof window.notusAttendanceRecordLogin === "function"){
         await window.notusAttendanceRecordLogin();
       }
+
+      /* Successful login must NOT auto-set Available.
+         Shift timing only decides whether the user may be active. */
+      if(typeof window.notusMobileEnforceShiftDutyHours === "function"){
+        await window.notusMobileEnforceShiftDutyHours({showMessage:false});
+      }
     }catch(attErr){
-      console.warn("Mobile attendance login save:",attErr);
+      console.warn("Mobile attendance/login status save:",attErr);
     }
 
     showStatus("Login successful", "success");
@@ -4789,6 +4804,11 @@ async function loadMyWorkspaceStatus(){
     );
 
     paintWorkspaceStatus(status,statusLabels[status]);
+
+    /* Shift can replace a stale Available/Busy/etc. with Offline. */
+    if(typeof window.notusMobileEnforceShiftDutyHours === "function"){
+      await window.notusMobileEnforceShiftDutyHours({showMessage:false});
+    }
   }catch(err){
     console.warn("Workspace status load failed:",err);
   }
@@ -4871,8 +4891,275 @@ function startWorkspaceStatusLive(){
     if(!companyChatScreen?.classList.contains("show")){
       await refreshVisiblePeopleStatuses();
     }
-  },2000);
+  },15000);
 }
+
+
+/* =========================================================
+   MOBILE SHIFT DUTY HOURS — SAME RULES AS ADMIN/DESKTOP
+   ========================================================= */
+let notusMobileShiftCache = null;
+let notusMobileShiftCacheKey = "";
+let notusMobileShiftCacheAt = 0;
+let notusMobileShiftTimer = null;
+let notusMobileShiftBusy = false;
+const NOTUS_MOBILE_SHIFT_CACHE_MS = 30000;
+
+function notusMobileTimeToMinutes(value){
+  const raw = String(value || "").trim();
+  if(!raw) return null;
+  const m = raw.match(/^(\d{1,2}):(\d{2})/);
+  if(!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if(!Number.isFinite(h) || !Number.isFinite(min) || h < 0 || h > 23 || min < 0 || min > 59) return null;
+  return (h * 60) + min;
+}
+
+function notusMobileCurrentMinutes(){
+  const now = new Date();
+  return (now.getHours() * 60) + now.getMinutes();
+}
+
+function notusMobileInsideShift(shift, nowMinutes = notusMobileCurrentMinutes()){
+  if(!shift) return true;
+
+  const start = notusMobileTimeToMinutes(shift.shift_start_time);
+  const end = notusMobileTimeToMinutes(shift.shift_end_time);
+
+  if(start === null || end === null) return true;
+
+  /* Same time = 24-hour shift. */
+  if(start === end) return true;
+
+  /* Normal shift, e.g. 10:00 -> 18:00 */
+  if(end > start){
+    return nowMinutes >= start && nowMinutes < end;
+  }
+
+  /* Overnight shift, e.g. 21:00 -> 06:00 */
+  return nowMinutes >= start || nowMinutes < end;
+}
+
+function notusMobileFormatShiftTime(value){
+  const mins = notusMobileTimeToMinutes(value);
+  if(mins === null) return "";
+  let h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const ap = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${h}:${String(m).padStart(2,"0")} ${ap}`;
+}
+
+async function notusMobileLoadMyShift(force=false){
+  const s = window.notusSession || getNotusSession?.() || {};
+  const member = getCurrentMobileAttendanceMember(s);
+
+  /* Company Admin has no employee shift restriction. */
+  if(!s?.company_id || !member?.member_id || member.member_type === "admin"){
+    notusMobileShiftCache = null;
+    notusMobileShiftCacheKey = "";
+    notusMobileShiftCacheAt = 0;
+    return null;
+  }
+
+  const key = `${s.company_id}|${member.member_id}`;
+  const now = Date.now();
+
+  if(
+    !force &&
+    key === notusMobileShiftCacheKey &&
+    (now - notusMobileShiftCacheAt) < NOTUS_MOBILE_SHIFT_CACHE_MS
+  ){
+    return notusMobileShiftCache;
+  }
+
+  try{
+    const {data,error} = await db.from("notus_user_shifts")
+      .select("id,member_id,member_type,shift_name,shift_start_time,shift_end_time,total_hours,is_active,updated_at")
+      .eq("company_id",s.company_id)
+      .eq("member_id",String(member.member_id))
+      .eq("is_active",true)
+      .order("updated_at",{ascending:false})
+      .limit(1);
+
+    if(error) throw error;
+
+    const row = Array.isArray(data) ? (data[0] || null) : (data || null);
+
+    notusMobileShiftCache = row;
+    notusMobileShiftCacheKey = key;
+    notusMobileShiftCacheAt = now;
+
+    return row;
+  }catch(err){
+    console.warn("Mobile shift load:",err);
+
+    /* If shift table is unavailable, preserve old status behavior. */
+    notusMobileShiftCache = null;
+    notusMobileShiftCacheKey = key;
+    notusMobileShiftCacheAt = now;
+    return null;
+  }
+}
+
+async function notusMobileForceOffline({closeAttendance=true}={}){
+  if(notusMobileShiftBusy) return false;
+
+  const s = window.notusSession || getNotusSession?.() || {};
+  const member = getCurrentMobileAttendanceMember(s);
+
+  if(!s?.company_id || !member?.member_id || member.member_type === "admin") return false;
+
+  notusMobileShiftBusy = true;
+
+  try{
+    let saved = false;
+
+    try{
+      const {error} = await db.rpc("set_member_attendance_status",{
+        p_company_id:s.company_id,
+        p_member_type:member.member_type,
+        p_member_id:member.member_id,
+        p_status:"offline"
+      });
+      if(!error) saved = true;
+    }catch(_e){}
+
+    if(!saved){
+      const {error} = await db.from("notus_member_status").upsert({
+        company_id:s.company_id,
+        member_type:member.member_type,
+        member_id:String(member.member_id),
+        current_status:"offline",
+        updated_at:new Date().toISOString()
+      },{
+        onConflict:"company_id,member_type,member_id"
+      });
+      if(!error) saved = true;
+    }
+
+    paintWorkspaceStatus("offline",statusLabels.offline || "Offline");
+
+    try{
+      localStorage.setItem("notus_workspace_status","offline");
+    }catch(_e){}
+
+    if(closeAttendance && typeof window.notusAttendanceRecordLogout === "function"){
+      await window.notusAttendanceRecordLogout();
+    }
+
+    return saved;
+  }catch(err){
+    console.warn("Mobile force Offline:",err);
+    return false;
+  }finally{
+    notusMobileShiftBusy = false;
+  }
+}
+
+window.notusMobileEnforceShiftDutyHours = async function({showMessage=false,statusAttempt=null}={}){
+  const s = window.notusSession || getNotusSession?.() || {};
+  const member = getCurrentMobileAttendanceMember(s);
+
+  if(!member || member.member_type === "admin"){
+    return {allowed:true,shift:null};
+  }
+
+  const shift = await notusMobileLoadMyShift();
+
+  /* No assigned shift = preserve existing behavior. */
+  if(!shift){
+    return {allowed:true,shift:null};
+  }
+
+  const inside = notusMobileInsideShift(shift);
+
+  if(!inside){
+    await notusMobileForceOffline({closeAttendance:true});
+
+    if(showMessage && statusAttempt && statusAttempt !== "offline"){
+      const start = notusMobileFormatShiftTime(shift.shift_start_time);
+      const end = notusMobileFormatShiftTime(shift.shift_end_time);
+      const msg = (start && end)
+        ? `Out of duty hours. Your shift is ${start} - ${end}.`
+        : "Out of duty hours.";
+
+      /* Use existing toast if available; otherwise a small non-blocking status message. */
+      if(typeof toast === "function"){
+        toast(msg);
+      }else{
+        console.info(msg);
+      }
+    }
+
+    return {allowed:false,shift};
+  }
+
+  /*
+    IMPORTANT:
+    Inside duty hours we DO NOT auto-set Available.
+    The user stays on the saved/manual status until they select one.
+  */
+  return {allowed:true,shift};
+};
+
+async function notusMobileStartAttendanceOnlyInsideShift(){
+  const s = window.notusSession || getNotusSession?.() || {};
+  const member = getCurrentMobileAttendanceMember(s);
+
+  if(!member?.member_id) return;
+
+  /* Admin is unrestricted. */
+  if(member.member_type === "admin"){
+    if(typeof window.notusAttendanceRecordLogin === "function"){
+      await window.notusAttendanceRecordLogin();
+    }
+    return;
+  }
+
+  const duty = await window.notusMobileEnforceShiftDutyHours({showMessage:false});
+
+  if(!duty.allowed){
+    return;
+  }
+
+  if(typeof window.notusAttendanceRecordLogin === "function"){
+    await window.notusAttendanceRecordLogin();
+  }
+}
+
+function startNotusMobileShiftWatcher(){
+  if(notusMobileShiftTimer){
+    clearInterval(notusMobileShiftTimer);
+    notusMobileShiftTimer = null;
+  }
+
+  /* Initial check; no page refresh / no full list repaint. */
+  window.notusMobileEnforceShiftDutyHours({showMessage:false}).catch(()=>{});
+
+  /* Check the duty boundary once per minute. */
+  notusMobileShiftTimer = setInterval(()=>{
+    if(document.visibilityState !== "visible") return;
+    window.notusMobileEnforceShiftDutyHours({showMessage:false}).catch(()=>{});
+  },60000);
+}
+
+window.addEventListener("focus",()=>{
+  if((window.notusSession || getNotusSession?.())?.company_id){
+    notusMobileLoadMyShift(true)
+      .then(()=>window.notusMobileEnforceShiftDutyHours({showMessage:false}))
+      .catch(()=>{});
+  }
+});
+
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState === "visible" && (window.notusSession || getNotusSession?.())?.company_id){
+    notusMobileLoadMyShift(true)
+      .then(()=>window.notusMobileEnforceShiftDutyHours({showMessage:false}))
+      .catch(()=>{});
+  }
+});
 
 async function saveMyWorkspaceStatus(status){
   const session = window.notusSession || getNotusSession?.() || {};
@@ -4926,6 +5213,20 @@ document.querySelectorAll(".workspace-status-option").forEach(btn=>{
 
     workspaceStatusMenu?.classList.remove("show");
     workspaceStatusWrap?.classList.remove("open");
+
+    /* Admin-assigned shift timing is the final authority.
+       Outside duty hours only Offline is allowed. */
+    if(status !== "offline" && typeof window.notusMobileEnforceShiftDutyHours === "function"){
+      const duty = await window.notusMobileEnforceShiftDutyHours({
+        showMessage:true,
+        statusAttempt:status
+      });
+
+      if(!duty.allowed){
+        paintWorkspaceStatus("offline",statusLabels.offline || "Offline");
+        return;
+      }
+    }
 
     /* Scheduled leave owns the status for the full leave window. */
     if(window.__notusScheduledLeaveActive && status!=="leave"){
@@ -5586,8 +5887,24 @@ workspaceProfileBtn?.addEventListener("click",e=>{e.stopPropagation();openProfil
     if(typeof window.notusAttendanceRecordLogout === "function") {
       await window.notusAttendanceRecordLogout();
     }
+
+    /* Logout-time status: exact user logout becomes Offline.
+       No refresh; realtime will update other users' availability counters. */
+    const logoutSession = window.notusSession || getNotusSession?.() || {};
+    const logoutMember = (typeof getCurrentMobileAttendanceMember === "function")
+      ? getCurrentMobileAttendanceMember(logoutSession)
+      : null;
+
+    if(typeof db !== "undefined" && logoutSession?.company_id && logoutMember?.member_id){
+      await db.rpc("set_member_attendance_status",{
+        p_company_id:logoutSession.company_id,
+        p_member_type:logoutMember.member_type,
+        p_member_id:logoutMember.member_id,
+        p_status:"offline"
+      });
+    }
   }catch(attErr){
-    console.warn("Mobile attendance logout save:",attErr);
+    console.warn("Mobile attendance/logout status save:",attErr);
   }
   try{localStorage.removeItem("notus_company_session");localStorage.removeItem("notus_workspace_status")}catch(e){}
   window.notusSession=null;closeProfilePanel();document.getElementById("workspaceScreen")?.classList.remove("show");
@@ -9481,6 +9798,17 @@ window.openOutsideApp = function(rawUrl){
 
 <style id="notus-mobile-groups-documents-css">
 /* ===== GROUPS IN CHAT LIST ===== */
+.mobile-group-stable-area{
+  width:100%;
+  background:transparent;
+  padding:3px 0 2px;
+}
+.mobile-group-stable-area[hidden]{display:none!important}
+.mobile-group-stable-area .mobile-group-section-title{
+  padding:8px 16px 5px!important;
+  margin:0!important;
+}
+#mobileGroupStableList{width:100%}
 .mobile-group-section{padding:8px 0 1px}
 .mobile-group-section[hidden]{display:none!important}
 .mobile-group-section-title,
@@ -9491,8 +9819,9 @@ window.openOutsideApp = function(rawUrl){
   color:#89938f;text-transform:uppercase;
 }
 .mobile-group-row{
-  width:100%;min-height:72px;border:0;background:transparent;
-  display:flex;align-items:center;gap:12px;padding:9px 16px;text-align:left;
+  width:100%;min-height:74px;border:0;background:transparent;
+  display:flex;align-items:center;gap:12px;padding:10px 16px 8px;text-align:left;
+  cursor:pointer;
 }
 .mobile-group-row:active{background:rgba(15,118,110,.045)}
 .mobile-group-avatar{
@@ -9503,8 +9832,14 @@ window.openOutsideApp = function(rawUrl){
 }
 .mobile-group-avatar img{width:100%;height:100%;object-fit:cover;display:none}
 .mobile-group-body{min-width:0;flex:1;border-bottom:1px solid rgba(130,145,140,.16);padding:8px 0 14px}
-.mobile-group-name{font-family:"Outfit",sans-serif;font-size:15px;font-weight:600;color:#171717;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mobile-group-available{margin-top:4px;font-size:9px;font-weight:600;color:#2f9e62}
+.mobile-group-name{
+  display:block;
+  font-family:"Outfit",sans-serif;font-size:15px;font-weight:600;color:#171717;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.mobile-group-available{
+  display:block;margin-top:5px;font-size:9px;font-weight:600;color:#2f9e62;
+}
 .mobile-group-available:empty{display:none}
 
 /* ===== GROUP CHAT ===== */
@@ -9749,73 +10084,132 @@ window.openOutsideApp = function(rawUrl){
     }
   }
 
-  function getGroupHost(){
-    const list = $("workspaceChatList");
-    if(!list) return null;
+  const groupStatusMap = new Map();
+  let groupPaintSignature = "";
 
-    let host = list.querySelector(":scope > .mobile-group-section");
-    if(!host){
-      host = document.createElement("section");
-      host.className = "mobile-group-section";
-      host.hidden = true;
-      list.prepend(host);
-    }
-    return host;
+  function getGroupHost(){
+    return $("mobileGroupStableArea");
   }
 
-  async function paintGroups(){
+  function getGroupListHost(){
+    return $("mobileGroupStableList");
+  }
+
+  function statusKey(type,id){
+    return safe(type).toLowerCase() + ":" + safe(id);
+  }
+
+  function groupAvailableCountLocal(group){
+    const keys = Array.isArray(group?.member_keys) ? group.member_keys : [];
+    let count = 0;
+    keys.forEach(key=>{
+      if(groupStatusMap.get(String(key)) === "available") count++;
+    });
+    return count;
+  }
+
+  async function primeGroupStatuses(){
+    const s = session();
+    if(!s?.company_id || typeof db === "undefined") return;
+    try{
+      const {data,error} = await db.from("notus_member_status")
+        .select("member_type,member_id,current_status")
+        .eq("company_id",s.company_id);
+      if(error) throw error;
+
+      groupStatusMap.clear();
+      (data || []).forEach(row=>{
+        groupStatusMap.set(
+          statusKey(row.member_type,row.member_id),
+          safe(row.current_status).toLowerCase()
+        );
+      });
+    }catch(err){
+      console.warn("Mobile group statuses:",err);
+    }
+  }
+
+  async function paintGroups(force=false){
     const host = getGroupHost();
-    if(!host) return;
+    const list = getGroupListHost();
+    if(!host || !list) return;
 
     if(!groups.length){
-      host.hidden = true;
-      host.innerHTML = "";
+      if(!host.hidden){
+        host.hidden = true;
+        list.innerHTML = "";
+      }
+      groupPaintSignature = "";
       return;
     }
 
     const logo = await resolveCompanyLogo();
 
-    const rows = await Promise.all(groups.map(async g=>{
-      const available = await groupAvailableCount(g);
-      return `
-        <button class="mobile-group-row" type="button" data-mobile-group-id="${esc(g.id)}">
-          <span class="mobile-group-avatar">
-            ${logo ? `<img src="${esc(logo)}" alt="Company logo" style="display:block">` : `<span>${esc((g.group_name||"G").charAt(0).toUpperCase())}</span>`}
-          </span>
-          <span class="mobile-group-body">
-            <span class="mobile-group-name">${esc(g.group_name || "Group")}</span>
-            <span class="mobile-group-available">${available > 0 ? `${available} available` : ""}</span>
-          </span>
-        </button>
-      `;
-    }));
+    const signature = JSON.stringify(groups.map(g=>[
+      String(g.id||""),
+      safe(g.group_name),
+      (Array.isArray(g.member_keys)?g.member_keys:[]).join(","),
+      groupAvailableCountLocal(g),
+      safe(g.updated_at)
+    ]));
 
-    host.innerHTML = `<div class="mobile-group-section-title">Groups</div>${rows.join("")}`;
-    host.hidden = false;
+    /* No DOM write when nothing visible changed. This removes blink/repaint. */
+    if(!force && signature === groupPaintSignature && !host.hidden) return;
+    groupPaintSignature = signature;
 
-    host.querySelectorAll("[data-mobile-group-id]").forEach(btn=>{
-      btn.addEventListener("click",()=>{
-        const g = groups.find(x=>String(x.id) === String(btn.dataset.mobileGroupId));
-        if(g) openGroup(g);
+    const fragment = document.createDocumentFragment();
+
+    groups.forEach(g=>{
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "mobile-group-row";
+      row.dataset.mobileGroupId = String(g.id || "");
+
+      const avatar = document.createElement("span");
+      avatar.className = "mobile-group-avatar";
+
+      if(logo){
+        const img = document.createElement("img");
+        img.alt = "Company logo";
+        img.src = logo;
+        img.style.display = "block";
+        avatar.appendChild(img);
+      }else{
+        const fallback = document.createElement("span");
+        fallback.textContent = (safe(g.group_name) || "G").charAt(0).toUpperCase();
+        avatar.appendChild(fallback);
+      }
+
+      const body = document.createElement("span");
+      body.className = "mobile-group-body";
+
+      const name = document.createElement("span");
+      name.className = "mobile-group-name";
+      name.textContent = safe(g.group_name) || "Group";
+
+      const status = document.createElement("span");
+      status.className = "mobile-group-available";
+      const available = groupAvailableCountLocal(g);
+      status.textContent = available > 0 ? `${available} available` : "";
+
+      body.append(name,status);
+      row.append(avatar,body);
+
+      row.addEventListener("click",()=>{
+        const fresh = groups.find(x=>String(x.id) === String(row.dataset.mobileGroupId));
+        if(fresh) openGroup(fresh);
       });
+
+      fragment.appendChild(row);
     });
+
+    list.replaceChildren(fragment);
+    host.hidden = false;
   }
 
   function ensureConversationsLabel(){
-    const list = $("workspaceChatList");
-    if(!list) return;
-    const hasDirectRows = !!list.querySelector(":scope > .chat-item");
-    const existing = list.querySelector(":scope > .mobile-conversations-title");
-
-    if(hasDirectRows && !existing){
-      const label = document.createElement("div");
-      label.className = "mobile-conversations-title";
-      label.textContent = "Conversations";
-      const firstDirect = list.querySelector(":scope > .chat-item");
-      if(firstDirect) list.insertBefore(label, firstDirect);
-    }else if(!hasDirectRows && existing){
-      existing.remove();
-    }
+    const label = $("mobileConversationsTitle");
+    if(label) label.hidden = false;
   }
 
   async function decorateChatList(){
@@ -9823,23 +10217,33 @@ window.openOutsideApp = function(rawUrl){
     ensureConversationsLabel();
   }
 
+  function groupHasMe(group){
+    const key = memberIdentity().key;
+    return !!key && Array.isArray(group?.member_keys) && group.member_keys.map(String).includes(String(key));
+  }
+
   async function loadGroups(){
     const s = session();
     const me = memberIdentity();
+
     if(!s?.company_id || !me.key || me.key.endsWith(":") || typeof db === "undefined"){
       groups = [];
-      await decorateChatList();
+      await paintGroups(true);
       return;
     }
 
     try{
-      const {data,error} = await db.from("notus_group_chats")
-        .select("*")
-        .eq("company_id",s.company_id)
-        .contains("member_keys",[me.key])
-        .order("updated_at",{ascending:false});
+      const [{data,error}] = await Promise.all([
+        db.from("notus_group_chats")
+          .select("*")
+          .eq("company_id",s.company_id)
+          .contains("member_keys",[me.key])
+          .order("updated_at",{ascending:false}),
+        primeGroupStatuses()
+      ]);
 
       if(error) throw error;
+
       groups = Array.isArray(data) ? data : [];
 
       if(activeGroup){
@@ -9852,12 +10256,41 @@ window.openOutsideApp = function(rawUrl){
         }
       }
 
-      await decorateChatList();
+      await paintGroups(true);
+      ensureConversationsLabel();
     }catch(err){
       console.warn("Mobile groups load:",err);
       groups = [];
-      await decorateChatList();
+      await paintGroups(true);
     }
+  }
+
+  async function applyGroupRealtimePayload(payload){
+    const event = safe(payload?.eventType).toUpperCase();
+    const row = payload?.new || payload?.old || null;
+    if(!row?.id) return;
+
+    const id = String(row.id);
+    const index = groups.findIndex(g=>String(g.id) === id);
+
+    if(event === "DELETE" || !groupHasMe(payload?.new || {})){
+      if(index >= 0) groups.splice(index,1);
+      if(activeGroup && String(activeGroup.id) === id) closeGroup();
+      await paintGroups();
+      return;
+    }
+
+    if(index >= 0) groups[index] = payload.new;
+    else groups.unshift(payload.new);
+
+    groups.sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
+
+    if(activeGroup && String(activeGroup.id) === id){
+      activeGroup = payload.new;
+      paintActiveGroup();
+    }
+
+    await paintGroups();
   }
 
   function renderGroupMessages(){
@@ -9887,7 +10320,7 @@ window.openOutsideApp = function(rawUrl){
 
     $("mobileGroupChatName").textContent = safe(activeGroup.group_name) || "Group";
 
-    const available = await groupAvailableCount(activeGroup);
+    const available = groupAvailableCountLocal(activeGroup);
     $("mobileGroupChatSub").textContent = available > 0 ? `${available} available` : "";
 
     const logo = await resolveCompanyLogo();
@@ -9976,13 +10409,24 @@ window.openOutsideApp = function(rawUrl){
           schema:"public",
           table:"notus_group_chats",
           filter:`company_id=eq.${s.company_id}`
-        },()=>{ loadGroups(); })
+        },payload=>{
+          applyGroupRealtimePayload(payload);
+        })
         .on("postgres_changes",{
           event:"*",
           schema:"public",
           table:"notus_member_status",
           filter:`company_id=eq.${s.company_id}`
-        },()=>{
+        },payload=>{
+          const row = payload.new || payload.old || {};
+          const key = statusKey(row.member_type,row.member_id);
+
+          if(payload.eventType === "DELETE"){
+            groupStatusMap.delete(key);
+          }else{
+            groupStatusMap.set(key,safe(row.current_status).toLowerCase());
+          }
+
           paintGroups();
           if(activeGroup) paintActiveGroup();
         })
@@ -10001,21 +10445,8 @@ window.openOutsideApp = function(rawUrl){
     }
   });
 
-  /* The existing direct-chat renderer owns workspaceChatList.
-     Wrap it once so Groups are restored immediately after every live direct-chat repaint. */
-  try{
-    if(typeof renderPeopleList === "function" && !window.__notusMobileGroupsWrapped){
-      const originalRenderPeopleList = renderPeopleList;
-      renderPeopleList = function(){
-        const result = originalRenderPeopleList.apply(this,arguments);
-        Promise.resolve().then(decorateChatList);
-        return result;
-      };
-      window.__notusMobileGroupsWrapped = true;
-    }
-  }catch(err){
-    console.warn("Group list integration:",err);
-  }
+  /* Groups now live OUTSIDE workspaceChatList.
+     Direct chat re-renders can no longer delete/repaint Groups. */
 
   /* =========================================================
      DOCUMENTS
@@ -10391,6 +10822,51 @@ window.openOutsideApp = function(rawUrl){
   requestAnimationFrame(()=>{
     if(session()?.company_id) initExtras();
   });
+})();
+</script>
+
+
+<script id="notus-mobile-shift-restored-session-start">
+window.addEventListener("DOMContentLoaded",()=>{
+  try{
+    const s = window.notusSession || (typeof getNotusSession==="function" ? getNotusSession() : null);
+    if(s?.company_id && typeof startNotusMobileShiftWatcher==="function"){
+      startNotusMobileShiftWatcher();
+    }
+  }catch(_e){}
+});
+</script>
+
+
+<script id="notus-mobile-profile-shift-js">
+(function(){
+  async function paintMyMobileShift(){
+    const el=document.getElementById("mobileProfileShiftTime");
+    if(!el || typeof notusMobileLoadMyShift!=="function") return;
+    try{
+      const shift=await notusMobileLoadMyShift(true);
+      if(!shift){
+        el.textContent="Not Assigned";
+        return;
+      }
+      const start=typeof notusMobileFormatShiftTime==="function"
+        ? notusMobileFormatShiftTime(shift.shift_start_time)
+        : String(shift.shift_start_time||"");
+      const end=typeof notusMobileFormatShiftTime==="function"
+        ? notusMobileFormatShiftTime(shift.shift_end_time)
+        : String(shift.shift_end_time||"");
+      const name=String(shift.shift_name||"").trim();
+      el.textContent=[start&&end?`${start} - ${end}`:"",name].filter(Boolean).join(" · ")||"Not Assigned";
+    }catch(_e){
+      el.textContent="Not Assigned";
+    }
+  }
+
+  document.getElementById("workspaceProfileBtn")?.addEventListener("click",()=>{
+    setTimeout(paintMyMobileShift,0);
+  });
+
+  window.paintMyMobileShift=paintMyMobileShift;
 })();
 </script>
 
