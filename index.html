@@ -4427,16 +4427,15 @@ html,body{
         </div>
         <div class="mobile-role-field">
           <label>Date &amp; Time</label>
-          <div class="mobile-datetime-combo">
-            <div class="mobile-datetime-part mobile-datetime-date">
-              <i class="fa-regular fa-calendar"></i>
+          <div class="mobile-native-datetime-row">
+            <label class="mobile-native-date-item">
+              <span><i class="fa-regular fa-calendar"></i> Date</span>
               <input id="mobileMeetingDate" type="date" required aria-label="Meeting date">
-            </div>
-            <div class="mobile-datetime-divider"></div>
-            <div class="mobile-datetime-part mobile-datetime-time">
-              <i class="fa-regular fa-clock"></i>
+            </label>
+            <label class="mobile-native-date-item">
+              <span><i class="fa-regular fa-clock"></i> Time</span>
               <input id="mobileMeetingTime" type="time" required aria-label="Meeting time">
-            </div>
+            </label>
           </div>
         </div>
         <div class="mobile-role-field">
@@ -4489,10 +4488,10 @@ html,body{
         </div>
         <div class="mobile-role-field">
           <label>Due Date &amp; Time</label>
-          <div class="mobile-task-datetime-box">
-            <i class="fa-regular fa-calendar-check"></i>
+          <label class="mobile-native-task-due">
+            <span><i class="fa-regular fa-calendar-check"></i> Select due date &amp; time</span>
             <input id="mobileTaskDue" type="datetime-local" aria-label="Task due date and time">
-          </div>
+          </label>
         </div>
       </div>
       <div class="mobile-role-sheet-foot">
@@ -13878,6 +13877,365 @@ html,body{
   };
 })();
 </script>
+
+
+<style id="notus-native-bottom-sheet-clean-final">
+
+/* =====================================================
+   CREATE MEETING + ASSIGN TASK — CLEAN NATIVE BOTTOM SHEET
+   no floating card / no boxy field UI
+   ===================================================== */
+
+#mobileCreateMeetingOverlay,
+#mobileCreateTaskOverlay{
+  position:fixed!important;
+  inset:0!important;
+  display:flex!important;
+  align-items:flex-end!important;
+  justify-content:center!important;
+  padding:0!important;
+  background:rgba(15,18,17,.22)!important;
+  overflow:hidden!important;
+}
+
+#mobileCreateMeetingOverlay:not(.show),
+#mobileCreateTaskOverlay:not(.show){
+  display:none!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-sheet,
+#mobileCreateTaskOverlay .mobile-role-sheet{
+  width:100%!important;
+  max-width:560px!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:91dvh!important;
+  margin:0!important;
+
+  display:flex!important;
+  flex-direction:column!important;
+
+  background:#fff!important;
+  border:0!important;
+  border-radius:24px 24px 0 0!important;
+  box-shadow:0 -12px 40px rgba(20,26,30,.13)!important;
+  overflow:hidden!important;
+}
+
+/* Native sheet handle */
+#mobileCreateMeetingOverlay .mobile-role-sheet::before,
+#mobileCreateTaskOverlay .mobile-role-sheet::before{
+  content:"";
+  width:36px;
+  height:4px;
+  margin:9px auto 2px;
+  border-radius:999px;
+  background:#d7dcda;
+  flex:0 0 auto;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-sheet-head,
+#mobileCreateTaskOverlay .mobile-role-sheet-head{
+  min-height:auto!important;
+  padding:10px 18px 14px!important;
+  border-bottom:1px solid #f0f2f1!important;
+  background:#fff!important;
+  flex:0 0 auto!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-sheet-head h3,
+#mobileCreateTaskOverlay .mobile-role-sheet-head h3{
+  font-size:18px!important;
+  line-height:1.2!important;
+  font-weight:650!important;
+  letter-spacing:-.3px!important;
+  color:#161918!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-sheet-head p,
+#mobileCreateTaskOverlay .mobile-role-sheet-head p{
+  margin-top:4px!important;
+  font-size:9.5px!important;
+  line-height:1.45!important;
+  color:#87908c!important;
+}
+
+/* clean circular close */
+#mobileCreateMeetingOverlay .mobile-role-sheet-head > button,
+#mobileCreateTaskOverlay .mobile-role-sheet-head > button{
+  width:32px!important;
+  height:32px!important;
+  flex:0 0 32px!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:#f3f5f4!important;
+  color:#515a56!important;
+  display:grid!important;
+  place-items:center!important;
+}
+
+/* body */
+#mobileCreateMeetingOverlay .mobile-role-sheet-body,
+#mobileCreateTaskOverlay .mobile-role-sheet-body{
+  flex:0 1 auto!important;
+  min-height:0!important;
+  max-height:calc(91dvh - 145px)!important;
+  padding:7px 18px 4px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  scrollbar-width:none!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-sheet-body::-webkit-scrollbar,
+#mobileCreateTaskOverlay .mobile-role-sheet-body::-webkit-scrollbar{
+  display:none!important;
+}
+
+/* No card-like boxes for fields */
+#mobileCreateMeetingOverlay .mobile-role-field,
+#mobileCreateTaskOverlay .mobile-role-field{
+  margin:0!important;
+  padding:13px 0 11px!important;
+  border-bottom:1px solid #edf0ef!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-field:last-child,
+#mobileCreateTaskOverlay .mobile-role-field:last-child{
+  border-bottom:0!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-field > label,
+#mobileCreateTaskOverlay .mobile-role-field > label{
+  display:block!important;
+  margin:0 0 6px!important;
+  font-size:9px!important;
+  line-height:1.2!important;
+  font-weight:700!important;
+  color:#6d7672!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-field input,
+#mobileCreateMeetingOverlay .mobile-role-field select,
+#mobileCreateMeetingOverlay .mobile-role-field textarea,
+#mobileCreateTaskOverlay .mobile-role-field input,
+#mobileCreateTaskOverlay .mobile-role-field select,
+#mobileCreateTaskOverlay .mobile-role-field textarea{
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:none!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#181c1a!important;
+  font-family:"Inter",sans-serif!important;
+  font-size:12px!important;
+  font-weight:550!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-field input,
+#mobileCreateMeetingOverlay .mobile-role-field select,
+#mobileCreateTaskOverlay .mobile-role-field input,
+#mobileCreateTaskOverlay .mobile-role-field select{
+  height:30px!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-field textarea,
+#mobileCreateTaskOverlay .mobile-role-field textarea{
+  min-height:72px!important;
+  max-height:130px!important;
+  line-height:1.55!important;
+  resize:none!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-field input:focus,
+#mobileCreateMeetingOverlay .mobile-role-field select:focus,
+#mobileCreateMeetingOverlay .mobile-role-field textarea:focus,
+#mobileCreateTaskOverlay .mobile-role-field input:focus,
+#mobileCreateTaskOverlay .mobile-role-field select:focus,
+#mobileCreateTaskOverlay .mobile-role-field textarea:focus{
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+
+/* ===== Meeting Date + Time: two clean columns, NO outer box ===== */
+#mobileCreateMeetingOverlay .mobile-native-datetime-row{
+  width:100%;
+  min-width:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,.8fr);
+  gap:20px;
+  padding-top:2px;
+}
+
+#mobileCreateMeetingOverlay .mobile-native-date-item{
+  min-width:0;
+  display:block;
+  margin:0!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-native-date-item > span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-bottom:5px;
+  font-size:9px;
+  font-weight:700;
+  color:#7a837f;
+}
+
+#mobileCreateMeetingOverlay .mobile-native-date-item > span i{
+  font-size:11px;
+}
+
+#mobileCreateMeetingOverlay .mobile-native-date-item input{
+  width:100%!important;
+  min-width:0!important;
+  height:32px!important;
+  padding:0 0 5px!important;
+  border:0!important;
+  border-bottom:1px solid #dfe4e2!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  font-size:11px!important;
+  font-weight:600!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-native-date-item:focus-within input{
+  border-bottom-color:#171b19!important;
+}
+
+/* ===== Task due date/time: clean native line, no box ===== */
+#mobileCreateTaskOverlay .mobile-native-task-due{
+  display:block!important;
+  width:100%;
+  min-width:0;
+  margin:0!important;
+}
+
+#mobileCreateTaskOverlay .mobile-native-task-due > span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-bottom:5px;
+  font-size:9px;
+  font-weight:700;
+  color:#7a837f;
+}
+
+#mobileCreateTaskOverlay .mobile-native-task-due input{
+  width:100%!important;
+  min-width:0!important;
+  height:34px!important;
+  padding:0 0 5px!important;
+  border:0!important;
+  border-bottom:1px solid #dfe4e2!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  font-size:11px!important;
+  font-weight:600!important;
+}
+
+#mobileCreateTaskOverlay .mobile-native-task-due:focus-within input{
+  border-bottom-color:#171b19!important;
+}
+
+/* Native date/time controls should not overflow */
+#mobileCreateMeetingOverlay input[type="date"],
+#mobileCreateMeetingOverlay input[type="time"],
+#mobileCreateTaskOverlay input[type="datetime-local"]{
+  min-inline-size:0!important;
+  max-inline-size:100%!important;
+}
+
+#mobileCreateMeetingOverlay input[type="date"]::-webkit-calendar-picker-indicator,
+#mobileCreateMeetingOverlay input[type="time"]::-webkit-calendar-picker-indicator,
+#mobileCreateTaskOverlay input[type="datetime-local"]::-webkit-calendar-picker-indicator{
+  opacity:.58;
+  margin:0;
+  padding:2px;
+}
+
+/* footer stays attached to bottom of sheet */
+#mobileCreateMeetingOverlay .mobile-role-sheet-foot,
+#mobileCreateTaskOverlay .mobile-role-sheet-foot{
+  flex:0 0 auto!important;
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:10px!important;
+  padding:11px 18px calc(11px + env(safe-area-inset-bottom))!important;
+  border-top:1px solid #edf0ef!important;
+  background:#fff!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-secondary,
+#mobileCreateMeetingOverlay .mobile-role-primary,
+#mobileCreateTaskOverlay .mobile-role-secondary,
+#mobileCreateTaskOverlay .mobile-role-primary{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:44px!important;
+  margin:0!important;
+  padding:0 12px!important;
+  border-radius:10px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-size:10px!important;
+  font-weight:700!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-secondary,
+#mobileCreateTaskOverlay .mobile-role-secondary{
+  background:#f4f6f5!important;
+  border:0!important;
+  color:#4f5854!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-primary,
+#mobileCreateTaskOverlay .mobile-role-primary{
+  background:#151817!important;
+  border:0!important;
+  color:#fff!important;
+}
+
+/* Never horizontal scroll */
+#mobileCreateMeetingOverlay,
+#mobileCreateTaskOverlay,
+#mobileCreateMeetingOverlay .mobile-role-sheet,
+#mobileCreateTaskOverlay .mobile-role-sheet,
+#mobileCreateMeetingOverlay .mobile-role-sheet-body,
+#mobileCreateTaskOverlay .mobile-role-sheet-body,
+#mobileCreateMeetingOverlay .mobile-role-field,
+#mobileCreateTaskOverlay .mobile-role-field{
+  max-width:100%!important;
+  overflow-x:hidden!important;
+}
+
+@media(max-width:360px){
+  #mobileCreateMeetingOverlay .mobile-native-datetime-row{
+    gap:12px;
+    grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);
+  }
+
+  #mobileCreateMeetingOverlay .mobile-role-sheet-head,
+  #mobileCreateMeetingOverlay .mobile-role-sheet-body,
+  #mobileCreateMeetingOverlay .mobile-role-sheet-foot,
+  #mobileCreateTaskOverlay .mobile-role-sheet-head,
+  #mobileCreateTaskOverlay .mobile-role-sheet-body,
+  #mobileCreateTaskOverlay .mobile-role-sheet-foot{
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+}
+</style>
 
 </body>
 </html>
