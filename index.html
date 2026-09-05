@@ -21,7 +21,6 @@
 />
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 
@@ -3868,20 +3867,6 @@ html,body{
 
 
 <style id="notus-mobile-payslip-final-css">
-.mobile-payroll-payslip-row{
-  margin-top:12px;padding-top:11px;border-top:1px solid #eef1ef;
-  display:flex;justify-content:flex-end;
-}
-.mobile-payroll-generate{
-  min-width:112px;height:38px;padding:0 13px;border:0;border-radius:10px;
-  background:#171717;color:#fff;font-family:"Inter",sans-serif;font-size:9px;font-weight:700;
-  display:inline-flex;align-items:center;justify-content:center;gap:7px;
-}
-.mobile-payroll-generate:disabled{opacity:.6}
-.mobile-payroll-generated{
-  min-height:36px;padding:0 10px;border-radius:10px;background:#eef7f0;color:#477154;
-  display:inline-flex;align-items:center;gap:7px;font-size:8px;font-weight:800;
-}
 .mobile-payslip-body{padding:14px 14px calc(24px + env(safe-area-inset-bottom))!important}
 .mobile-payslip-owner{
   background:#fff;border:1px solid #e7ebe9;border-radius:14px;padding:14px 15px;
@@ -3992,6 +3977,37 @@ html,body{
   .mobile-slip-doc-title{font-size:16px}
   .mobile-slip-table td{padding:7px 5px;font-size:7px}
 }
+</style>
+
+
+<style id="notus-mobile-simple-pay-view-css">
+.mobile-payslip-body{padding:10px 14px calc(22px + env(safe-area-inset-bottom))!important}
+.mobile-payslip-owner{
+  background:transparent!important;border:0!important;border-radius:0!important;
+  padding:8px 2px 12px!important;margin-bottom:0!important;
+  border-bottom:1px solid #e7ebe9!important;
+}
+.mobile-payslip-list{display:block!important}
+.mobile-payslip-card{
+  background:transparent!important;border:0!important;border-radius:0!important;
+  padding:15px 2px!important;border-bottom:1px solid #e7ebe9!important;
+}
+.mobile-payslip-card-top{align-items:center!important}
+.mobile-payslip-card-status{display:none!important}
+.mobile-payslip-card-grid{
+  margin-top:10px!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;
+}
+.mobile-payslip-card-cell{
+  background:transparent!important;border:0!important;border-radius:0!important;padding:0!important;
+}
+.mobile-payslip-card-cell span{font-size:7.5px!important;color:#929a97!important}
+.mobile-payslip-card-cell b{font-size:10px!important;margin-top:4px!important}
+.mobile-payslip-card-net{
+  margin-top:12px!important;padding:0!important;background:transparent!important;border-radius:0!important;
+}
+.mobile-payslip-card-net span{font-size:8px!important}
+.mobile-payslip-card-net b{font-size:15px!important}
+.mobile-payslip-view{display:none!important}
 </style>
 
 </head>
@@ -4652,120 +4668,7 @@ html,body{
     <div class="mobile-task-list" id="mobileTaskList"></div>
   </div>
 </section>
-
-<section class="mobile-role-screen" id="mobilePayrollScreen" aria-hidden="true">
-  <header class="mobile-role-head mobile-payroll-head">
-    <button class="mobile-role-back" id="mobilePayrollBack" type="button"><i class="fa-solid fa-arrow-left"></i></button>
-    <div class="mobile-role-head-copy">
-      <h2>Payroll</h2>
-      <p>Monthly attendance and work summary</p>
-    </div>
-  </header>
-
-  <div class="mobile-role-body mobile-payroll-body">
-    <div class="mobile-payroll-month-card">
-      <label for="mobilePayrollMonth">Payroll Month</label>
-      <div class="mobile-payroll-select-wrap">
-        <i class="fa-regular fa-calendar"></i>
-        <select id="mobilePayrollMonth"></select>
-      </div>
-    </div>
-
-    <div class="mobile-payroll-summary">
-      <div class="mobile-payroll-summary-item">
-        <span>People</span>
-        <b id="mobilePayrollPeople">0</b>
-      </div>
-      <div class="mobile-payroll-summary-item">
-        <span>Monthly Salary</span>
-        <b id="mobilePayrollSalaryTotal">₹0</b>
-      </div>
-      <div class="mobile-payroll-summary-item">
-        <span>Attendance Earned</span>
-        <b id="mobilePayrollEarnedTotal">₹0</b>
-      </div>
-      <div class="mobile-payroll-summary-item">
-        <span>Bonus</span>
-        <b id="mobilePayrollBonusTotal">₹0</b>
-      </div>
-    </div>
-
-    <div class="mobile-payroll-search">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input id="mobilePayrollSearch" placeholder="Search team member">
-    </div>
-
-    <div class="mobile-payroll-list" id="mobilePayrollList"></div>
-    <div class="mobile-payroll-empty" id="mobilePayrollEmpty" hidden>
-      <i class="fa-regular fa-credit-card"></i>
-      <b>No payroll data</b>
-      <span>Payroll data for this month will appear here.</span>
-    </div>
-
-    <section class="mobile-payroll-bonus-box">
-      <div class="mobile-payroll-bonus-title">
-        <i class="fa-solid fa-gift"></i>
-        <div>
-          <b>Bonus</b>
-          <span>Select month and team member</span>
-        </div>
-      </div>
-
-      <form id="mobilePayrollBonusForm">
-        <div class="mobile-payroll-field">
-          <label>Month</label>
-          <div class="mobile-payroll-field-control">
-            <i class="fa-regular fa-calendar"></i>
-            <select id="mobilePayrollBonusMonth" required></select>
-          </div>
-        </div>
-
-        <div class="mobile-payroll-field">
-          <label>Team Member</label>
-          <div class="mobile-payroll-field-control">
-            <i class="fa-regular fa-user"></i>
-            <select id="mobilePayrollBonusMember" required>
-              <option value="">Select person</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="mobile-payroll-field">
-          <label>Amount</label>
-          <div class="mobile-payroll-field-control mobile-payroll-money-control">
-            <span>₹</span>
-            <input id="mobilePayrollBonusAmount" type="number" min="0" step="0.01" placeholder="0" required>
-          </div>
-        </div>
-
-        <div class="mobile-payroll-field">
-          <label>Note <small>optional</small></label>
-          <div class="mobile-payroll-field-control">
-            <i class="fa-regular fa-note-sticky"></i>
-            <input id="mobilePayrollBonusNote" maxlength="180" placeholder="Bonus note">
-          </div>
-        </div>
-
-        <button class="mobile-payroll-add-bonus" id="mobilePayrollBonusSave" type="submit">
-          <i class="fa-solid fa-plus"></i>
-          Add Bonus
-        </button>
-      </form>
-
-      <div class="mobile-payroll-history-head">
-        <div>
-          <b>Added Bonuses</b>
-          <span>Saved for selected payroll month</span>
-        </div>
-        <small id="mobilePayrollBonusCount">0 entries</small>
-      </div>
-
-      <div id="mobilePayrollBonusHistory"></div>
-      <div class="mobile-payroll-bonus-empty" id="mobilePayrollBonusEmpty">
-        No bonus adjustments for this month.
-      </div>
-    </section>
-  </div>
+</div>
 </section>
 
 
@@ -4773,14 +4676,14 @@ html,body{
   <header class="mobile-role-head">
     <button class="mobile-role-back" id="mobilePayslipBack" type="button"><i class="fa-solid fa-arrow-left"></i></button>
     <div class="mobile-role-head-copy">
-      <h2>Payslip</h2>
-      <p>View your generated monthly salary payslips</p>
+      <h2>Pay View</h2>
+      <p>Your salary details</p>
     </div>
   </header>
   <div class="mobile-role-body mobile-payslip-body">
     <div class="mobile-payslip-owner">
-      <div><span>My Payslips</span><b id="mobilePayslipOwnerName">—</b></div>
-      <div class="mobile-payslip-owner-count"><span>Generated</span><b id="mobilePayslipCount">0</b></div>
+      <div><span>Pay Details</span><b id="mobilePayslipOwnerName">—</b></div>
+      <div class="mobile-payslip-owner-count"><span>Records</span><b id="mobilePayslipCount">0</b></div>
     </div>
     <div class="mobile-payslip-list" id="mobilePayslipList"></div>
     <div class="mobile-payslip-empty" id="mobilePayslipEmpty" hidden>
@@ -4790,21 +4693,6 @@ html,body{
     </div>
   </div>
 </section>
-
-<section class="mobile-payslip-viewer" id="mobilePayslipViewer" aria-hidden="true">
-  <header class="mobile-payslip-viewer-head">
-    <button class="mobile-payslip-viewer-back" id="mobilePayslipViewerBack" type="button"><i class="fa-solid fa-arrow-left"></i></button>
-    <div class="mobile-payslip-viewer-title">
-      <h2>Payslip</h2>
-      <p id="mobilePayslipViewerMonth">—</p>
-    </div>
-    <button class="mobile-payslip-download" id="mobilePayslipDownload" type="button">
-      <i class="fa-solid fa-download"></i> PDF
-    </button>
-  </header>
-  <div class="mobile-payslip-document" id="mobilePayslipDocument"></div>
-</section>
-
 <div class="mobile-role-overlay" id="mobileCreateGroupOverlay" aria-hidden="true">
   <div class="mobile-role-sheet">
     <div class="mobile-role-sheet-head">
@@ -5020,7 +4908,7 @@ html,body{
 
     <button class="profile-quick-item" id="mobilePayslipAction" type="button" data-profile-action="payslip">
       <span class="profile-quick-icon"><i class="fa-regular fa-file-lines"></i></span>
-      <span class="profile-quick-text">Pay Slip</span>
+      <span class="profile-quick-text">Pay View</span>
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
     </button>
 
@@ -12692,7 +12580,6 @@ function showLoginDutyToast(message){
   /* ===================== EVENTS ===================== */
   $("mobilePeopleBack")?.addEventListener("click",()=>closeScreen("mobilePeopleScreen"));
   $("mobileTasksBack")?.addEventListener("click",()=>closeScreen("mobileTasksScreen"));
-  $("mobilePayrollBack")?.addEventListener("click",()=>closeScreen("mobilePayrollScreen"));
   $("mobilePayslipBack")?.addEventListener("click",()=>closeScreen("mobilePayslipScreen"));
 
   $("mobileCreateGroupClose")?.addEventListener("click",()=>closeOverlay("mobileCreateGroupOverlay"));
@@ -12777,7 +12664,6 @@ function showLoginDutyToast(message){
     ["mobileGroupChatScreen","mobileGroupChatBack"],
     ["mobilePeopleScreen","mobilePeopleBack"],
     ["mobileTasksScreen","mobileTasksBack"],
-    ["mobilePayrollScreen","mobilePayrollBack"],
     ["mobilePayslipScreen","mobilePayslipBack"]
   ];
 
@@ -15730,7 +15616,6 @@ function render(){
     <article class="mobile-payslip-card">
       <div class="mobile-payslip-card-top">
         <div class="mobile-payslip-card-month">${esc(monthLabel(x.payroll_month))}</div>
-        <span class="mobile-payslip-card-status"><i class="fa-solid fa-check"></i> Generated</span>
       </div>
       <div class="mobile-payslip-card-grid">
         <div class="mobile-payslip-card-cell"><span>Monthly Salary</span><b>${money(x.monthly_salary)}</b></div>
@@ -15739,9 +15624,7 @@ function render(){
         <div class="mobile-payslip-card-cell"><span>Generated On</span><b>${esc(generatedAt(x.generated_at))}</b></div>
       </div>
       <div class="mobile-payslip-card-net"><span>Net Salary</span><b>${money(x.net_salary)}</b></div>
-      <button class="mobile-payslip-view" type="button" data-mobile-payslip-view="${esc(x.id)}"><i class="fa-regular fa-eye"></i> View Payslip</button>
     </article>`).join("");
-  list.querySelectorAll("[data-mobile-payslip-view]").forEach(b=>b.addEventListener("click",()=>openPayslip(b.dataset.mobilePayslipView)));
 }
 async function load(){
   try{
@@ -15762,117 +15645,9 @@ async function load(){
     if(list)list.innerHTML='<div class="mobile-payslip-empty"><i class="fa-solid fa-triangle-exclamation"></i><b>Payslip database is not ready</b><span>Run the updated Payslip SQL once.</span></div>';
   }
 }
-function documentHtml(x){
-  const d=new Date(String(x.payroll_month||"").slice(0,10)+"T00:00:00");
-  const y=d.getFullYear(),m=d.getMonth();
-  const f=n=>n.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
-  const period=`${f(new Date(y,m,1))} - ${f(new Date(y,m+1,0))}`;
-  return `<div class="mobile-slip-paper" id="mobilePayslipPdfPaper">
-    <div class="mobile-slip-header">
-      <div class="mobile-slip-company">
-        <div class="mobile-slip-logo">
-          ${x.company_logo_url?`<img src="${esc(x.company_logo_url)}" alt="Company logo" crossorigin="anonymous" onerror="this.style.display='none'">`:`<i class="fa-regular fa-building"></i>`}
-        </div>
-        <div>
-          <div class="mobile-slip-company-name">${esc(x.company_brand_name||x.company_name||"Company")}</div>
-          <div class="mobile-slip-company-location">${esc(x.branch_location||x.company_location||x.company_address||"")}</div>
-        </div>
-      </div>
-      <div class="mobile-slip-doc">
-        <div class="mobile-slip-doc-title">PAYSLIP</div>
-        <div class="mobile-slip-doc-month">${esc(monthLabel(x.payroll_month))}</div>
-        <div class="mobile-slip-doc-period">${esc(period)}</div>
-      </div>
-    </div>
 
-    <div class="mobile-slip-employee-head">
-      <div>
-        <div class="mobile-slip-employee-name">${esc(x.member_name||"—")}</div>
-        <div class="mobile-slip-employee-role">${esc(x.member_role||"—")}${x.job_type?` · ${esc(x.job_type)}`:""}</div>
-      </div>
-    </div>
-
-    <section class="mobile-slip-section">
-      <div class="mobile-slip-section-title">Employee Details</div>
-      <table class="mobile-slip-table"><tbody>
-        <tr><td>Employee Name</td><td>${esc(x.member_name||"—")}</td><td>Designation</td><td>${esc(x.member_role||"—")}</td></tr>
-        <tr><td>Email</td><td>${esc(x.member_email||"—")}</td><td>Employment Type</td><td>${esc(x.job_type||"—")}</td></tr>
-        <tr><td>Company Email</td><td>${esc(x.company_email||"—")}</td><td>Company Mobile</td><td>${esc(x.company_mobile||"—")}</td></tr>
-      </tbody></table>
-    </section>
-
-    <section class="mobile-slip-section">
-      <div class="mobile-slip-section-title">Bank Details</div>
-      <table class="mobile-slip-table"><tbody>
-        <tr><td>Bank Name</td><td>${esc(x.bank_name||"—")}</td><td>Branch Name</td><td>${esc(x.bank_branch_name||"—")}</td></tr>
-        <tr><td>Account Holder</td><td>${esc(x.account_holder_name||"—")}</td><td>Account Number</td><td>${esc(x.bank_account_number||"—")}</td></tr>
-        <tr><td>IFSC Code</td><td>${esc(String(x.bank_ifsc_code||"—").toUpperCase())}</td><td>Transfer Type</td><td>Bank Transfer</td></tr>
-      </tbody></table>
-    </section>
-
-    <section class="mobile-slip-section">
-      <div class="mobile-slip-section-title">Salary Details</div>
-      <table class="mobile-slip-table mobile-slip-salary">
-        <thead><tr><th>Description</th><th>Amount</th></tr></thead>
-        <tbody>
-          <tr><td>Monthly Salary</td><td>${money(x.monthly_salary)}</td></tr>
-          <tr><td>Attendance Earned</td><td>${money(x.attendance_earned)}</td></tr>
-          <tr><td>Bonus</td><td>${money(x.bonus_amount)}</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <div class="mobile-slip-net">
-      <div><span>Net Salary Payable</span><small>For ${esc(period)}</small></div>
-      <b>${money(x.net_salary)}</b>
-    </div>
-
-    <div class="mobile-slip-generated">
-      <div><span>Generated On</span><b>${esc(generatedAt(x.generated_at))}</b></div>
-      <div><span>Generated By</span><b>${esc(x.generated_by_name||"Company")}</b></div>
-    </div>
-
-    <div class="mobile-slip-note">
-      This is a computer-generated payslip and does not require a signature.
-      Salary information is based on the payroll and attendance records available for the stated period.
-    </div>
-  </div>`;
-}
-function openPayslip(id){
-  const x=rows.find(r=>String(r.id)===String(id));if(!x)return;
-  active=x;
-  $("mobilePayslipViewerMonth").textContent=monthLabel(x.payroll_month);
-  $("mobilePayslipDocument").innerHTML=documentHtml(x);
-  const v=$("mobilePayslipViewer");v.classList.add("show");v.setAttribute("aria-hidden","false");
-}
-function closeViewer(){
-  const v=$("mobilePayslipViewer");v.classList.remove("show");v.setAttribute("aria-hidden","true");active=null;
-}
-async function download(){
-  const paper=$("mobilePayslipPdfPaper"),btn=$("mobilePayslipDownload");if(!paper||!active)return;
-  if(typeof html2pdf!=="function"){window.showToast?.("PDF library could not load.");return}
-  const old=btn.innerHTML;btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> PDF';
-  try{
-    const logo=paper.querySelector("img");
-    if(logo&&!logo.complete)await new Promise(r=>{const done=()=>r();logo.addEventListener("load",done,{once:true});logo.addEventListener("error",done,{once:true});setTimeout(done,1600)});
-    const name=(safe(active.member_name)||"Employee").replace(/[^a-z0-9_-]+/gi,"-");
-    await html2pdf().set({
-      margin:[8,8,8,8],
-      filename:`${name}-${fileMonth(active.payroll_month)}-Payslip.pdf`,
-      image:{type:"jpeg",quality:.98},
-      html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff"},
-      jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
-      pagebreak:{mode:["avoid-all","css","legacy"]}
-    }).from(paper).save();
-  }catch(err){
-    console.error("Mobile payslip PDF:",err);
-    window.showToast?.("Unable to download PDF.");
-  }finally{btn.disabled=false;btn.innerHTML=old}
-}
 document.addEventListener("DOMContentLoaded",()=>{
   $("mobilePayslipBack")?.addEventListener("click",closeScreen);
-  $("mobilePayslipViewerBack")?.addEventListener("click",closeViewer);
-  $("mobilePayslipDownload")?.addEventListener("click",download);
 });
 window.openMobilePayslipScreen=openScreen;
 window.loadMobilePayslips=load;
