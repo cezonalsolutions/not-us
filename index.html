@@ -13578,5 +13578,306 @@ html,body{
 
 </style>
 
+
+<style id="notus-meeting-task-final-polish">
+
+/* ===== Shared native-like bottom sheet ===== */
+#mobileCreateMeetingOverlay,
+#mobileCreateTaskOverlay{
+  position:fixed!important;
+  inset:0!important;
+  display:flex!important;
+  align-items:flex-end!important;
+  justify-content:center!important;
+  padding:0 8px calc(8px + env(safe-area-inset-bottom))!important;
+  background:rgba(17,22,20,.22)!important;
+  backdrop-filter:blur(1.5px)!important;
+  -webkit-backdrop-filter:blur(1.5px)!important;
+  overflow:hidden!important;
+}
+
+#mobileCreateMeetingOverlay:not(.show),
+#mobileCreateTaskOverlay:not(.show){
+  display:none!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-sheet,
+#mobileCreateTaskOverlay .mobile-role-sheet{
+  width:100%!important;
+  max-width:520px!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:90dvh!important;
+  margin:0 auto!important;
+  display:flex!important;
+  flex-direction:column!important;
+  background:#fff!important;
+  border:1px solid #e5eae8!important;
+  border-radius:24px 24px 14px 14px!important;
+  box-shadow:0 22px 70px rgba(20,26,30,.20)!important;
+  overflow:hidden!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-sheet::before,
+#mobileCreateTaskOverlay .mobile-role-sheet::before{
+  content:"";
+  width:38px;
+  height:4px;
+  margin:9px auto 1px;
+  border-radius:20px;
+  background:#d7dcda;
+  flex:0 0 auto;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-sheet-head,
+#mobileCreateTaskOverlay .mobile-role-sheet-head{
+  padding:11px 17px 13px!important;
+  min-height:auto!important;
+  flex:0 0 auto!important;
+  border-bottom:1px solid #edf0ef!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-sheet-head h3,
+#mobileCreateTaskOverlay .mobile-role-sheet-head h3{
+  font-size:17px!important;
+  font-weight:650!important;
+  letter-spacing:-.25px!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-sheet-head p,
+#mobileCreateTaskOverlay .mobile-role-sheet-head p{
+  margin-top:4px!important;
+  font-size:9px!important;
+  line-height:1.45!important;
+  color:#8b9490!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-sheet-body,
+#mobileCreateTaskOverlay .mobile-role-sheet-body{
+  flex:0 1 auto!important;
+  min-height:0!important;
+  max-height:calc(90dvh - 145px)!important;
+  padding:15px 17px 4px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  scrollbar-width:none!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-sheet-body::-webkit-scrollbar,
+#mobileCreateTaskOverlay .mobile-role-sheet-body::-webkit-scrollbar{
+  display:none!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-field,
+#mobileCreateTaskOverlay .mobile-role-field{
+  margin-bottom:13px!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-field label,
+#mobileCreateTaskOverlay .mobile-role-field label{
+  display:block!important;
+  margin-bottom:7px!important;
+  font-size:9px!important;
+  font-weight:700!important;
+  color:#424a47!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-field input,
+#mobileCreateMeetingOverlay .mobile-role-field select,
+#mobileCreateMeetingOverlay .mobile-role-field textarea,
+#mobileCreateTaskOverlay .mobile-role-field input,
+#mobileCreateTaskOverlay .mobile-role-field select,
+#mobileCreateTaskOverlay .mobile-role-field textarea{
+  width:100%!important;
+  min-width:0!important;
+  border:1px solid #dfe5e2!important;
+  border-radius:12px!important;
+  background:#fbfcfc!important;
+  color:#202523!important;
+  box-shadow:none!important;
+  outline:none!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-field input,
+#mobileCreateMeetingOverlay .mobile-role-field select,
+#mobileCreateTaskOverlay .mobile-role-field input,
+#mobileCreateTaskOverlay .mobile-role-field select{
+  height:46px!important;
+  padding:0 13px!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-field textarea,
+#mobileCreateTaskOverlay .mobile-role-field textarea{
+  min-height:98px!important;
+  padding:12px 13px!important;
+  line-height:1.5!important;
+  resize:vertical!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-field input:focus,
+#mobileCreateMeetingOverlay .mobile-role-field select:focus,
+#mobileCreateMeetingOverlay .mobile-role-field textarea:focus,
+#mobileCreateTaskOverlay .mobile-role-field input:focus,
+#mobileCreateTaskOverlay .mobile-role-field select:focus,
+#mobileCreateTaskOverlay .mobile-role-field textarea:focus{
+  background:#fff!important;
+  border-color:#0f766e!important;
+  box-shadow:0 0 0 3px rgba(15,118,110,.06)!important;
+}
+
+/* Date & Time single clean boxes */
+#mobileCreateMeetingOverlay .mobile-datetime-combo,
+#mobileCreateTaskOverlay .mobile-task-datetime-box{
+  border:1px solid #dfe5e2!important;
+  border-radius:12px!important;
+  background:#fbfcfc!important;
+  min-height:46px!important;
+  box-shadow:none!important;
+}
+
+/* Equal footer buttons */
+#mobileCreateMeetingOverlay .mobile-role-sheet-foot,
+#mobileCreateTaskOverlay .mobile-role-sheet-foot{
+  flex:0 0 auto!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  gap:9px!important;
+  padding:12px 17px calc(12px + env(safe-area-inset-bottom))!important;
+  border-top:1px solid #edf0ef!important;
+  background:#fff!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-secondary,
+#mobileCreateMeetingOverlay .mobile-role-primary,
+#mobileCreateTaskOverlay .mobile-role-secondary,
+#mobileCreateTaskOverlay .mobile-role-primary{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:45px!important;
+  margin:0!important;
+  border-radius:11px!important;
+  font-size:10px!important;
+  font-weight:700!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-secondary,
+#mobileCreateTaskOverlay .mobile-role-secondary{
+  background:#f7f8f8!important;
+  border:1px solid #dde3e0!important;
+  color:#4f5955!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-role-primary,
+#mobileCreateTaskOverlay .mobile-role-primary{
+  background:#171717!important;
+  border:1px solid #171717!important;
+  color:#fff!important;
+}
+
+/* ===== Employee / assignee avatar rows ===== */
+.mobile-person-row,
+.mobile-member-option,
+.mobile-role-person,
+.mobile-task-assignee-option{
+  min-width:0!important;
+}
+
+.mobile-person-avatar,
+.mobile-member-avatar,
+.mobile-role-person-avatar,
+.mobile-task-assignee-avatar{
+  width:40px!important;
+  height:40px!important;
+  flex:0 0 40px!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  background:#f1f4f2!important;
+  border:1px solid #e3e8e5!important;
+  display:grid!important;
+  place-items:center!important;
+}
+
+.mobile-person-avatar img,
+.mobile-member-avatar img,
+.mobile-role-person-avatar img,
+.mobile-task-assignee-avatar img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  display:block!important;
+}
+
+/* absolutely no initials/letters inside employee avatars */
+.mobile-person-avatar > span,
+.mobile-member-avatar > span,
+.mobile-role-person-avatar > span,
+.mobile-task-assignee-avatar > span{
+  display:none!important;
+}
+
+@media(max-width:390px){
+  #mobileCreateMeetingOverlay,
+  #mobileCreateTaskOverlay{
+    padding-left:6px!important;
+    padding-right:6px!important;
+  }
+  #mobileCreateMeetingOverlay .mobile-role-sheet-head,
+  #mobileCreateMeetingOverlay .mobile-role-sheet-body,
+  #mobileCreateMeetingOverlay .mobile-role-sheet-foot,
+  #mobileCreateTaskOverlay .mobile-role-sheet-head,
+  #mobileCreateTaskOverlay .mobile-role-sheet-body,
+  #mobileCreateTaskOverlay .mobile-role-sheet-foot{
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+}
+</style>
+
+
+<script id="notus-mobile-employee-image-helper">
+(function(){
+  const FALLBACK =
+    (window.NOTUS_DEFAULT_EMPLOYEE_AVATAR ||
+     window.NOTUS_DEFAULT_AVATAR ||
+     window.NOTUS_COMPANY_LOGO ||
+     "");
+
+  window.notusResolvePersonImage = function(p){
+    if(!p) return FALLBACK;
+    return (
+      p.profile_image ||
+      p.profile_image_url ||
+      p.profile_url ||
+      p.profile_pic ||
+      p.profile_photo ||
+      p.photo_url ||
+      p.image_url ||
+      p.image ||
+      p.avatar_url ||
+      p.avatar ||
+      p.employee_image ||
+      p.member_image ||
+      p.admin_profile_url ||
+      FALLBACK ||
+      ""
+    );
+  };
+
+  window.notusPersonAvatarHtml = function(p, cls){
+    const image = window.notusResolvePersonImage(p);
+    const klass = cls || "mobile-person-avatar";
+    if(image){
+      return `<div class="${klass}"><img src="${String(image).replace(/"/g,"&quot;")}" alt="" onerror="this.style.display='none';this.parentElement.classList.add('notus-avatar-fallback')"></div>`;
+    }
+    return `<div class="${klass}"><i class="fa-regular fa-user"></i></div>`;
+  };
+})();
+</script>
+
 </body>
 </html>
