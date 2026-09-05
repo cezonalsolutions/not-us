@@ -3704,6 +3704,167 @@ html,body{
 @media(max-width:380px){.mobile-attendance-meta{grid-template-columns:1fr 1fr}.mobile-attendance-meta div:last-child{grid-column:1/-1}}
 </style>
 
+
+<style id="notus-mobile-payroll-live-css">
+.mobile-payroll-body{
+  padding:14px 14px calc(26px + env(safe-area-inset-bottom))!important;
+  background:#f7f9f8!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+}
+.mobile-payroll-month-card{
+  background:#fff;border:1px solid #e7ebe9;border-radius:14px;padding:13px;
+}
+.mobile-payroll-month-card>label,
+.mobile-payroll-field>label{
+  display:block;margin:0 0 7px;font-size:9px;font-weight:700;color:#56615d;
+}
+.mobile-payroll-select-wrap,
+.mobile-payroll-field-control{
+  width:100%;height:44px;border:1px solid #dfe5e2;border-radius:11px;
+  background:#fff;display:flex;align-items:center;gap:10px;padding:0 12px;
+}
+.mobile-payroll-select-wrap i,
+.mobile-payroll-field-control>i{font-size:12px;color:#8b9591;flex:0 0 auto}
+.mobile-payroll-select-wrap select,
+.mobile-payroll-field-control select,
+.mobile-payroll-field-control input{
+  min-width:0;width:100%;height:100%;border:0;outline:0;background:transparent;
+  font-family:"Inter",sans-serif;font-size:12px;font-weight:600;color:#202523;
+}
+.mobile-payroll-summary{
+  display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:11px;
+}
+.mobile-payroll-summary-item{
+  min-width:0;background:#fff;border:1px solid #e7ebe9;border-radius:13px;padding:12px;
+}
+.mobile-payroll-summary-item span{display:block;font-size:8px;color:#8a9490}
+.mobile-payroll-summary-item b{
+  display:block;margin-top:7px;font-family:"Outfit",sans-serif;font-size:15px;
+  color:#202523;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.mobile-payroll-search{
+  margin-top:11px;height:44px;border:1px solid #e4e9e7;border-radius:12px;
+  background:#fff;display:flex;align-items:center;gap:10px;padding:0 13px;
+}
+.mobile-payroll-search i{font-size:12px;color:#909995}
+.mobile-payroll-search input{
+  flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;
+  font-family:"Inter",sans-serif;font-size:12px;color:#202523;
+}
+.mobile-payroll-list{margin-top:11px}
+.mobile-payroll-card{
+  background:#fff;border:1px solid #e7ebe9;border-radius:14px;
+  padding:14px;margin-bottom:10px;
+}
+.mobile-payroll-person{
+  display:flex;align-items:center;gap:11px;padding-bottom:12px;border-bottom:1px solid #eef1ef;
+}
+.mobile-payroll-avatar{
+  width:42px;height:42px;flex:0 0 42px;border-radius:12px;background:#eef5f3;
+  display:grid;place-items:center;color:#0f766e;overflow:hidden;font-size:14px;
+}
+.mobile-payroll-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.mobile-payroll-person-copy{min-width:0;flex:1}
+.mobile-payroll-person-copy b{
+  display:block;font-size:12px;color:#202523;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.mobile-payroll-person-copy span{
+  display:block;margin-top:3px;font-size:8.5px;color:#8a9490;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.mobile-payroll-role-pill{
+  flex:0 0 auto;padding:5px 8px;border-radius:999px;background:#f3f6f5;
+  font-size:7px;font-weight:700;color:#59635f;
+}
+.mobile-payroll-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px;
+}
+.mobile-payroll-cell{
+  min-width:0;border:1px solid #edf0ef;border-radius:10px;padding:10px;background:#fafbfb;
+}
+.mobile-payroll-cell span{display:block;font-size:7px;color:#929b97;margin-bottom:4px}
+.mobile-payroll-cell b{
+  display:block;font-size:10px;color:#303633;word-break:break-word;
+}
+.mobile-payroll-task-progress{margin-top:11px}
+.mobile-payroll-task-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  font-size:8px;color:#7d8783;
+}
+.mobile-payroll-task-row b{font-size:9px;color:#303633}
+.mobile-payroll-task-bar{
+  height:5px;margin-top:7px;border-radius:999px;background:#edf1ef;overflow:hidden;
+}
+.mobile-payroll-task-bar span{display:block;height:100%;background:#0f766e;border-radius:inherit}
+.mobile-payroll-total{
+  margin-top:11px;padding-top:11px;border-top:1px solid #eef1ef;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.mobile-payroll-total span{font-size:8px;color:#7f8985}
+.mobile-payroll-total b{font-family:"Outfit",sans-serif;font-size:15px;color:#171717}
+.mobile-payroll-empty{
+  min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;color:#929b97;padding:24px;
+}
+.mobile-payroll-empty i{font-size:21px;margin-bottom:10px;color:#aab3af}
+.mobile-payroll-empty b{font-size:11px;color:#3c433f}
+.mobile-payroll-empty span{margin-top:5px;font-size:8px}
+.mobile-payroll-bonus-box{
+  margin-top:14px;background:#fff;border:1px solid #e7ebe9;border-radius:14px;overflow:hidden;
+}
+.mobile-payroll-bonus-title{
+  min-height:58px;padding:11px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eef1ef;
+}
+.mobile-payroll-bonus-title>i{
+  width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:#f2f6f5;
+  display:grid;place-items:center;color:#0f766e;font-size:12px;
+}
+.mobile-payroll-bonus-title b{display:block;font-size:11px;color:#202523}
+.mobile-payroll-bonus-title span{display:block;margin-top:3px;font-size:7.5px;color:#929b97}
+#mobilePayrollBonusForm{padding:14px}
+.mobile-payroll-field{margin-bottom:11px}
+.mobile-payroll-field label small{font-size:7px;font-weight:500;color:#a0a8a4}
+.mobile-payroll-money-control{padding-left:0}
+.mobile-payroll-money-control>span{
+  width:35px;height:100%;flex:0 0 35px;border-right:1px solid #edf0ef;
+  display:grid;place-items:center;font-size:11px;font-weight:700;color:#626c67;
+}
+.mobile-payroll-money-control input{padding-left:10px!important}
+.mobile-payroll-add-bonus{
+  width:100%;height:45px;border:0;border-radius:11px;background:#171717;color:#fff;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-family:"Inter",sans-serif;font-size:10px;font-weight:700;
+}
+.mobile-payroll-add-bonus:disabled{opacity:.55}
+.mobile-payroll-history-head{
+  min-height:52px;padding:0 14px;border-top:1px solid #eef1ef;border-bottom:1px solid #eef1ef;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.mobile-payroll-history-head b{display:block;font-size:9px;color:#303633}
+.mobile-payroll-history-head span{display:block;margin-top:3px;font-size:7px;color:#929b97}
+.mobile-payroll-history-head small{
+  padding:5px 8px;border-radius:999px;background:#f4f6f5;font-size:7px;color:#757e7a;font-weight:700;
+}
+.mobile-payroll-bonus-row{
+  padding:12px 14px;border-bottom:1px solid #f0f2f1;
+}
+.mobile-payroll-bonus-row:last-child{border-bottom:0}
+.mobile-payroll-bonus-row-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.mobile-payroll-bonus-row b{font-size:9px;color:#2b312e}
+.mobile-payroll-bonus-row .amount{font-size:10px;color:#356348;font-weight:800}
+.mobile-payroll-bonus-row span{display:block;margin-top:4px;font-size:7.5px;color:#8e9793}
+.mobile-payroll-bonus-actions{margin-top:9px}
+.mobile-payroll-remove-bonus{
+  height:32px;padding:0 10px;border:1px solid #eddede;border-radius:9px;
+  background:#fff7f7;color:#a94b4b;font-family:"Inter",sans-serif;font-size:8px;font-weight:700;
+}
+.mobile-payroll-bonus-empty{
+  min-height:74px;display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:16px;font-size:8px;color:#969e9a;
+}
+.mobile-payroll-soft-loading{opacity:.65;pointer-events:none;transition:opacity .16s ease}
+</style>
+
 </head>
 
 <body>
@@ -4364,19 +4525,117 @@ html,body{
 </section>
 
 <section class="mobile-role-screen" id="mobilePayrollScreen" aria-hidden="true">
-  <header class="mobile-role-head">
+  <header class="mobile-role-head mobile-payroll-head">
     <button class="mobile-role-back" id="mobilePayrollBack" type="button"><i class="fa-solid fa-arrow-left"></i></button>
     <div class="mobile-role-head-copy">
       <h2>Payroll</h2>
-      <p>Salary and payroll workspace</p>
+      <p>Monthly attendance and work summary</p>
     </div>
   </header>
-  <div class="mobile-role-body">
-    <div class="mobile-role-empty">
-      <i class="fa-regular fa-credit-card"></i>
-      <b>Payroll</b>
-      <span>This module is ready for the next step.</span>
+
+  <div class="mobile-role-body mobile-payroll-body">
+    <div class="mobile-payroll-month-card">
+      <label for="mobilePayrollMonth">Payroll Month</label>
+      <div class="mobile-payroll-select-wrap">
+        <i class="fa-regular fa-calendar"></i>
+        <select id="mobilePayrollMonth"></select>
+      </div>
     </div>
+
+    <div class="mobile-payroll-summary">
+      <div class="mobile-payroll-summary-item">
+        <span>People</span>
+        <b id="mobilePayrollPeople">0</b>
+      </div>
+      <div class="mobile-payroll-summary-item">
+        <span>Monthly Salary</span>
+        <b id="mobilePayrollSalaryTotal">₹0</b>
+      </div>
+      <div class="mobile-payroll-summary-item">
+        <span>Attendance Earned</span>
+        <b id="mobilePayrollEarnedTotal">₹0</b>
+      </div>
+      <div class="mobile-payroll-summary-item">
+        <span>Bonus</span>
+        <b id="mobilePayrollBonusTotal">₹0</b>
+      </div>
+    </div>
+
+    <div class="mobile-payroll-search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input id="mobilePayrollSearch" placeholder="Search team member">
+    </div>
+
+    <div class="mobile-payroll-list" id="mobilePayrollList"></div>
+    <div class="mobile-payroll-empty" id="mobilePayrollEmpty" hidden>
+      <i class="fa-regular fa-credit-card"></i>
+      <b>No payroll data</b>
+      <span>Payroll data for this month will appear here.</span>
+    </div>
+
+    <section class="mobile-payroll-bonus-box">
+      <div class="mobile-payroll-bonus-title">
+        <i class="fa-solid fa-gift"></i>
+        <div>
+          <b>Bonus</b>
+          <span>Select month and team member</span>
+        </div>
+      </div>
+
+      <form id="mobilePayrollBonusForm">
+        <div class="mobile-payroll-field">
+          <label>Month</label>
+          <div class="mobile-payroll-field-control">
+            <i class="fa-regular fa-calendar"></i>
+            <select id="mobilePayrollBonusMonth" required></select>
+          </div>
+        </div>
+
+        <div class="mobile-payroll-field">
+          <label>Team Member</label>
+          <div class="mobile-payroll-field-control">
+            <i class="fa-regular fa-user"></i>
+            <select id="mobilePayrollBonusMember" required>
+              <option value="">Select person</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mobile-payroll-field">
+          <label>Amount</label>
+          <div class="mobile-payroll-field-control mobile-payroll-money-control">
+            <span>₹</span>
+            <input id="mobilePayrollBonusAmount" type="number" min="0" step="0.01" placeholder="0" required>
+          </div>
+        </div>
+
+        <div class="mobile-payroll-field">
+          <label>Note <small>optional</small></label>
+          <div class="mobile-payroll-field-control">
+            <i class="fa-regular fa-note-sticky"></i>
+            <input id="mobilePayrollBonusNote" maxlength="180" placeholder="Bonus note">
+          </div>
+        </div>
+
+        <button class="mobile-payroll-add-bonus" id="mobilePayrollBonusSave" type="submit">
+          <i class="fa-solid fa-plus"></i>
+          Add Bonus
+        </button>
+      </form>
+
+      <div class="mobile-payroll-history-head">
+        <div>
+          <b>Added Bonuses</b>
+          <span>Saved for selected payroll month</span>
+        </div>
+        <small id="mobilePayrollBonusCount">0 entries</small>
+      </div>
+
+      <div id="mobilePayrollBonusHistory"></div>
+      <div class="mobile-payroll-bonus-empty" id="mobilePayrollBonusEmpty">
+        No bonus adjustments for this month.
+      </div>
+    </section>
   </div>
 </section>
 
@@ -11637,11 +11896,9 @@ function showLoginDutyToast(message){
     show("mobileLeaveAction",["employee","hr","team_lead","manager","technical_supporter"].includes(t));
     show("mobileAttendanceAction",["employee","hr","team_lead","manager","technical_supporter"].includes(t));
 
-    /* Payroll is visible on web for HR, Manager, Team Lead/Employee workspace,
-       plus IT / Technical Supporter limited workspaces. */
-    show("mobilePayrollAction",[
-      "employee","hr","team_lead","manager","it_admin","technical_supporter"
-    ].includes(t));
+    /* Payroll is restricted to Company Admin + HR.
+       Other roles use their own Pay Slip only. */
+    show("mobilePayrollAction",["admin","hr"].includes(t));
 
     /* Payslip is visible to every logged-in web role. */
     show("mobilePayslipAction",allCore.includes(t));
@@ -12301,7 +12558,7 @@ function showLoginDutyToast(message){
     else if(action==="tasks"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openTasks()}
     else if(action==="employees"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openPeople("employees")}
     else if(action==="hr"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openPeople("hr")}
-    else if(action==="payroll"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openScreen("mobilePayrollScreen")}
+    else if(action==="payroll"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openScreen("mobilePayrollScreen");window.loadMobilePayroll?.()}
     else if(action==="work-report"){
       e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();
       const tab=document.getElementById("workspaceTabWorkReport");
@@ -14783,6 +15040,303 @@ body:has(.chat-screen.show){
       try{ window.scrollTo(0,0); }catch(_e){}
     },40);
   });
+})();
+</script>
+
+
+<script id="notus-mobile-payroll-live-js">
+(function(){
+  "use strict";
+  const $=id=>document.getElementById(id);
+  const safe=v=>String(v??"").trim();
+  const norm=v=>safe(v).toLowerCase().replace(/[_-]+/g," ");
+  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+  const money=v=>"₹"+Number(v||0).toLocaleString("en-IN",{maximumFractionDigits:2});
+  const round=v=>Math.round((Number(v||0)+Number.EPSILON)*100)/100;
+  const state={month:"",people:[],rows:[],bonuses:[],loading:false};
+
+  function ses(){
+    try{return window.notusSession||window.session||JSON.parse(localStorage.getItem("notus_company_session")||"{}")||{}}
+    catch(_){return window.notusSession||window.session||{}}
+  }
+  function actorType(){
+    const s=ses(),t=norm(s.user_type||s.login_type),r=norm(s.role);
+    if(["company admin","admin","administrator","company"].includes(t)||["company admin","admin","administrator"].includes(r))return"admin";
+    if(["hr","hr member"].includes(t)||r==="hr")return"hr";
+    return t||r;
+  }
+  function actorId(){
+    const s=ses();
+    return actorType()==="hr"?safe(s.hr_id||s.member_id||s.id):safe(s.company_id);
+  }
+  function actorName(){
+    const s=ses();return safe(s.full_name||s.company_name||s.gmail||s.email||"Administrator");
+  }
+  function allowed(){return["admin","hr"].includes(actorType())}
+  function key(d=new Date()){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`}
+  function label(k){const [y,m]=k.split("-").map(Number);return new Date(y,m-1,1).toLocaleDateString("en-IN",{month:"long",year:"numeric"})}
+  function start(k){return`${k}-01`}
+  function next(k){const [y,m]=k.split("-").map(Number),d=new Date(y,m,1);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`}
+  function pkey(t,id){return`${t}:${safe(id)}`}
+
+  function buildMonths(id,preferred){
+    const el=$(id);if(!el)return;
+    const n=new Date(),want=preferred||el.value||$("mobilePayrollMonth")?.value||state.month||key();
+    let h="";
+    for(let i=0;i<36;i++){
+      const d=new Date(n.getFullYear(),n.getMonth()-i,1),k=key(d);
+      h+=`<option value="${k}" ${k===want?"selected":""}>${label(k)}</option>`;
+    }
+    el.innerHTML=h;
+    if([...el.options].some(o=>o.value===want))el.value=want;
+  }
+
+  function shiftHours(sh){
+    const parse=v=>{const a=safe(v).split(":");if(a.length<2)return null;const h=+a[0],m=+a[1];return Number.isFinite(h)&&Number.isFinite(m)?h*60+m:null};
+    const a=parse(sh?.shift_start_time),b=parse(sh?.shift_end_time);
+    if(a===null||b===null)return 8;
+    let mins=b-a;if(mins<=0)mins+=1440;
+    return Math.max(.25,mins/60);
+  }
+
+  function eligibleDays(joining,k){
+    const [y,m]=k.split("-").map(Number),end=new Date(y,m,0);
+    let begin=new Date(y,m-1,1);
+    if(joining){
+      const j=new Date(String(joining).slice(0,10)+"T00:00:00");
+      if(!Number.isNaN(j.getTime())&&j>begin)begin=j;
+    }
+    if(begin>end)return 0;
+    return Math.max(0,Math.min(30,Math.floor((end-begin)/86400000)+1));
+  }
+
+  function worked(row,k){
+    const lo=new Date(start(k)+"T00:00:00").getTime(),hi=new Date(next(k)+"T00:00:00").getTime();
+    let a=new Date(row.login_time).getTime(),b=row.logout_time?new Date(row.logout_time).getTime():Date.now();
+    if(!Number.isFinite(a)||!Number.isFinite(b))return 0;
+    a=Math.max(a,lo);b=Math.min(b,hi);
+    return Math.max(0,(b-a)/3600000);
+  }
+
+  function role(p){
+    if(p.member_type==="hr")return safe(p.role||"HR");
+    const r=safe(p.role||"Employee");
+    return norm(r)==="employee"?safe(p.designation||"Employee"):r;
+  }
+
+  async function people(){
+    const s=ses(),cid=safe(s.company_id);if(!cid)return[];
+    const [er,hr,sr]=await Promise.all([
+      db.from("employees").select("id,company_id,branch_id,full_name,email,role,designation,job_type,status,salary,joining_date,profile_image_url").eq("company_id",cid),
+      db.from("hr_members").select("id,company_id,branch_id,full_name,email,role,job_type,status,salary,joining_date,profile_image_url").eq("company_id",cid),
+      db.from("notus_user_shifts").select("member_id,member_type,shift_name,shift_start_time,shift_end_time,is_active,updated_at").eq("company_id",cid).eq("is_active",true)
+    ]);
+    if(er.error)throw er.error;if(hr.error)throw hr.error;
+    let es=(er.data||[]).map(x=>({...x,member_type:"employee"}));
+    let hs=(hr.data||[]).map(x=>({...x,member_type:"hr"}));
+    if(actorType()==="hr"){
+      const branch=safe(s.branch_id),me=actorId();
+      if(branch)es=es.filter(x=>safe(x.branch_id)===branch);
+      hs=hs.filter(x=>safe(x.id)===me||(branch&&safe(x.branch_id)===branch));
+    }
+    const sm=new Map();
+    (sr.data||[]).forEach(x=>{
+      const t=norm(x.member_type)==="hr"?"hr":"employee";
+      sm.set(pkey(t,x.member_id),x);
+    });
+    return [...es,...hs].filter(x=>norm(x.status)!=="deleted").map(x=>({...x,shift:sm.get(pkey(x.member_type,x.id))||null})).sort((a,b)=>safe(a.full_name).localeCompare(safe(b.full_name)));
+  }
+
+  async function attendance(k){
+    const s=ses();
+    const r=await db.from("notus_attendance_logs").select("member_type,member_id,attendance_date,login_time,logout_time").eq("company_id",s.company_id).gte("attendance_date",start(k)).lt("attendance_date",next(k));
+    if(r.error)throw r.error;return r.data||[];
+  }
+
+  async function tasks(k){
+    const s=ses();
+    try{
+      const r=await db.from("notus_tasks").select("*").eq("company_id",s.company_id);
+      if(r.error)throw r.error;
+      const lo=new Date(start(k)+"T00:00:00").getTime(),hi=new Date(next(k)+"T00:00:00").getTime();
+      return(r.data||[]).filter(x=>{
+        const stamp=x.due_at||x.submitted_at||x.created_at||x.updated_at;
+        if(!stamp)return true;
+        const ms=new Date(stamp).getTime();
+        return!Number.isFinite(ms)||(ms>=lo&&ms<hi);
+      });
+    }catch(e){console.warn("Mobile payroll tasks:",e);return[]}
+  }
+
+  async function bonuses(k){
+    const s=ses();
+    const r=await db.from("notus_payroll_bonuses").select("*").eq("company_id",s.company_id).eq("payroll_month",start(k)).order("updated_at",{ascending:false});
+    if(r.error)throw r.error;return r.data||[];
+  }
+
+  function aggregate(ps,ats,ts,bs,k){
+    const am=new Map(),tm=new Map(),bm=new Map();
+    ats.forEach(x=>{const t=norm(x.member_type)==="hr"?"hr":"employee",kk=pkey(t,x.member_id);am.set(kk,(am.get(kk)||0)+worked(x,k))});
+    ts.forEach(x=>{
+      const id=safe(x.assignee_id||x.member_id||x.employee_id);if(!id)return;
+      const kk=pkey("employee",id),v=tm.get(kk)||{total:0,completed:0};v.total++;
+      if(["completed","complete","done","submitted","approved"].includes(norm(x.status)))v.completed++;
+      tm.set(kk,v);
+    });
+    bs.forEach(x=>{const t=norm(x.member_type)==="hr"?"hr":"employee",kk=pkey(t,x.member_id);bm.set(kk,(bm.get(kk)||0)+Number(x.bonus_amount||0))});
+    return ps.map(p=>{
+      const kk=pkey(p.member_type,p.id),salary=Math.max(0,Number(p.salary||0)),per=shiftHours(p.shift),days=eligibleDays(p.joining_date,k);
+      const wh=round(am.get(kk)||0),expected=round(per*days),hourly=salary>0?(salary/30)/per:0,earned=salary>0?round(Math.min(salary,wh*hourly)):0,bonus=round(bm.get(kk)||0),task=tm.get(kk)||{total:0,completed:0};
+      return{...p,displayRole:role(p),salary,per,days,wh,expected,hourly,earned,bonus,total:round(earned+bonus),task};
+    });
+  }
+
+  function render(){
+    const list=$("mobilePayrollList"),empty=$("mobilePayrollEmpty");if(!list)return;
+    const q=norm($("mobilePayrollSearch")?.value);
+    const rows=state.rows.filter(x=>!q||[x.full_name,x.email,x.displayRole,x.job_type].some(v=>norm(v).includes(q)));
+    if(!rows.length){list.innerHTML="";if(empty)empty.hidden=false;return}
+    if(empty)empty.hidden=true;
+    list.innerHTML=rows.map(x=>{
+      const pct=x.task.total?Math.min(100,Math.round(x.task.completed/x.task.total*100)):0;
+      return`<article class="mobile-payroll-card">
+        <div class="mobile-payroll-person">
+          <div class="mobile-payroll-avatar">${x.profile_image_url?`<img src="${esc(x.profile_image_url)}" alt="">`:`<i class="fa-regular fa-user"></i>`}</div>
+          <div class="mobile-payroll-person-copy"><b>${esc(x.full_name||"—")}</b><span>${esc(x.email||"")}</span></div>
+          <span class="mobile-payroll-role-pill">${esc(x.displayRole||"—")}</span>
+        </div>
+        <div class="mobile-payroll-grid">
+          <div class="mobile-payroll-cell"><span>Monthly Salary</span><b>${x.salary?money(x.salary):"Trainee"}</b></div>
+          <div class="mobile-payroll-cell"><span>Worked Hours</span><b>${x.wh.toFixed(2)}h</b></div>
+          <div class="mobile-payroll-cell"><span>Expected Hours</span><b>${x.expected.toFixed(2)}h</b></div>
+          <div class="mobile-payroll-cell"><span>Attendance Earned</span><b>${money(x.earned)}</b></div>
+          <div class="mobile-payroll-cell"><span>Bonus</span><b>${money(x.bonus)}</b></div>
+          <div class="mobile-payroll-cell"><span>Hourly Rate</span><b>${x.salary?money(x.hourly):"—"}</b></div>
+        </div>
+        <div class="mobile-payroll-task-progress">
+          <div class="mobile-payroll-task-row"><span>Task Progress</span><b>${x.task.completed}/${x.task.total} completed</b></div>
+          <div class="mobile-payroll-task-bar"><span style="width:${pct}%"></span></div>
+        </div>
+        <div class="mobile-payroll-total"><span>Estimated Pay</span><b>${money(x.total)}</b></div>
+      </article>`;
+    }).join("");
+  }
+
+  function summary(){
+    const set=(id,v)=>{const e=$(id);if(e)e.textContent=v},r=state.rows;
+    set("mobilePayrollPeople",r.length);
+    set("mobilePayrollSalaryTotal",money(r.reduce((a,x)=>a+x.salary,0)));
+    set("mobilePayrollEarnedTotal",money(r.reduce((a,x)=>a+x.earned,0)));
+    set("mobilePayrollBonusTotal",money(r.reduce((a,x)=>a+x.bonus,0)));
+  }
+
+  function memberOptions(){
+    const e=$("mobilePayrollBonusMember");if(!e)return;
+    const old=e.value;
+    e.innerHTML='<option value="">Select person</option>'+state.people.map(x=>`<option value="${x.member_type}|${esc(x.id)}">${esc(x.full_name||"—")} — ${esc(role(x))}</option>`).join("");
+    if([...e.options].some(o=>o.value===old))e.value=old;
+  }
+
+  function bonusHistory(){
+    const box=$("mobilePayrollBonusHistory"),empty=$("mobilePayrollBonusEmpty"),count=$("mobilePayrollBonusCount");if(!box)return;
+    if(count)count.textContent=`${state.bonuses.length} ${state.bonuses.length===1?"entry":"entries"}`;
+    if(!state.bonuses.length){box.innerHTML="";if(empty)empty.style.display="flex";return}
+    if(empty)empty.style.display="none";
+    const pm=new Map(state.people.map(x=>[pkey(x.member_type,x.id),x]));
+    box.innerHTML=state.bonuses.map(x=>{
+      const t=norm(x.member_type)==="hr"?"hr":"employee",p=pm.get(pkey(t,x.member_id));
+      return`<div class="mobile-payroll-bonus-row">
+        <div class="mobile-payroll-bonus-row-top">
+          <div><b>${esc(p?.full_name||x.member_name||"Team member")}</b><span>${esc(p?role(p):(x.member_role||t))}</span></div>
+          <div class="amount">${money(x.bonus_amount)}</div>
+        </div>
+        <span>${esc(x.bonus_note||"Bonus")}</span>
+        <div class="mobile-payroll-bonus-actions">
+          <button class="mobile-payroll-remove-bonus" type="button" data-mobile-remove-bonus="${esc(x.id)}"><i class="fa-regular fa-trash-can"></i> Remove</button>
+        </div>
+      </div>`;
+    }).join("");
+    box.querySelectorAll("[data-mobile-remove-bonus]").forEach(b=>b.addEventListener("click",()=>removeBonus(b.dataset.mobileRemoveBonus,b)));
+  }
+
+  async function load(force=false){
+    if(!allowed())return;
+    if(state.loading&&!force)return state.loading;
+    if(!$("mobilePayrollMonth")?.options.length)buildMonths("mobilePayrollMonth");
+    if(!$("mobilePayrollBonusMonth")?.options.length)buildMonths("mobilePayrollBonusMonth");
+    state.month=$("mobilePayrollMonth")?.value||key();
+    const body=$("mobilePayrollScreen")?.querySelector(".mobile-payroll-body");
+    if(body)body.classList.add("mobile-payroll-soft-loading");
+    state.loading=(async()=>{
+      try{
+        const ps=await people();
+        const [a,t,b]=await Promise.all([attendance(state.month),tasks(state.month),bonuses(state.month)]);
+        state.people=ps;state.bonuses=b;state.rows=aggregate(ps,a,t,b,state.month);
+        summary();memberOptions();bonusHistory();render();
+      }catch(err){
+        console.error("Mobile payroll:",err);
+        if(!state.rows.length){
+          const list=$("mobilePayrollList");
+          if(list)list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-triangle-exclamation"></i><b>Payroll database is not ready</b><span>Run the Payroll SQL once.</span></div>';
+        }
+      }finally{
+        state.loading=false;
+        if(body)body.classList.remove("mobile-payroll-soft-loading");
+      }
+    })();
+    return state.loading;
+  }
+
+  async function saveBonus(e){
+    e.preventDefault();if(!allowed())return;
+    const raw=safe($("mobilePayrollBonusMember")?.value),amount=Number($("mobilePayrollBonusAmount")?.value||0),note=safe($("mobilePayrollBonusNote")?.value),month=$("mobilePayrollBonusMonth")?.value||state.month,btn=$("mobilePayrollBonusSave");
+    if(!raw.includes("|")||!Number.isFinite(amount)||amount<0)return;
+    const [type,id]=raw.split("|"),p=state.people.find(x=>x.member_type===type&&safe(x.id)===safe(id));if(!p)return;
+    const s=ses();btn.disabled=true;
+    try{
+      const r=await db.from("notus_payroll_bonuses").upsert({
+        company_id:s.company_id,payroll_month:start(month),member_type:type,member_id:String(id),
+        member_name:p.full_name||null,member_role:role(p)||null,bonus_amount:round(amount),bonus_note:note||null,
+        added_by_type:actorType(),added_by_id:actorId()||null,added_by_name:actorName()||null,updated_at:new Date().toISOString()
+      },{onConflict:"company_id,payroll_month,member_type,member_id"});
+      if(r.error)throw r.error;
+      $("mobilePayrollBonusForm")?.reset();
+      $("mobilePayrollMonth").value=month;state.month=month;
+      buildMonths("mobilePayrollBonusMonth",month);
+      if(typeof window.showToast==="function")window.showToast("Bonus saved.");
+      await load(true);
+    }catch(err){
+      console.error(err);
+      if(typeof window.showToast==="function")window.showToast(err?.message||"Unable to save bonus.");
+    }finally{btn.disabled=false}
+  }
+
+  async function removeBonus(id,btn){
+    if(!id||!allowed())return;const s=ses(),old=btn.innerHTML;btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Removing';
+    try{
+      const r=await db.from("notus_payroll_bonuses").delete().eq("id",id).eq("company_id",s.company_id);
+      if(r.error)throw r.error;
+      if(typeof window.showToast==="function")window.showToast("Bonus removed.");
+      await load(true);
+    }catch(err){
+      console.error(err);
+      if(typeof window.showToast==="function")window.showToast(err?.message||"Unable to remove bonus.");
+    }finally{btn.disabled=false;btn.innerHTML=old}
+  }
+
+  document.addEventListener("DOMContentLoaded",()=>{
+    buildMonths("mobilePayrollMonth");
+    buildMonths("mobilePayrollBonusMonth");
+    $("mobilePayrollMonth")?.addEventListener("change",()=>{
+      const m=$("mobilePayrollMonth").value;
+      if($("mobilePayrollBonusMonth"))$("mobilePayrollBonusMonth").value=m;
+      load(true);
+    });
+    $("mobilePayrollSearch")?.addEventListener("input",render);
+    $("mobilePayrollBonusForm")?.addEventListener("submit",saveBonus);
+  });
+
+  window.loadMobilePayroll=load;
 })();
 </script>
 
