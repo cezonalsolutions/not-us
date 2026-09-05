@@ -3999,6 +3999,13 @@ html,body{
 }
 </style>
 
+
+<style id="notus-mobile-add-task-hidden-fix">
+.mobile-role-head-action[hidden]{
+  display:none!important;
+}
+</style>
+
 </head>
 
 <body>
@@ -11858,7 +11865,7 @@ function showLoginDutyToast(message){
   }
 
   function canAssignTasks(){
-    return ["hr","manager","team_lead"].includes(actorType());
+    return ["admin","hr","manager","team_lead"].includes(actorType());
   }
 
   function showToast(message){
