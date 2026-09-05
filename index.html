@@ -4425,14 +4425,18 @@ html,body{
           <label>Title</label>
           <input id="mobileMeetingTitle" maxlength="120" placeholder="Meeting title" required>
         </div>
-        <div class="mobile-role-grid-2">
-          <div class="mobile-role-field">
-            <label>Date</label>
-            <input id="mobileMeetingDate" type="date" required>
-          </div>
-          <div class="mobile-role-field">
-            <label>Time</label>
-            <input id="mobileMeetingTime" type="time" required>
+        <div class="mobile-role-field">
+          <label>Date &amp; Time</label>
+          <div class="mobile-datetime-combo">
+            <div class="mobile-datetime-part mobile-datetime-date">
+              <i class="fa-regular fa-calendar"></i>
+              <input id="mobileMeetingDate" type="date" required aria-label="Meeting date">
+            </div>
+            <div class="mobile-datetime-divider"></div>
+            <div class="mobile-datetime-part mobile-datetime-time">
+              <i class="fa-regular fa-clock"></i>
+              <input id="mobileMeetingTime" type="time" required aria-label="Meeting time">
+            </div>
           </div>
         </div>
         <div class="mobile-role-field">
@@ -12992,6 +12996,157 @@ function showWorkspaceDutyToast(message){
   .mobile-role-grid-2{
     grid-template-columns:1fr 1fr!important;
     gap:8px!important;
+  }
+}
+
+</style>
+
+
+<style id="notus-single-datetime-no-horizontal-scroll">
+
+html,body{
+  max-width:100%;
+  overflow-x:hidden!important;
+}
+
+.workspace-screen,
+.workspace-main,
+.mobile-role-screen,
+.mobile-role-overlay,
+.mobile-role-sheet,
+.mobile-role-sheet-body,
+.mobile-leave-overlay,
+.mobile-leave-sheet,
+.mobile-leave-form{
+  max-width:100%!important;
+  overflow-x:hidden!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-datetime-combo{
+  width:100%;
+  min-width:0;
+  height:48px;
+
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 1px minmax(0,.82fr);
+  align-items:center;
+
+  border:1px solid #dfe5e2;
+  border-radius:12px;
+
+  background:#fbfcfc;
+
+  overflow:hidden;
+
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
+}
+
+#mobileCreateMeetingOverlay .mobile-datetime-combo:focus-within{
+  background:#fff;
+  border-color:#0f766e;
+  box-shadow:0 0 0 3px rgba(15,118,110,.06);
+}
+
+#mobileCreateMeetingOverlay .mobile-datetime-part{
+  min-width:0;
+  height:100%;
+
+  display:flex;
+  align-items:center;
+
+  gap:7px;
+  padding:0 10px;
+}
+
+#mobileCreateMeetingOverlay .mobile-datetime-part i{
+  flex:0 0 auto;
+  font-size:12px;
+  color:#7c8783;
+}
+
+#mobileCreateMeetingOverlay .mobile-datetime-part input{
+  min-width:0!important;
+  width:100%!important;
+  height:100%!important;
+
+  padding:0!important;
+  margin:0!important;
+
+  border:0!important;
+  border-radius:0!important;
+
+  background:transparent!important;
+  box-shadow:none!important;
+  outline:none!important;
+
+  font-family:"Inter",sans-serif!important;
+  font-size:10px!important;
+  font-weight:600!important;
+
+  color:#202523!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-datetime-part input:focus{
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+
+#mobileCreateMeetingOverlay .mobile-datetime-divider{
+  width:1px;
+  height:26px;
+  background:#e4e8e6;
+  justify-self:center;
+}
+
+/* Prevent native date/time controls from forcing horizontal width */
+#mobileCreateMeetingOverlay input[type="date"],
+#mobileCreateMeetingOverlay input[type="time"]{
+  min-inline-size:0!important;
+  max-inline-size:100%!important;
+}
+
+/* Chromium/WebView date/time internals */
+#mobileCreateMeetingOverlay input[type="date"]::-webkit-date-and-time-value,
+#mobileCreateMeetingOverlay input[type="time"]::-webkit-date-and-time-value{
+  text-align:left;
+  min-width:0;
+}
+
+#mobileCreateMeetingOverlay input[type="date"]::-webkit-calendar-picker-indicator,
+#mobileCreateMeetingOverlay input[type="time"]::-webkit-calendar-picker-indicator{
+  margin:0;
+  padding:0;
+  width:16px;
+  height:16px;
+  opacity:.62;
+}
+
+/* Keep every form control inside the sheet width */
+#mobileCreateMeetingOverlay .mobile-role-field,
+#mobileCreateMeetingOverlay .mobile-role-sheet-body,
+#mobileCreateMeetingOverlay form{
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+}
+
+@media(max-width:360px){
+  #mobileCreateMeetingOverlay .mobile-datetime-combo{
+    grid-template-columns:minmax(0,1.08fr) 1px minmax(0,.92fr);
+  }
+
+  #mobileCreateMeetingOverlay .mobile-datetime-part{
+    gap:5px;
+    padding-left:8px;
+    padding-right:8px;
+  }
+
+  #mobileCreateMeetingOverlay .mobile-datetime-part input{
+    font-size:9px!important;
   }
 }
 
