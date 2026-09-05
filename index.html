@@ -12654,5 +12654,348 @@ function showWorkspaceDutyToast(message){
 })();
 </script>
 
+
+<style id="notus-all-sheets-unified-ui">
+
+/* =========================================================
+   ALL MOBILE BOTTOM SHEETS — SAME CLEAN UI AS CREATE MEETING
+   ========================================================= */
+
+.mobile-role-overlay,
+.mobile-leave-overlay{
+  padding-left:10px!important;
+  padding-right:10px!important;
+  padding-bottom:env(safe-area-inset-bottom)!important;
+  align-items:flex-end!important;
+}
+
+.mobile-role-sheet,
+.mobile-leave-sheet{
+  width:100%!important;
+  max-width:520px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+
+  background:#ffffff!important;
+
+  border:1px solid rgba(225,231,228,.92)!important;
+  border-radius:24px 24px 16px 16px!important;
+
+  box-shadow:
+    0 22px 70px rgba(20,26,30,.18)!important;
+
+  overflow:hidden!important;
+}
+
+/* Slightly taller forms */
+.mobile-role-sheet-tall{
+  max-height:94dvh!important;
+}
+
+/* HEADERS */
+.mobile-role-sheet-head,
+.mobile-leave-sheet-head{
+  min-height:64px!important;
+
+  padding:17px 18px 14px!important;
+
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+
+  gap:12px!important;
+
+  background:#fff!important;
+  border-bottom:1px solid #edf0ef!important;
+}
+
+.mobile-role-sheet-head h3,
+.mobile-leave-sheet-head h3{
+  margin:0!important;
+
+  font-family:"Outfit",sans-serif!important;
+  font-size:17px!important;
+  line-height:1.25!important;
+  font-weight:600!important;
+
+  letter-spacing:-.25px!important;
+  color:#171717!important;
+}
+
+.mobile-role-sheet-head p{
+  margin:5px 0 0!important;
+
+  max-width:320px!important;
+
+  font-family:"Inter",sans-serif!important;
+  font-size:9px!important;
+  line-height:1.5!important;
+
+  color:#8a9390!important;
+}
+
+/* X close button */
+.mobile-role-sheet-head > button,
+.mobile-leave-sheet-close{
+  width:34px!important;
+  height:34px!important;
+
+  flex:0 0 34px!important;
+
+  border:0!important;
+  border-radius:10px!important;
+
+  background:#f4f6f5!important;
+  color:#5f6965!important;
+
+  display:grid!important;
+  place-items:center!important;
+
+  font-size:13px!important;
+}
+
+.mobile-role-sheet-head > button:active,
+.mobile-leave-sheet-close:active{
+  transform:scale(.95)!important;
+}
+
+/* BODY */
+.mobile-role-sheet-body,
+.mobile-leave-form{
+  padding:16px 18px 5px!important;
+
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+
+  scrollbar-width:none!important;
+}
+
+.mobile-role-sheet-body::-webkit-scrollbar,
+.mobile-leave-form::-webkit-scrollbar{
+  display:none!important;
+}
+
+/* FIELDS */
+.mobile-role-field,
+.mobile-leave-field{
+  margin-bottom:14px!important;
+}
+
+.mobile-role-field label,
+.mobile-leave-field label{
+  display:block!important;
+
+  margin-bottom:7px!important;
+
+  font-family:"Inter",sans-serif!important;
+  font-size:9px!important;
+  line-height:1.2!important;
+  font-weight:700!important;
+
+  color:#414946!important;
+}
+
+.mobile-role-field input,
+.mobile-role-field select,
+.mobile-role-field textarea,
+.mobile-leave-field input,
+.mobile-leave-field select,
+.mobile-leave-field textarea{
+  width:100%!important;
+
+  border:1px solid #dfe5e2!important;
+  border-radius:12px!important;
+
+  outline:none!important;
+
+  background:#fbfcfc!important;
+
+  font-family:"Inter",sans-serif!important;
+  font-size:11px!important;
+  font-weight:500!important;
+
+  color:#202523!important;
+
+  box-shadow:none!important;
+
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease!important;
+}
+
+.mobile-role-field input,
+.mobile-role-field select,
+.mobile-leave-field input,
+.mobile-leave-field select{
+  height:46px!important;
+  padding:0 13px!important;
+}
+
+.mobile-role-field textarea,
+.mobile-leave-field textarea{
+  min-height:104px!important;
+  padding:12px 13px!important;
+
+  line-height:1.5!important;
+  resize:vertical!important;
+}
+
+.mobile-role-field input:focus,
+.mobile-role-field select:focus,
+.mobile-role-field textarea:focus,
+.mobile-leave-field input:focus,
+.mobile-leave-field select:focus,
+.mobile-leave-field textarea:focus{
+  background:#fff!important;
+  border-color:#0f766e!important;
+
+  box-shadow:
+    0 0 0 3px rgba(15,118,110,.06)!important;
+}
+
+/* TWO COLUMN FIELDS */
+.mobile-role-grid-2,
+.mobile-leave-meta{
+  gap:10px!important;
+}
+
+/* MEMBER PICKER */
+.mobile-member-picker{
+  border:1px solid #e1e6e4!important;
+  border-radius:13px!important;
+
+  overflow:hidden!important;
+  background:#fbfcfc!important;
+}
+
+.mobile-member-option{
+  min-height:62px!important;
+
+  padding:10px 12px!important;
+
+  border-bottom:1px solid #edf0ef!important;
+
+  background:#fff!important;
+}
+
+.mobile-member-option:last-child{
+  border-bottom:0!important;
+}
+
+.mobile-member-option:active{
+  background:#f7faf9!important;
+}
+
+/* FOOTER */
+.mobile-role-sheet-foot{
+  padding:
+    13px
+    18px
+    calc(13px + env(safe-area-inset-bottom))!important;
+
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+
+  gap:10px!important;
+
+  background:#fff!important;
+
+  border-top:1px solid #edf0ef!important;
+}
+
+.mobile-role-secondary,
+.mobile-role-primary,
+.mobile-leave-submit{
+  height:44px!important;
+
+  border-radius:11px!important;
+
+  font-family:"Inter",sans-serif!important;
+  font-size:10px!important;
+  font-weight:700!important;
+
+  transition:
+    transform .14s ease,
+    opacity .14s ease!important;
+}
+
+.mobile-role-secondary{
+  min-width:96px!important;
+
+  border:1px solid #dfe5e2!important;
+
+  background:#fff!important;
+  color:#59635f!important;
+}
+
+.mobile-role-primary,
+.mobile-leave-submit{
+  min-width:120px!important;
+
+  border:0!important;
+
+  background:#171717!important;
+  color:#fff!important;
+}
+
+.mobile-role-primary:active,
+.mobile-role-secondary:active,
+.mobile-leave-submit:active{
+  transform:scale(.98)!important;
+}
+
+.mobile-role-primary:disabled,
+.mobile-leave-submit:disabled{
+  opacity:.55!important;
+}
+
+/* APPLY LEAVE — same clean side spacing */
+.mobile-leave-sheet{
+  max-height:92dvh!important;
+}
+
+.mobile-leave-form{
+  padding-bottom:
+    calc(18px + env(safe-area-inset-bottom))!important;
+}
+
+.mobile-leave-submit{
+  width:100%!important;
+  margin-top:2px!important;
+}
+
+/* Prevent any sheet from touching phone edges */
+@media(max-width:390px){
+
+  .mobile-role-overlay,
+  .mobile-leave-overlay{
+    padding-left:8px!important;
+    padding-right:8px!important;
+  }
+
+  .mobile-role-sheet,
+  .mobile-leave-sheet{
+    border-radius:22px 22px 12px 12px!important;
+  }
+
+  .mobile-role-sheet-head,
+  .mobile-role-sheet-body,
+  .mobile-role-sheet-foot,
+  .mobile-leave-sheet-head,
+  .mobile-leave-form{
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+
+  .mobile-role-grid-2{
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+  }
+}
+
+</style>
+
 </body>
 </html>
