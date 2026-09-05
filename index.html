@@ -11668,17 +11668,134 @@ function showLoginDutyToast(message){
         return;
       }
 
+      /* Company Employees screen:
+         enrich RPC rows with the real employee profile image and assigned shift.
+         Do not use name initials as avatar fallback. */
+      let employeeRows=[];
+      let shiftRows=[];
+
+      if(mode!=="hr"){
+        try{
+          const {data:empData,error:empError}=await db
+            .from("employees")
+            .select("*")
+            .eq("company_id",s.company_id)
+            .limit(1000);
+          if(!empError && Array.isArray(empData)) employeeRows=empData;
+        }catch(_e){}
+
+        try{
+          const {data:shiftData,error:shiftError}=await db
+            .from("notus_user_shifts")
+            .select("member_id,member_type,shift_name,shift_start_time,shift_end_time,is_active,updated_at")
+            .eq("company_id",s.company_id)
+            .eq("is_active",true)
+            .limit(1000);
+          if(!shiftError && Array.isArray(shiftData)) shiftRows=shiftData;
+        }catch(_e){}
+      }
+
+      const keyOf=x=>safe(
+        x?.employee_id||
+        x?.member_id||
+        x?.user_id||
+        x?.id
+      );
+
+      const emailOf=x=>norm(x?.email||x?.gmail||x?.work_email||"");
+      const mobileOf=x=>String(x?.mobile||x?.phone||x?.mobile_number||"").replace(/\D/g,"");
+
+      const employeeMatch=r=>{
+        const rk=keyOf(r), re=emailOf(r), rm=mobileOf(r);
+        return employeeRows.find(e=>{
+          const ek=keyOf(e), ee=emailOf(e), em=mobileOf(e);
+          return (rk&&ek&&rk===ek) || (re&&ee&&re===ee) || (rm&&em&&rm===em);
+        }) || null;
+      };
+
+      const shiftMatch=r=>{
+        const ids=[
+          safe(r?.employee_id),
+          safe(r?.member_id),
+          safe(r?.user_id),
+          safe(r?.id)
+        ].filter(Boolean);
+
+        const matchedEmployee=employeeMatch(r);
+        [
+          safe(matchedEmployee?.employee_id),
+          safe(matchedEmployee?.member_id),
+          safe(matchedEmployee?.user_id),
+          safe(matchedEmployee?.id)
+        ].filter(Boolean).forEach(x=>ids.push(x));
+
+        return shiftRows
+          .filter(sh=>{
+            const sid=safe(sh?.member_id);
+            const mt=norm(sh?.member_type||"employee");
+            return sid && ids.includes(sid) && (!mt || mt==="employee");
+          })
+          .sort((a,b)=>String(b?.updated_at||"").localeCompare(String(a?.updated_at||"")))[0] || null;
+      };
+
+      const shiftTime=v=>{
+        if(!v)return "";
+        try{
+          if(typeof notusMobileFormatShiftTime==="function"){
+            return notusMobileFormatShiftTime(v);
+          }
+        }catch(_e){}
+        const parts=String(v).split(":");
+        let h=Number(parts[0]||0),m=Number(parts[1]||0);
+        const ap=h>=12?"PM":"AM";
+        h=h%12||12;
+        return `${h}:${String(m).padStart(2,"0")} ${ap}`;
+      };
+
       list.innerHTML=rows.map(r=>{
-        const name=safe(r.full_name||r.name||r.email)||"Member";
-        const role=safe(r.designation||r.role)||(mode==="hr"?"HR":"Employee");
-        const image=safe(r.profile_image_url||r.profile_image||r.avatar_url||r.photo_url);
-        return `<div class="mobile-role-person">
-          <div class="mobile-role-avatar">
-            ${image?`<img src="${esc(image)}" alt="${esc(name)}">`:`${esc(name.charAt(0).toUpperCase())}`}
+        const matched=mode==="hr"?null:employeeMatch(r);
+        const source=matched?{...r,...matched}:r;
+
+        const name=safe(source.full_name||source.name||source.email||source.gmail)||"Member";
+        const role=safe(source.designation||source.role)||(mode==="hr"?"HR":"Employee");
+
+        const image=safe(
+          source.profile_image_url||
+          source.profile_image||
+          source.profile_pic||
+          source.profile_picture||
+          source.profile_photo||
+          source.employee_image||
+          source.employee_image_url||
+          source.photo_url||
+          source.photo||
+          source.image_url||
+          source.image||
+          source.avatar_url||
+          source.avatar
+        );
+
+        const shift=mode==="hr"?null:shiftMatch(source);
+        const shiftStart=shiftTime(shift?.shift_start_time);
+        const shiftEnd=shiftTime(shift?.shift_end_time);
+        const shiftLabel=(shiftStart&&shiftEnd)
+          ? `${shiftStart} - ${shiftEnd}`
+          : (safe(shift?.shift_name)||"Not assigned");
+
+        return `<div class="mobile-role-person company-employee-person">
+          <div class="mobile-role-avatar company-employee-avatar">
+            ${image
+              ? `<img src="${esc(image)}" alt="${esc(name)}" loading="lazy" onerror="this.remove();this.parentElement.innerHTML='<i class=&quot;fa-regular fa-user&quot;></i>'">`
+              : `<i class="fa-regular fa-user"></i>`
+            }
           </div>
-          <div class="mobile-role-person-info">
+          <div class="mobile-role-person-info company-employee-info">
             <b>${esc(name)}</b>
-            <span>${esc(role)}${r.branch_name?` · ${esc(r.branch_name)}`:""}</span>
+            <span>${esc(role)}${source.branch_name?` · ${esc(source.branch_name)}`:""}</span>
+            ${mode!=="hr"
+              ? `<span class="company-employee-shift"><i class="fa-regular fa-clock"></i> Shift Timing: ${esc(shiftLabel)}</span>`
+              : ""
+            }
           </div>
         </div>`;
       }).join("");
@@ -14391,6 +14508,56 @@ html,body{
   document.addEventListener("notus:people-rendered",()=>setTimeout(window.notusRefreshEmployeeAvatars,0));
 })();
 </script>
+
+
+<style id="notus-company-employees-image-shift-ui">
+.company-employee-person{
+  align-items:center!important;
+}
+.company-employee-avatar{
+  width:44px!important;
+  height:44px!important;
+  flex:0 0 44px!important;
+  border-radius:13px!important;
+  overflow:hidden!important;
+  background:#f3f5f4!important;
+  border:1px solid #e3e8e5!important;
+  display:grid!important;
+  place-items:center!important;
+  color:#8a928f!important;
+}
+.company-employee-avatar img{
+  width:100%!important;
+  height:100%!important;
+  display:block!important;
+  object-fit:cover!important;
+}
+.company-employee-avatar i{
+  font-size:15px!important;
+}
+.company-employee-info{
+  min-width:0!important;
+}
+.company-employee-info b{
+  display:block!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.company-employee-shift{
+  display:flex!important;
+  align-items:center!important;
+  gap:5px!important;
+  margin-top:4px!important;
+  color:#747d79!important;
+  font-size:9px!important;
+  font-weight:600!important;
+}
+.company-employee-shift i{
+  font-size:9px!important;
+  color:#8b9490!important;
+}
+</style>
 
 </body>
 </html>
