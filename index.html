@@ -3987,6 +3987,18 @@ html,body{
 }
 </style>
 
+
+<style id="notus-mobile-role-hidden-fix">
+/* Respect role visibility controlled by the hidden attribute.
+   This prevents profile quick items such as Create Meeting,
+   Tasks, Employees, HR, etc. from appearing for unauthorized roles. */
+.profile-quick-item[hidden],
+.mobile-role-tool[hidden],
+.mobile-role-tools-label[hidden]{
+  display:none!important;
+}
+</style>
+
 </head>
 
 <body>
