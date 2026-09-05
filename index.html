@@ -5306,11 +5306,13 @@ window.notusMobileEnforceShiftDutyHours = async function({showMessage=false,stat
         const start = notusMobileFormatShiftTime(shift.shift_start_time);
         const end = notusMobileFormatShiftTime(shift.shift_end_time);
 
-        let msg = "Out of duty hours.";
+        let msg = "";
         if(start && end){
-          msg += ` Your shift timing is ${start} - ${end}.`;
+          msg = `Your shift timing is ${start} - ${end}`;
         }else if(start){
-          msg += ` Your shift starts at ${start}.`;
+          msg = `Your shift starts at ${start}`;
+        }else{
+          msg = "You are outside your assigned shift timing";
         }
 
         if(typeof showWorkspaceDutyToast === "function"){
@@ -6996,7 +6998,7 @@ async function loadRecentDirectChats(silent=false){
   }
 
   if(workspaceChatList && !silent){
-    workspaceChatList.innerHTML = '<div class="chat-load-state">Loading chats...</div>';
+    workspaceChatList.innerHTML = '<div class="chat-load-state"><span class="notus-ios-spinner" aria-label="Loading"></span></div>';
   }
 
   try{
@@ -7257,7 +7259,7 @@ async function openDirectChat(peer){
   await refreshPeerBeforeOpen(peer);
   paintDirectChatHeader(peer);
   if(chatMessages){
-    chatMessages.innerHTML = '<div class="chat-load-state">Loading messages...</div>';
+    chatMessages.innerHTML = '<div class="chat-load-state"><span class="notus-ios-spinner" aria-label="Loading"></span></div>';
   }
 
   lockPageBehindChat();
@@ -11632,7 +11634,7 @@ function showLoginDutyToast(message){
     if(sub)sub.textContent=mode==="hr"?"Company HR members":"Company employees";
 
     if(!list.children.length){
-      list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading</b></div>';
+      list.innerHTML='<div class="notus-loading-center"><span class="notus-ios-spinner" aria-label="Loading"></span></div>';
     }
 
     try{
@@ -11688,7 +11690,7 @@ function showLoginDutyToast(message){
     $("mobilePeopleTitle").textContent="Team Members";
     $("mobilePeopleSub").textContent="Members assigned to your team";
     const list=$("mobilePeopleList");
-    list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading team</b></div>';
+    list.innerHTML='<div class="notus-loading-center"><span class="notus-ios-spinner" aria-label="Loading"></span></div>';
     try{
       const {data,error}=await db.rpc("list_team_members",{
         p_company_id:s.company_id,
@@ -11758,7 +11760,7 @@ function showLoginDutyToast(message){
     if(actorType()!=="team_lead")return;
     $("mobileGroupNameInput").value="";
     const box=$("mobileGroupMemberPicker");
-    box.innerHTML='<div class="mobile-role-empty" style="min-height:130px"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading members</b></div>';
+    box.innerHTML='<div class="notus-loading-center" style="min-height:130px"><span class="notus-ios-spinner" aria-label="Loading"></span></div>';
     openOverlay("mobileCreateGroupOverlay");
 
     const rows=await companyGroupPeople();
@@ -11993,7 +11995,7 @@ function showLoginDutyToast(message){
     const s=session(),list=$("mobileTaskList");
     if(!s.company_id||!list)return;
     if(!list.children.length){
-      list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading tasks</b></div>';
+      list.innerHTML='<div class="notus-loading-center"><span class="notus-ios-spinner" aria-label="Loading"></span></div>';
     }
     try{
       const {data,error}=await db.rpc("notus_list_tasks_for_me",{
@@ -12357,20 +12359,22 @@ function showLoginDutyToast(message){
 .workspace-duty-toast{
   position:fixed;
   left:50%;
-  top:max(16px,env(safe-area-inset-top));
+  bottom:calc(18px + env(safe-area-inset-bottom));
+  top:auto;
   z-index:16000;
-  width:min(calc(100% - 28px),390px);
-  padding:12px 14px;
+  width:auto;
+  max-width:min(calc(100% - 28px),390px);
+  padding:11px 14px;
   border-radius:13px;
-  background:#2f3337;
+  background:#202426;
   color:#fff;
-  box-shadow:0 14px 38px rgba(18,24,28,.22);
+  box-shadow:0 14px 34px rgba(18,24,28,.20);
   display:flex;
-  align-items:flex-start;
-  gap:10px;
+  align-items:center;
+  gap:9px;
   opacity:0;
   visibility:hidden;
-  transform:translate(-50%,-10px);
+  transform:translate(-50%,12px);
   transition:opacity .18s ease,transform .22s cubic-bezier(.2,.8,.2,1),visibility .18s ease;
   pointer-events:none;
 }
@@ -12380,17 +12384,20 @@ function showLoginDutyToast(message){
   transform:translate(-50%,0);
 }
 .workspace-duty-toast i{
-  margin-top:2px;
   flex:0 0 auto;
-  font-size:14px;
-  color:#ffd7d7;
+  font-size:13px;
+  color:#d8dedb;
 }
 .workspace-duty-toast span{
   min-width:0;
   font-family:"Inter",sans-serif;
-  font-size:11px;
+  font-size:10.5px;
   font-weight:600;
-  line-height:1.5;
+  line-height:1.45;
+  white-space:nowrap;
+}
+@media(max-width:390px){
+  .workspace-duty-toast span{white-space:normal}
 }
 </style>
 <div class="workspace-duty-toast" id="workspaceDutyToast" role="status" aria-live="polite">
@@ -12415,6 +12422,236 @@ function showWorkspaceDutyToast(message){
     box.classList.remove("show");
   },4500);
 }
+</script>
+
+
+<style id="notus-meeting-ui-polish">
+#mobileCreateMeetingOverlay{
+  padding:0 12px env(safe-area-inset-bottom);
+  align-items:flex-end;
+}
+#mobileCreateMeetingOverlay .mobile-role-sheet{
+  width:100%;
+  max-width:520px;
+  margin:0 auto;
+  border-radius:24px 24px 16px 16px;
+  box-shadow:0 22px 70px rgba(20,26,30,.18);
+  border:1px solid rgba(225,231,228,.9);
+}
+#mobileCreateMeetingOverlay .mobile-role-sheet-head{
+  padding:18px 18px 14px;
+  align-items:center;
+}
+#mobileCreateMeetingOverlay .mobile-role-sheet-head h3{
+  font-size:17px;
+  letter-spacing:-.25px;
+}
+#mobileCreateMeetingOverlay .mobile-role-sheet-head p{
+  margin-top:5px;
+  font-size:9px;
+  line-height:1.5;
+  max-width:310px;
+}
+#mobileCreateMeetingOverlay .mobile-role-sheet-body{
+  padding:16px 18px 4px;
+}
+#mobileCreateMeetingOverlay .mobile-role-field{
+  margin-bottom:14px;
+}
+#mobileCreateMeetingOverlay .mobile-role-field label{
+  margin-bottom:7px;
+  font-size:9px;
+  font-weight:700;
+  color:#414946;
+}
+#mobileCreateMeetingOverlay .mobile-role-field input,
+#mobileCreateMeetingOverlay .mobile-role-field select,
+#mobileCreateMeetingOverlay .mobile-role-field textarea{
+  border:1px solid #dfe5e2;
+  background:#fbfcfc;
+  border-radius:12px;
+  box-shadow:none;
+}
+#mobileCreateMeetingOverlay .mobile-role-field input,
+#mobileCreateMeetingOverlay .mobile-role-field select{
+  height:46px;
+  padding:0 13px;
+}
+#mobileCreateMeetingOverlay .mobile-role-field textarea{
+  min-height:104px;
+  padding:12px 13px;
+}
+#mobileCreateMeetingOverlay .mobile-role-field input:focus,
+#mobileCreateMeetingOverlay .mobile-role-field select:focus,
+#mobileCreateMeetingOverlay .mobile-role-field textarea:focus{
+  background:#fff;
+  border-color:#0f766e;
+  box-shadow:0 0 0 3px rgba(15,118,110,.06);
+}
+#mobileCreateMeetingOverlay .mobile-role-grid-2{
+  gap:11px;
+}
+#mobileCreateMeetingOverlay .mobile-role-sheet-foot{
+  padding:13px 18px calc(13px + env(safe-area-inset-bottom));
+  gap:10px;
+}
+#mobileCreateMeetingOverlay .mobile-role-secondary,
+#mobileCreateMeetingOverlay .mobile-role-primary{
+  height:44px;
+  min-width:110px;
+  border-radius:11px;
+  font-size:10px;
+}
+#mobileCreateMeetingOverlay .mobile-role-primary{
+  flex:1;
+  max-width:190px;
+}
+#mobileCreateMeetingOverlay .mobile-role-secondary{
+  min-width:96px;
+}
+@media(max-width:390px){
+  #mobileCreateMeetingOverlay{
+    padding-left:8px;
+    padding-right:8px;
+  }
+  #mobileCreateMeetingOverlay .mobile-role-sheet{
+    border-radius:22px 22px 12px 12px;
+  }
+  #mobileCreateMeetingOverlay .mobile-role-sheet-body,
+  #mobileCreateMeetingOverlay .mobile-role-sheet-head,
+  #mobileCreateMeetingOverlay .mobile-role-sheet-foot{
+    padding-left:14px;
+    padding-right:14px;
+  }
+  #mobileCreateMeetingOverlay .mobile-role-grid-2{
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+}
+</style>
+
+
+<style id="notus-ios-spinner-css">
+.notus-ios-spinner{
+  width:20px;
+  height:20px;
+  position:relative;
+  display:inline-block;
+}
+.notus-ios-spinner::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(32,38,36,.08),
+      rgba(32,38,36,.18),
+      rgba(32,38,36,.30),
+      rgba(32,38,36,.46),
+      rgba(32,38,36,.65),
+      rgba(32,38,36,.88)
+    );
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2.2px),#000 0);
+  mask:radial-gradient(farthest-side,transparent calc(100% - 2.2px),#000 0);
+  animation:notusIosSpin .72s linear infinite;
+}
+@keyframes notusIosSpin{to{transform:rotate(360deg)}}
+.notus-loading-center{
+  min-height:110px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+</style>
+
+
+<style id="notus-mobile-sheet-global-polish">
+.mobile-role-overlay{
+  padding-left:10px;
+  padding-right:10px;
+}
+.mobile-role-sheet{
+  max-width:540px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.mobile-role-sheet-body{
+  scrollbar-width:none;
+}
+.mobile-role-sheet-body::-webkit-scrollbar{display:none}
+.mobile-role-field input,
+.mobile-role-field select,
+.mobile-role-field textarea{
+  transition:border-color .18s ease,background .18s ease,box-shadow .18s ease;
+}
+</style>
+
+
+<script id="notus-mobile-swipe-extra-bindings">
+(function(){
+  const candidates=[
+    ["mobilePayslipScreen","mobilePayslipBack"],
+    ["mobileHelpScreen","mobileHelpBack"],
+    ["mobileWorkReportScreen","mobileWorkReportBack"],
+    ["mobileAnnouncementScreen","mobileAnnouncementBack"],
+    ["mobileAnnouncementsScreen","mobileAnnouncementsBack"]
+  ];
+
+  const EDGE=30,TRIGGER=82;
+
+  function bind(screenId,backId){
+    const screen=document.getElementById(screenId);
+    const back=document.getElementById(backId);
+    if(!screen||!back||screen.dataset.notusSwipeBound==="1")return;
+
+    screen.dataset.notusSwipeBound="1";
+    let active=false,h=false,sx=0,sy=0,dx=0;
+
+    screen.addEventListener("touchstart",e=>{
+      if(!screen.classList.contains("show")||e.touches?.length!==1)return;
+      const t=e.touches[0];
+      if(t.clientX>EDGE)return;
+      sx=t.clientX;sy=t.clientY;dx=0;active=true;h=false;
+    },{passive:true});
+
+    screen.addEventListener("touchmove",e=>{
+      if(!active||e.touches?.length!==1)return;
+      const t=e.touches[0],x=t.clientX-sx,y=t.clientY-sy;
+      if(!h){
+        if(Math.abs(x)<8&&Math.abs(y)<8)return;
+        if(Math.abs(y)>Math.abs(x)){active=false;return}
+        h=true;
+      }
+      if(x<=0)return;
+      dx=Math.min(x,innerWidth);
+      screen.style.transition="none";
+      screen.style.transform=`translate3d(${dx}px,0,0)`;
+      e.preventDefault();
+    },{passive:false});
+
+    const finish=()=>{
+      if(!active)return;
+      active=false;
+      const close=h&&dx>=TRIGGER;
+      screen.style.transition="transform .20s cubic-bezier(.2,.8,.2,1)";
+      screen.style.transform=close?"translate3d(100%,0,0)":"translate3d(0,0,0)";
+      setTimeout(()=>{
+        screen.style.transition="";
+        screen.style.transform="";
+        if(close)back.click();
+      },205);
+    };
+
+    screen.addEventListener("touchend",finish,{passive:true});
+    screen.addEventListener("touchcancel",()=>{
+      active=false;screen.style.transition="";screen.style.transform="";
+    },{passive:true});
+  }
+
+  candidates.forEach(x=>bind(...x));
+})();
 </script>
 
 </body>
