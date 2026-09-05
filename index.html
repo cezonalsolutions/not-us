@@ -14648,5 +14648,215 @@ html,body{
 }
 </style>
 
+
+<style id="notus-profile-shift-logout-final">
+#workspaceProfilePanel .profile-panel-footer{
+  padding:10px 18px max(4px,env(safe-area-inset-bottom))!important;
+}
+
+#workspaceProfilePanel .profile-logout-btn{
+  height:44px!important;
+  margin:0!important;
+}
+
+/* Shift timing row */
+#workspaceProfilePanel .profile-shift-timing-row{
+  display:flex!important;
+  align-items:flex-start!important;
+  gap:10px!important;
+}
+
+#workspaceProfilePanel .profile-shift-timing-row .profile-detail-icon{
+  margin-top:2px!important;
+}
+
+#workspaceProfilePanel .profile-shift-timing-value{
+  color:#252a28!important;
+  font-weight:600!important;
+}
+</style>
+
+
+<script id="notus-profile-shift-timing-final">
+(function(){
+  const safe=v=>String(v??"").trim();
+  const norm=v=>safe(v).toLowerCase().replace(/[\s_-]+/g,"_");
+
+  function formatShiftTime(v){
+    if(!v) return "";
+    try{
+      if(typeof window.notusMobileFormatShiftTime==="function"){
+        return window.notusMobileFormatShiftTime(v);
+      }
+    }catch(_e){}
+    const p=String(v).split(":");
+    let h=Number(p[0]||0), m=Number(p[1]||0);
+    const ap=h>=12?"PM":"AM";
+    h=h%12||12;
+    return `${h}:${String(m).padStart(2,"0")} ${ap}`;
+  }
+
+  function actor(){
+    try{
+      return window.notusMobileSession?.() || window.workspaceSession || {};
+    }catch(_e){
+      return window.workspaceSession || {};
+    }
+  }
+
+  function actorMemberId(s){
+    return safe(
+      s.employee_id||
+      s.hr_id||
+      s.manager_id||
+      s.team_lead_id||
+      s.recruiter_id||
+      s.member_id||
+      s.user_id||
+      s.id
+    );
+  }
+
+  function actorMemberType(s){
+    const r=norm(
+      s.user_type||
+      s.login_type||
+      s.role||
+      s.employee_role||
+      s.designation||
+      s.user_role
+    );
+    if(r.includes("team")&&r.includes("lead")) return "employee";
+    if(r.includes("manager")) return "manager";
+    if(r.includes("hr")) return "hr";
+    if(r.includes("admin")) return "admin";
+    return "employee";
+  }
+
+  function getDb(){
+    return window.supabaseClient || window.db || window.supabase || null;
+  }
+
+  function findLocationRow(){
+    const panel=document.getElementById("workspaceProfilePanel");
+    if(!panel) return null;
+
+    const rows=[...panel.querySelectorAll(".profile-detail-row,.profile-info-row,.profile-detail-item,.profile-row")];
+    return rows.find(row=>{
+      const t=(row.textContent||"").trim().toLowerCase();
+      return t.startsWith("location") || t.includes("location");
+    }) || null;
+  }
+
+  function ensureShiftRow(){
+    const panel=document.getElementById("workspaceProfilePanel");
+    if(!panel) return null;
+
+    let row=panel.querySelector(".profile-shift-timing-row");
+    if(row) return row;
+
+    const locationRow=findLocationRow();
+    if(!locationRow) return null;
+
+    row=document.createElement("div");
+    row.className = locationRow.className + " profile-shift-timing-row";
+    row.innerHTML = `
+      <div class="profile-detail-icon"><i class="fa-regular fa-clock"></i></div>
+      <div class="profile-detail-content">
+        <div class="profile-detail-label">Shift Timing</div>
+        <div class="profile-detail-value profile-shift-timing-value" id="profileShiftTimingValue">Loading...</div>
+      </div>
+    `;
+    locationRow.insertAdjacentElement("afterend",row);
+    return row;
+  }
+
+  async function loadProfileShiftTiming(){
+    const row=ensureShiftRow();
+    if(!row) return;
+
+    const val=row.querySelector("#profileShiftTimingValue");
+    if(!val) return;
+
+    const s=actor();
+    const companyId=safe(s.company_id);
+    const memberId=actorMemberId(s);
+    const memberType=actorMemberType(s);
+
+    if(!companyId || !memberId){
+      val.textContent="Not assigned";
+      return;
+    }
+
+    const db=getDb();
+    if(!db?.from){
+      val.textContent="Not assigned";
+      return;
+    }
+
+    try{
+      let q=db
+        .from("notus_user_shifts")
+        .select("shift_name,shift_start_time,shift_end_time,is_active,updated_at")
+        .eq("company_id",companyId)
+        .eq("member_id",memberId)
+        .eq("is_active",true)
+        .order("updated_at",{ascending:false})
+        .limit(1);
+
+      // Try exact type first where applicable.
+      if(memberType && memberType!=="admin"){
+        q=q.eq("member_type",memberType);
+      }
+
+      let {data,error}=await q;
+
+      // Fallback without member_type in case older rows used a different label.
+      if((error || !data?.length) && memberType!=="admin"){
+        const res=await db
+          .from("notus_user_shifts")
+          .select("shift_name,shift_start_time,shift_end_time,is_active,updated_at")
+          .eq("company_id",companyId)
+          .eq("member_id",memberId)
+          .eq("is_active",true)
+          .order("updated_at",{ascending:false})
+          .limit(1);
+        data=res.data;
+        error=res.error;
+      }
+
+      if(error || !data?.length){
+        val.textContent="Not assigned";
+        return;
+      }
+
+      const sh=data[0];
+      const start=formatShiftTime(sh.shift_start_time);
+      const end=formatShiftTime(sh.shift_end_time);
+
+      val.textContent = start && end
+        ? `${start} - ${end}`
+        : (safe(sh.shift_name)||"Not assigned");
+    }catch(_e){
+      val.textContent="Not assigned";
+    }
+  }
+
+  window.notusLoadProfileShiftTiming=loadProfileShiftTiming;
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",()=>setTimeout(loadProfileShiftTiming,0),{once:true});
+  }else{
+    setTimeout(loadProfileShiftTiming,0);
+  }
+
+  // refresh when profile is opened, without observer/reload
+  document.addEventListener("click",e=>{
+    const t=e.target.closest?.("#workspaceProfileBtn,#profileButton,.workspace-profile-trigger,[data-open-profile]");
+    if(t) setTimeout(loadProfileShiftTiming,60);
+  },true);
+})();
+</script>
+
 </body>
 </html>
