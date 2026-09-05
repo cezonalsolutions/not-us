@@ -4505,6 +4505,7 @@ html,body{
 <div class="workspace-profile-overlay" id="workspaceProfileOverlay"></div>
 <aside class="workspace-profile-panel" id="workspaceProfilePanel" aria-hidden="true">
   <div class="profile-panel-top"><div class="profile-panel-head"><div class="profile-panel-title">Profile</div><button class="profile-panel-close" id="profilePanelClose" type="button" aria-label="Close profile"><i class="fa-solid fa-xmark"></i></button></div></div>
+  <div class="profile-panel-scroll">
   <div class="profile-user-card"><div class="profile-user-avatar" id="profileUserAvatar"><img class="side-user-profile-img" id="sideUserProfileImg" alt="Profile"><span class="side-user-profile-fallback" id="sideUserProfileFallback">U</span></div><div class="profile-user-info"><div class="profile-user-name" id="profileUserName">User</div><div class="profile-user-role" id="profileUserRole">Employee</div></div></div>
   <div class="profile-details">
     <div class="profile-detail-item"><div class="profile-detail-icon"><i class="fa-solid fa-building"></i></div><div class="profile-detail-content"><div class="profile-detail-label">Company</div><div class="profile-detail-value" id="profileCompanyName">—</div></div></div>
@@ -4608,6 +4609,7 @@ html,body{
       <span class="profile-quick-text">Help &amp; Support</span>
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
     </button>
+  </div>
   </div>
 
   <div class="profile-panel-footer"><button class="profile-logout-btn" id="profileLogoutBtn" type="button"><i class="fa-solid fa-arrow-right-from-bracket"></i>Logout</button></div>
@@ -14560,169 +14562,91 @@ html,body{
 </style>
 
 
-<style id="notus-profile-nav-fixed-logout-scroll">
 
-/* Profile side nav:
-   - upper profile/menu area scrolls
-   - logout stays pinned at bottom
+
+
+
+
+
+<style id="notus-profile-three-part-layout-final">
+/* EXACT PROFILE DRAWER LAYOUT
+   1) Profile + X fixed at top
+   2) Only middle content scrolls
+   3) Logout fixed at bottom
 */
-
-#mobileProfileDrawer,
-.mobile-profile-drawer,
-.profile-drawer,
-.profile-side-nav{
-  overflow:hidden!important;
-}
-
-#mobileProfileDrawer .mobile-profile-panel,
-.mobile-profile-drawer .mobile-profile-panel,
-.profile-drawer .profile-panel,
-.profile-side-nav .profile-panel{
+#workspaceProfilePanel.workspace-profile-panel{
   height:100dvh!important;
   max-height:100dvh!important;
+  padding-top:max(22px,env(safe-area-inset-top))!important;
   display:flex!important;
   flex-direction:column!important;
   overflow:hidden!important;
+  overscroll-behavior:none!important;
+  background:#fff!important;
 }
 
-/* Scrollable upper area */
-#mobileProfileDrawer .mobile-profile-scroll,
-#mobileProfileDrawer .mobile-profile-content,
-#mobileProfileDrawer .mobile-profile-body,
-.mobile-profile-drawer .mobile-profile-scroll,
-.mobile-profile-drawer .mobile-profile-content,
-.mobile-profile-drawer .mobile-profile-body,
-.profile-drawer .profile-content,
-.profile-drawer .profile-body,
-.profile-side-nav .profile-content{
+/* TOP FIXED */
+#workspaceProfilePanel .profile-panel-top{
+  position:relative!important;
+  top:auto!important;
+  flex:0 0 auto!important;
+  z-index:20!important;
+  background:#fff!important;
+  padding:14px 18px 18px!important;
+  border-bottom:1px solid #edf0ef!important;
+}
+
+#workspaceProfilePanel .profile-panel-head{
+  min-height:34px!important;
+}
+
+/* MIDDLE ONLY SCROLL */
+#workspaceProfilePanel .profile-panel-scroll{
   flex:1 1 auto!important;
   min-height:0!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
   -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;
   scrollbar-width:none!important;
-  padding-bottom:12px!important;
+  background:#fff!important;
 }
 
-#mobileProfileDrawer .mobile-profile-scroll::-webkit-scrollbar,
-#mobileProfileDrawer .mobile-profile-content::-webkit-scrollbar,
-#mobileProfileDrawer .mobile-profile-body::-webkit-scrollbar,
-.mobile-profile-drawer .mobile-profile-scroll::-webkit-scrollbar,
-.mobile-profile-drawer .mobile-profile-content::-webkit-scrollbar,
-.mobile-profile-drawer .mobile-profile-body::-webkit-scrollbar,
-.profile-drawer .profile-content::-webkit-scrollbar,
-.profile-drawer .profile-body::-webkit-scrollbar,
-.profile-side-nav .profile-content::-webkit-scrollbar{
+#workspaceProfilePanel .profile-panel-scroll::-webkit-scrollbar{
   display:none!important;
 }
 
-/* Logout pinned to bottom */
-#mobileProfileLogout,
-#profileLogoutBtn,
-.mobile-profile-logout,
-.profile-logout,
-[data-action="logout"]{
-  flex:0 0 auto!important;
+/* ensure middle children never escape scroll area */
+#workspaceProfilePanel .profile-user-card,
+#workspaceProfilePanel .profile-details,
+#workspaceProfilePanel .profile-quick-menu{
+  flex:none!important;
 }
 
-/* Dedicated footer if logout already sits inside one */
-#mobileProfileDrawer .mobile-profile-footer,
-.mobile-profile-drawer .mobile-profile-footer,
-.profile-drawer .profile-footer,
-.profile-side-nav .profile-footer{
-  flex:0 0 auto!important;
+/* BOTTOM FIXED */
+#workspaceProfilePanel .profile-panel-footer{
   position:relative!important;
-  margin-top:auto!important;
-  padding:
-    10px
-    14px
-    calc(12px + env(safe-area-inset-bottom))!important;
+  bottom:auto!important;
+  flex:0 0 auto!important;
+  margin-top:0!important;
+  z-index:20!important;
+  padding:12px 18px calc(12px + env(safe-area-inset-bottom))!important;
+  border-top:1px solid #edf0ef!important;
   background:#fff!important;
-  border-top:1px solid #ecefed!important;
-  z-index:5!important;
+  box-shadow:0 -8px 24px rgba(20,28,25,.045)!important;
 }
 
-/* logout button full neat width */
-#mobileProfileDrawer .mobile-profile-footer #mobileProfileLogout,
-#mobileProfileDrawer .mobile-profile-footer .mobile-profile-logout,
-.mobile-profile-drawer .mobile-profile-footer .mobile-profile-logout,
-.profile-drawer .profile-footer .profile-logout{
+#workspaceProfilePanel .profile-logout-btn{
   width:100%!important;
-  min-height:44px!important;
-  border-radius:11px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:8px!important;
+  height:46px!important;
+  margin:0!important;
 }
 
-/* fallback pin when logout is not already in a footer */
-#mobileProfileDrawer > #mobileProfileLogout,
-.mobile-profile-drawer > .mobile-profile-logout{
-  position:absolute!important;
-  left:14px!important;
-  right:14px!important;
-  bottom:calc(12px + env(safe-area-inset-bottom))!important;
-  z-index:10!important;
+/* prevent the drawer itself from becoming scroll container */
+#workspaceProfilePanel.show{
+  overflow:hidden!important;
 }
-
 </style>
-
-
-<script id="notus-profile-fixed-logout-helper">
-(function(){
-  function setupProfileLogout(){
-    const drawer =
-      document.getElementById("mobileProfileDrawer") ||
-      document.querySelector(".mobile-profile-drawer,.profile-drawer,.profile-side-nav");
-
-    if(!drawer) return;
-
-    const panel =
-      drawer.querySelector(".mobile-profile-panel,.profile-panel") ||
-      drawer.firstElementChild ||
-      drawer;
-
-    const logout =
-      drawer.querySelector("#mobileProfileLogout,#profileLogoutBtn,.mobile-profile-logout,.profile-logout,[data-action='logout']");
-
-    if(!logout) return;
-
-    let footer = logout.closest(".mobile-profile-footer,.profile-footer");
-    if(!footer){
-      footer = document.createElement("div");
-      footer.className = "mobile-profile-footer";
-      logout.parentNode.insertBefore(footer, logout);
-      footer.appendChild(logout);
-    }
-
-    /* identify the upper scroll region without changing existing UI */
-    let scroll =
-      panel.querySelector(".mobile-profile-scroll,.mobile-profile-content,.mobile-profile-body,.profile-content,.profile-body");
-
-    if(!scroll){
-      scroll = document.createElement("div");
-      scroll.className = "mobile-profile-scroll";
-
-      const move = [];
-      [...panel.children].forEach(child=>{
-        if(child!==footer) move.push(child);
-      });
-
-      if(move.length){
-        panel.insertBefore(scroll, footer);
-        move.forEach(el=>scroll.appendChild(el));
-      }
-    }
-  }
-
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",setupProfileLogout,{once:true});
-  }else{
-    setupProfileLogout();
-  }
-})();
-</script>
 
 </body>
 </html>
