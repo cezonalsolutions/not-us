@@ -4010,6 +4010,14 @@ html,body{
 .mobile-payslip-view{display:none!important}
 </style>
 
+
+<style id="notus-hide-profile-payroll-only">
+.profile-quick-item[data-profile-action="payroll"],
+[data-profile-action="payroll"].profile-quick-item{
+  display:none!important;
+}
+</style>
+
 </head>
 
 <body>
@@ -4676,7 +4684,7 @@ html,body{
   <header class="mobile-role-head">
     <button class="mobile-role-back" id="mobilePayslipBack" type="button"><i class="fa-solid fa-arrow-left"></i></button>
     <div class="mobile-role-head-copy">
-      <h2>Pay View</h2>
+      <h2>Pay Slip</h2>
       <p>Your salary details</p>
     </div>
   </header>
@@ -4867,10 +4875,7 @@ html,body{
       <span class="profile-quick-icon"><i class="fa-solid fa-user-tie"></i></span>
       <span class="profile-quick-text">HR</span>
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
-    </button>
-
-    <button class="profile-quick-item mobile-role-tool" id="mobilePayrollAction" type="button" data-profile-action="payroll" hidden>
-      <span class="profile-quick-icon"><i class="fa-regular fa-credit-card"></i></span>
+    </button></span>
       <span class="profile-quick-text">Payroll</span>
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
     </button>
@@ -4908,7 +4913,7 @@ html,body{
 
     <button class="profile-quick-item" id="mobilePayslipAction" type="button" data-profile-action="payslip">
       <span class="profile-quick-icon"><i class="fa-regular fa-file-lines"></i></span>
-      <span class="profile-quick-text">Pay View</span>
+      <span class="profile-quick-text">Pay Slip</span>
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
     </button>
 
