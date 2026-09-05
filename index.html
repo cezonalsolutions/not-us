@@ -13356,5 +13356,221 @@ html,body{
 
 </style>
 
+
+<style id="notus-assign-task-bottom-sheet-final">
+
+/* ASSIGN TASK — REAL BOTTOM SHEET */
+#mobileCreateTaskOverlay{
+  position:fixed!important;
+  inset:0!important;
+
+  display:flex!important;
+  align-items:flex-end!important;
+  justify-content:center!important;
+
+  padding:
+    0
+    10px
+    calc(8px + env(safe-area-inset-bottom))!important;
+
+  background:rgba(18,24,22,.24)!important;
+  backdrop-filter:blur(1.5px)!important;
+  -webkit-backdrop-filter:blur(1.5px)!important;
+
+  overflow:hidden!important;
+}
+
+/* hidden state must still work */
+#mobileCreateTaskOverlay:not(.show){
+  display:none!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-sheet{
+  width:100%!important;
+  max-width:520px!important;
+
+  height:auto!important;
+  min-height:0!important;
+  max-height:min(88dvh,720px)!important;
+
+  margin:0 auto!important;
+
+  display:flex!important;
+  flex-direction:column!important;
+
+  background:#fff!important;
+
+  border:1px solid #e4e9e7!important;
+  border-radius:24px 24px 15px 15px!important;
+
+  box-shadow:
+    0 -4px 14px rgba(20,26,30,.04),
+    0 24px 70px rgba(20,26,30,.20)!important;
+
+  overflow:hidden!important;
+}
+
+/* small visual handle like native bottom sheet */
+#mobileCreateTaskOverlay .mobile-role-sheet::before{
+  content:"";
+  width:38px;
+  height:4px;
+
+  margin:9px auto 1px;
+
+  flex:0 0 auto;
+
+  border-radius:20px;
+  background:#d9dddb;
+}
+
+/* Header */
+#mobileCreateTaskOverlay .mobile-role-sheet-head{
+  flex:0 0 auto!important;
+
+  min-height:auto!important;
+
+  padding:11px 18px 13px!important;
+
+  border-bottom:1px solid #edf0ef!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-sheet-head h3{
+  font-size:17px!important;
+  line-height:1.25!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-sheet-head p{
+  margin-top:4px!important;
+  font-size:9px!important;
+}
+
+/* Body grows only when needed */
+#mobileCreateTaskOverlay .mobile-role-sheet-body{
+  flex:0 1 auto!important;
+
+  width:100%!important;
+  min-height:0!important;
+  max-height:calc(88dvh - 150px)!important;
+
+  padding:15px 18px 4px!important;
+
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+
+  -webkit-overflow-scrolling:touch!important;
+  scrollbar-width:none!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-sheet-body::-webkit-scrollbar{
+  display:none!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-field{
+  margin-bottom:13px!important;
+}
+
+/* Footer */
+#mobileCreateTaskOverlay .mobile-role-sheet-foot{
+  flex:0 0 auto!important;
+
+  width:100%!important;
+
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+
+  gap:10px!important;
+
+  padding:
+    12px
+    18px
+    calc(12px + env(safe-area-inset-bottom))!important;
+
+  border-top:1px solid #edf0ef!important;
+  background:#fff!important;
+}
+
+/* Cancel + Create = EXACT equal width */
+#mobileCreateTaskOverlay .mobile-role-secondary,
+#mobileCreateTaskOverlay .mobile-role-primary{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+
+  height:45px!important;
+
+  margin:0!important;
+  padding:0 12px!important;
+
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+
+  border-radius:11px!important;
+
+  font-size:10px!important;
+  font-weight:700!important;
+
+  white-space:nowrap!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-secondary{
+  background:#f7f8f8!important;
+  border:1px solid #dde3e0!important;
+  color:#4e5854!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-primary{
+  background:#171717!important;
+  border:1px solid #171717!important;
+  color:#fff!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-secondary:active,
+#mobileCreateTaskOverlay .mobile-role-primary:active{
+  transform:scale(.98)!important;
+}
+
+/* Cleaner spacing */
+#mobileCreateTaskOverlay #mobileTaskTitle,
+#mobileCreateTaskOverlay #mobileTaskAssignee{
+  height:46px!important;
+}
+
+#mobileCreateTaskOverlay #mobileTaskDescription{
+  min-height:96px!important;
+  max-height:145px!important;
+}
+
+#mobileCreateTaskOverlay .mobile-task-datetime-box{
+  height:46px!important;
+}
+
+/* very small phones */
+@media(max-width:390px){
+  #mobileCreateTaskOverlay{
+    padding-left:7px!important;
+    padding-right:7px!important;
+  }
+
+  #mobileCreateTaskOverlay .mobile-role-sheet{
+    border-radius:21px 21px 11px 11px!important;
+    max-height:90dvh!important;
+  }
+
+  #mobileCreateTaskOverlay .mobile-role-sheet-head,
+  #mobileCreateTaskOverlay .mobile-role-sheet-body,
+  #mobileCreateTaskOverlay .mobile-role-sheet-foot{
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+
+  #mobileCreateTaskOverlay .mobile-role-sheet-foot{
+    gap:8px!important;
+  }
+}
+
+</style>
+
 </body>
 </html>
