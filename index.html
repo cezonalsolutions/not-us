@@ -4488,8 +4488,11 @@ html,body{
           <select id="mobileTaskAssignee" required></select>
         </div>
         <div class="mobile-role-field">
-          <label>Due Date & Time</label>
-          <input id="mobileTaskDue" type="datetime-local">
+          <label>Due Date &amp; Time</label>
+          <div class="mobile-task-datetime-box">
+            <i class="fa-regular fa-calendar-check"></i>
+            <input id="mobileTaskDue" type="datetime-local" aria-label="Task due date and time">
+          </div>
         </div>
       </div>
       <div class="mobile-role-sheet-foot">
@@ -13147,6 +13150,207 @@ html,body{
 
   #mobileCreateMeetingOverlay .mobile-datetime-part input{
     font-size:9px!important;
+  }
+}
+
+</style>
+
+
+<style id="notus-assign-task-polish">
+
+/* =========================
+   ASSIGN TASK — POLISHED UI
+   ========================= */
+
+#mobileCreateTaskOverlay{
+  padding-left:12px!important;
+  padding-right:12px!important;
+  padding-bottom:env(safe-area-inset-bottom)!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-sheet{
+  max-width:520px!important;
+  border-radius:24px 24px 16px 16px!important;
+  box-shadow:0 22px 70px rgba(20,26,30,.18)!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-sheet-head{
+  padding:18px 18px 14px!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-sheet-head h3{
+  font-size:17px!important;
+  letter-spacing:-.25px!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-sheet-head p{
+  margin-top:5px!important;
+  max-width:310px!important;
+  font-size:9px!important;
+  line-height:1.5!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-sheet-body{
+  padding:17px 18px 5px!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-field{
+  margin-bottom:15px!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-field label{
+  margin-bottom:7px!important;
+  font-size:9px!important;
+  color:#414946!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-field input,
+#mobileCreateTaskOverlay .mobile-role-field select,
+#mobileCreateTaskOverlay .mobile-role-field textarea{
+  width:100%!important;
+  border:1px solid #dfe5e2!important;
+  border-radius:12px!important;
+  background:#fbfcfc!important;
+  color:#202523!important;
+  box-shadow:none!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-field input,
+#mobileCreateTaskOverlay .mobile-role-field select{
+  height:47px!important;
+  padding:0 13px!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-field textarea{
+  min-height:112px!important;
+  padding:12px 13px!important;
+  line-height:1.55!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-field input:focus,
+#mobileCreateTaskOverlay .mobile-role-field select:focus,
+#mobileCreateTaskOverlay .mobile-role-field textarea:focus{
+  background:#fff!important;
+  border-color:#0f766e!important;
+  box-shadow:0 0 0 3px rgba(15,118,110,.06)!important;
+}
+
+#mobileCreateTaskOverlay #mobileTaskAssignee{
+  appearance:auto;
+  padding-right:34px!important;
+}
+
+/* Due date + time as one clean box */
+#mobileCreateTaskOverlay .mobile-task-datetime-box{
+  width:100%;
+  min-width:0;
+  height:47px;
+
+  display:flex;
+  align-items:center;
+  gap:9px;
+
+  padding:0 12px;
+
+  border:1px solid #dfe5e2;
+  border-radius:12px;
+
+  background:#fbfcfc;
+
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
+}
+
+#mobileCreateTaskOverlay .mobile-task-datetime-box:focus-within{
+  background:#fff;
+  border-color:#0f766e;
+  box-shadow:0 0 0 3px rgba(15,118,110,.06);
+}
+
+#mobileCreateTaskOverlay .mobile-task-datetime-box i{
+  flex:0 0 auto;
+  font-size:12px;
+  color:#7c8783;
+}
+
+#mobileCreateTaskOverlay .mobile-task-datetime-box input{
+  min-width:0!important;
+  width:100%!important;
+  height:100%!important;
+
+  padding:0!important;
+  margin:0!important;
+
+  border:0!important;
+  border-radius:0!important;
+
+  background:transparent!important;
+  box-shadow:none!important;
+  outline:none!important;
+
+  font-size:10px!important;
+  font-weight:600!important;
+}
+
+#mobileCreateTaskOverlay .mobile-task-datetime-box input:focus{
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+
+#mobileCreateTaskOverlay input[type="datetime-local"]{
+  min-inline-size:0!important;
+  max-inline-size:100%!important;
+}
+
+#mobileCreateTaskOverlay input[type="datetime-local"]::-webkit-calendar-picker-indicator{
+  margin:0;
+  padding:0;
+  width:16px;
+  height:16px;
+  opacity:.62;
+}
+
+/* Footer buttons */
+#mobileCreateTaskOverlay .mobile-role-sheet-foot{
+  padding:13px 18px calc(13px + env(safe-area-inset-bottom))!important;
+  gap:10px!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-secondary{
+  min-width:96px!important;
+  height:44px!important;
+}
+
+#mobileCreateTaskOverlay .mobile-role-primary{
+  flex:1;
+  max-width:190px;
+  min-width:130px!important;
+  height:44px!important;
+}
+
+/* Give the sheet a little more breathing room */
+#mobileCreateTaskOverlay .mobile-role-sheet{
+  max-height:92dvh!important;
+}
+
+@media(max-width:390px){
+  #mobileCreateTaskOverlay{
+    padding-left:8px!important;
+    padding-right:8px!important;
+  }
+
+  #mobileCreateTaskOverlay .mobile-role-sheet-head,
+  #mobileCreateTaskOverlay .mobile-role-sheet-body,
+  #mobileCreateTaskOverlay .mobile-role-sheet-foot{
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+
+  #mobileCreateTaskOverlay .mobile-role-sheet{
+    border-radius:22px 22px 12px 12px!important;
   }
 }
 
