@@ -4362,6 +4362,12 @@ html,body{
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
     </button>
 
+    <button class="profile-quick-item mobile-documents-profile-item" id="mobileDocumentsProfileItem" type="button" data-profile-action="documents" hidden>
+      <span class="profile-quick-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
+      <span class="profile-quick-text">Upload Documents</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
     <button class="profile-quick-item" type="button" data-profile-action="help">
       <span class="profile-quick-icon"><i class="fa-regular fa-circle-question"></i></span>
       <span class="profile-quick-text">Help &amp; Support</span>
@@ -9335,6 +9341,1056 @@ window.openOutsideApp = function(rawUrl){
   attendanceTicker=setInterval(()=>{
     if($("mobileAttendanceScreen")?.classList.contains("show"))window.loadMobileDailyAttendance();
   },60000);
+})();
+</script>
+
+
+<!-- =========================================================
+     MOBILE EXTRAS — GROUPS + DOCUMENT UPLOAD
+     ========================================================= -->
+
+<section class="mobile-documents-screen" id="mobileDocumentsScreen" aria-hidden="true">
+  <header class="mobile-documents-head">
+    <button class="mobile-documents-back" id="mobileDocumentsBack" type="button" aria-label="Back">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <div class="mobile-documents-head-copy">
+      <h2>Upload Documents</h2>
+      <p>Submit your employee documents securely</p>
+    </div>
+  </header>
+
+  <div class="mobile-documents-body">
+    <div class="mobile-documents-card">
+      <div class="mobile-doc-field">
+        <label for="mobileDocFatherName">Father Name</label>
+        <input id="mobileDocFatherName" type="text" autocomplete="off" placeholder="Enter father name">
+      </div>
+
+      <div class="mobile-doc-field">
+        <label for="mobileDocMotherName">Mother Name</label>
+        <input id="mobileDocMotherName" type="text" autocomplete="off" placeholder="Enter mother name">
+      </div>
+
+      <div class="mobile-doc-upload-grid">
+        <label class="mobile-doc-upload">
+          <input id="mobileDocPassport" type="file" accept="image/jpeg,image/png,image/webp">
+          <span class="mobile-doc-upload-icon"><i class="fa-regular fa-image"></i></span>
+          <span><b>Passport Photo</b><small id="mobileDocPassportState">Choose photo</small></span>
+        </label>
+
+        <label class="mobile-doc-upload">
+          <input id="mobileDocAadhaar" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+          <span class="mobile-doc-upload-icon"><i class="fa-regular fa-id-card"></i></span>
+          <span><b>Aadhaar Card</b><small id="mobileDocAadhaarState">Choose document</small></span>
+        </label>
+
+        <label class="mobile-doc-upload">
+          <input id="mobileDocTenth" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+          <span class="mobile-doc-upload-icon"><i class="fa-regular fa-file-lines"></i></span>
+          <span><b>10th Class Memo</b><small id="mobileDocTenthState">Choose document</small></span>
+        </label>
+
+        <label class="mobile-doc-upload">
+          <input id="mobileDocTwelfth" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+          <span class="mobile-doc-upload-icon"><i class="fa-regular fa-file-lines"></i></span>
+          <span><b>12th / Intermediate</b><small id="mobileDocTwelfthState">Choose document</small></span>
+        </label>
+
+        <label class="mobile-doc-upload mobile-doc-upload-full">
+          <input id="mobileDocDegree" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+          <span class="mobile-doc-upload-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+          <span><b>Degree Certificate</b><small id="mobileDocDegreeState">Choose document</small></span>
+        </label>
+      </div>
+
+      <div class="mobile-doc-exp">
+        <div class="mobile-doc-exp-title">Do you have previous work experience?</div>
+        <div class="mobile-doc-exp-options">
+          <label><input type="radio" name="mobileDocHasExperience" value="no" checked> No</label>
+          <label><input type="radio" name="mobileDocHasExperience" value="yes"> Yes</label>
+        </div>
+      </div>
+
+      <div class="mobile-doc-experience-fields" id="mobileDocExperienceFields" hidden>
+        <div class="mobile-doc-exp-time">
+          <div class="mobile-doc-field">
+            <label for="mobileDocExperienceYears">Years</label>
+            <input id="mobileDocExperienceYears" type="number" inputmode="numeric" min="0" max="60" value="0">
+          </div>
+          <div class="mobile-doc-field">
+            <label for="mobileDocExperienceMonths">Months</label>
+            <input id="mobileDocExperienceMonths" type="number" inputmode="numeric" min="0" max="11" value="0">
+          </div>
+        </div>
+
+        <div class="mobile-doc-upload-grid">
+          <label class="mobile-doc-upload">
+            <input id="mobileDocPayslip" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+            <span class="mobile-doc-upload-icon"><i class="fa-regular fa-file-lines"></i></span>
+            <span><b>Previous Payslip</b><small id="mobileDocPayslipState">Choose document</small></span>
+          </label>
+
+          <label class="mobile-doc-upload">
+            <input id="mobileDocExperienceLetter" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+            <span class="mobile-doc-upload-icon"><i class="fa-regular fa-envelope-open"></i></span>
+            <span><b>Experience Letter</b><small id="mobileDocExperienceLetterState">Choose document</small></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="mobile-doc-message" id="mobileDocMessage" aria-live="polite"></div>
+
+      <button class="mobile-doc-submit" id="mobileDocSubmit" type="button">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <span>Submit Documents</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="mobile-group-chat-screen" id="mobileGroupChatScreen" aria-hidden="true">
+  <header class="mobile-group-chat-head">
+    <button class="mobile-group-chat-back" id="mobileGroupChatBack" type="button" aria-label="Back">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+
+    <div class="mobile-group-chat-avatar" id="mobileGroupChatAvatar">
+      <img id="mobileGroupChatLogo" alt="Company logo">
+      <span id="mobileGroupChatFallback">G</span>
+    </div>
+
+    <div class="mobile-group-chat-head-info">
+      <div class="mobile-group-chat-name" id="mobileGroupChatName">Group</div>
+      <div class="mobile-group-chat-sub" id="mobileGroupChatSub"></div>
+    </div>
+  </header>
+
+  <div class="mobile-group-chat-messages" id="mobileGroupChatMessages"></div>
+
+  <div class="mobile-group-chat-compose">
+    <div class="mobile-group-chat-input-wrap">
+      <textarea id="mobileGroupChatInput" rows="1" maxlength="2500" placeholder="Message"></textarea>
+    </div>
+    <button class="mobile-group-chat-send" id="mobileGroupChatSend" type="button" aria-label="Send">
+      <i class="fa-solid fa-paper-plane"></i>
+    </button>
+  </div>
+</section>
+
+
+<style id="notus-mobile-groups-documents-css">
+/* ===== GROUPS IN CHAT LIST ===== */
+.mobile-group-section{padding:8px 0 1px}
+.mobile-group-section[hidden]{display:none!important}
+.mobile-group-section-title,
+.mobile-conversations-title{
+  padding:8px 16px 6px;
+  font-family:"Inter",sans-serif;
+  font-size:9px;font-weight:800;letter-spacing:.7px;
+  color:#89938f;text-transform:uppercase;
+}
+.mobile-group-row{
+  width:100%;min-height:72px;border:0;background:transparent;
+  display:flex;align-items:center;gap:12px;padding:9px 16px;text-align:left;
+}
+.mobile-group-row:active{background:rgba(15,118,110,.045)}
+.mobile-group-avatar{
+  width:52px;height:52px;flex:0 0 52px;border-radius:50%;
+  overflow:hidden;background:#e6f3ef;color:#0f766e;
+  display:grid;place-items:center;font-family:"Outfit",sans-serif;
+  font-size:17px;font-weight:700;
+}
+.mobile-group-avatar img{width:100%;height:100%;object-fit:cover;display:none}
+.mobile-group-body{min-width:0;flex:1;border-bottom:1px solid rgba(130,145,140,.16);padding:8px 0 14px}
+.mobile-group-name{font-family:"Outfit",sans-serif;font-size:15px;font-weight:600;color:#171717;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mobile-group-available{margin-top:4px;font-size:9px;font-weight:600;color:#2f9e62}
+.mobile-group-available:empty{display:none}
+
+/* ===== GROUP CHAT ===== */
+.mobile-group-chat-screen{
+  position:fixed;inset:0;z-index:780;background:#efeae2;
+  display:flex;flex-direction:column;
+  transform:translate3d(100%,0,0);visibility:hidden;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s ease;
+  will-change:transform;
+}
+.mobile-group-chat-screen.show{transform:translate3d(0,0,0);visibility:visible}
+.mobile-group-chat-head{
+  flex:0 0 auto;min-height:76px;
+  padding:max(12px,env(safe-area-inset-top)) 12px 10px;
+  background:#fff;border-bottom:1px solid #e7ebe9;
+  display:flex;align-items:flex-end;gap:8px;box-shadow:0 1px 4px rgba(18,38,32,.05)
+}
+.mobile-group-chat-back{
+  width:36px;height:40px;border:0;background:transparent;color:#303634;
+  display:grid;place-items:center;font-size:18px
+}
+.mobile-group-chat-avatar{
+  width:40px;height:40px;flex:0 0 40px;border-radius:50%;
+  overflow:hidden;background:#e9f5f2;color:#0f766e;
+  display:grid;place-items:center;font-family:"Outfit",sans-serif;font-weight:700
+}
+.mobile-group-chat-avatar img{width:100%;height:100%;object-fit:cover;display:none}
+.mobile-group-chat-avatar span{width:100%;height:100%;display:grid;place-items:center}
+.mobile-group-chat-head-info{min-width:0;flex:1;padding-bottom:2px}
+.mobile-group-chat-name{font-family:"Outfit",sans-serif;font-size:14px;font-weight:600;color:#171717;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mobile-group-chat-sub{margin-top:2px;font-size:9px;color:#2f9e62}
+.mobile-group-chat-messages{
+  flex:1 1 auto;min-height:0;overflow-y:auto;
+  padding:18px 11px 14px;display:flex;flex-direction:column;gap:7px;
+  -webkit-overflow-scrolling:touch;background-color:#efeae2;
+  background-image:
+    radial-gradient(circle at 18px 18px,rgba(91,111,103,.055) 1.1px,transparent 1.2px),
+    radial-gradient(circle at 55px 42px,rgba(91,111,103,.04) 1px,transparent 1.1px);
+  background-size:72px 72px,84px 84px;
+}
+.mobile-group-message-row{display:flex}
+.mobile-group-message-row.in{justify-content:flex-start}
+.mobile-group-message-row.out{justify-content:flex-end}
+.mobile-group-message{
+  max-width:82%;padding:7px 9px 6px;border-radius:9px;
+  font-size:11px;line-height:1.45;color:#232725;box-shadow:0 1px 1.5px rgba(0,0,0,.08)
+}
+.mobile-group-message-row.in .mobile-group-message{background:#fff;border-top-left-radius:3px}
+.mobile-group-message-row.out .mobile-group-message{background:#d9fdd3;border-top-right-radius:3px}
+.mobile-group-sender{display:block;margin-bottom:3px;font-size:8px;font-weight:800;color:#0f766e}
+.mobile-group-time{display:block;margin-top:4px;text-align:right;font-size:7.5px;color:#7f8c87}
+.mobile-group-chat-compose{
+  flex:0 0 auto;background:#efeae2;
+  padding:7px 9px calc(7px + env(safe-area-inset-bottom));
+  display:flex;align-items:flex-end;gap:7px
+}
+.mobile-group-chat-input-wrap{
+  flex:1;min-height:45px;max-height:110px;border-radius:23px;background:#fff;
+  display:flex;align-items:center;padding:0 14px;box-shadow:0 1px 4px rgba(18,38,32,.08)
+}
+.mobile-group-chat-input-wrap textarea{
+  width:100%;max-height:88px;resize:none;border:0;outline:0;background:transparent;
+  font-family:"Inter",sans-serif;font-size:16px;line-height:1.4;color:#171717;padding:11px 0
+}
+.mobile-group-chat-send{
+  width:44px;height:44px;flex:0 0 44px;border:0;border-radius:50%;
+  background:#0f766e;color:#fff;display:grid;place-items:center;font-size:14px
+}
+.mobile-group-chat-send:disabled{opacity:.5}
+
+/* ===== DOCUMENTS ===== */
+.mobile-documents-profile-item[hidden]{display:none!important}
+.mobile-documents-screen{
+  position:fixed;inset:0;z-index:740;background:#f5f7f8;
+  display:flex;flex-direction:column;
+  transform:translate3d(100%,0,0);visibility:hidden;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s ease;
+}
+.mobile-documents-screen.show{transform:translate3d(0,0,0);visibility:visible}
+.mobile-documents-head{
+  flex:0 0 auto;min-height:94px;
+  padding:max(18px,env(safe-area-inset-top)) 16px 14px;
+  display:flex;align-items:flex-end;gap:10px;background:#fff;border-bottom:1px solid #e7ebe9
+}
+.mobile-documents-back{width:38px;height:38px;border:0;background:transparent;color:#303634;display:grid;place-items:center;font-size:17px}
+.mobile-documents-head-copy{min-width:0;flex:1;padding-bottom:3px}
+.mobile-documents-head-copy h2{font-family:"Outfit",sans-serif;font-size:18px;font-weight:600;color:#171717}
+.mobile-documents-head-copy p{margin-top:3px;font-size:9px;color:#8a9390}
+.mobile-documents-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(24px + env(safe-area-inset-bottom))}
+.mobile-documents-card{background:#fff;border:1px solid #e7ebe9;border-radius:15px;padding:15px}
+.mobile-doc-field{margin-bottom:13px}
+.mobile-doc-field label{display:block;margin-bottom:6px;font-size:9px;font-weight:700;color:#4b5551}
+.mobile-doc-field input{
+  width:100%;height:45px;border:1px solid #dfe5e2;border-radius:11px;outline:none;
+  background:#fff;padding:0 12px;font-family:"Inter",sans-serif;font-size:12px;color:#202523
+}
+.mobile-doc-field input:focus{border-color:#0f766e}
+.mobile-doc-upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.mobile-doc-upload-full{grid-column:1/-1}
+.mobile-doc-upload{
+  min-height:78px;border:1px solid #e3e8e5;border-radius:12px;background:#fbfcfc;
+  padding:11px;display:flex;align-items:center;gap:10px;cursor:pointer
+}
+.mobile-doc-upload input{display:none}
+.mobile-doc-upload-icon{width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:#edf6f3;color:#0f766e;display:grid;place-items:center}
+.mobile-doc-upload b{display:block;font-size:9px;color:#252b28}
+.mobile-doc-upload small{display:block;margin-top:4px;font-size:7.5px;color:#929b97;word-break:break-word}
+.mobile-doc-upload.selected{border-color:#b9d9cf;background:#f8fcfb}
+.mobile-doc-exp{margin:15px 0 12px;padding:12px;border:1px solid #e7ebe9;border-radius:12px}
+.mobile-doc-exp-title{font-size:9px;font-weight:700;color:#3d4542}
+.mobile-doc-exp-options{display:flex;gap:20px;margin-top:10px}
+.mobile-doc-exp-options label{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600;color:#56615d}
+.mobile-doc-exp-time{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mobile-doc-message{display:none;margin-top:13px;padding:10px 11px;border-radius:10px;font-size:9px;line-height:1.5}
+.mobile-doc-message.show{display:block}
+.mobile-doc-message.success{background:#f0faf5;border:1px solid #d6ebdf;color:#34704a}
+.mobile-doc-message.error{background:#fff5f5;border:1px solid #f0dede;color:#a33b3b}
+.mobile-doc-submit{
+  width:100%;height:47px;margin-top:14px;border:0;border-radius:12px;background:#171717;color:#fff;
+  display:flex;align-items:center;justify-content:center;gap:8px;font-family:"Inter",sans-serif;font-size:11px;font-weight:700
+}
+.mobile-doc-submit:disabled{opacity:.55}
+@media(max-width:390px){
+  .mobile-doc-upload-grid{grid-template-columns:1fr}
+  .mobile-doc-upload-full{grid-column:auto}
+}
+</style>
+
+
+<script id="notus-mobile-groups-documents-js">
+(function(){
+  "use strict";
+
+  const $ = id => document.getElementById(id);
+  const safe = v => String(v ?? "").trim();
+  const esc = v => String(v ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+
+  function session(){
+    try{
+      return window.notusSession ||
+        JSON.parse(localStorage.getItem("notus_company_session") || "null") ||
+        null;
+    }catch(_){ return window.notusSession || null; }
+  }
+
+  function memberIdentity(){
+    const s = session() || {};
+    const type = safe(s.user_type || s.login_type).toLowerCase();
+    const role = safe(s.role || s.employee_role).toLowerCase();
+
+    if(["admin","company_admin","company","administrator"].includes(type) ||
+       ["admin","administrator","company admin","company administrator"].includes(role)){
+      return {type:"admin", id:safe(s.company_id), key:"admin:"+safe(s.company_id)};
+    }
+
+    if(type === "hr" || type === "hr_member"){
+      const id = safe(s.hr_id || s.member_id || s.id);
+      return {type:"hr", id, key:"hr:"+id};
+    }
+
+    const id = safe(
+      s.employee_id || s.member_id || s.team_lead_id || s.manager_id ||
+      s.recruiter_id || s.it_admin_id || s.technical_supporter_id || s.id
+    );
+    return {type:"employee", id, key:"employee:"+id};
+  }
+
+  function myDisplayName(){
+    const s = session() || {};
+    return safe(
+      s.full_name || s.name || s.employee_name || s.hr_name ||
+      s.manager_name || s.recruiter_name ||
+      s.technical_supporter_name || s.it_admin_name || s.email || s.gmail
+    ) || "User";
+  }
+
+  function fmtTime(v){
+    if(!v) return "";
+    const d = new Date(v);
+    if(Number.isNaN(d.getTime())) return "";
+    return d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+  }
+
+  /* =========================================================
+     GROUPS
+     ========================================================= */
+  let groups = [];
+  let activeGroup = null;
+  let groupChannel = null;
+  let companyLogo = "";
+
+  const groupScreen = $("mobileGroupChatScreen");
+  const groupMessages = $("mobileGroupChatMessages");
+  const groupInput = $("mobileGroupChatInput");
+  const groupSend = $("mobileGroupChatSend");
+
+  async function resolveCompanyLogo(){
+    if(companyLogo) return companyLogo;
+
+    const img = $("workspaceCompanyLogo");
+    const current = safe(img?.src);
+    if(current && !current.startsWith("data:")){
+      companyLogo = current;
+      return companyLogo;
+    }
+
+    const s = session();
+    if(!s?.company_id || typeof db === "undefined") return "";
+
+    try{
+      const {data,error} = await db.from("companies")
+        .select("logo_url")
+        .eq("id",s.company_id)
+        .maybeSingle();
+      if(!error && data?.logo_url) companyLogo = safe(data.logo_url);
+    }catch(_){}
+    return companyLogo;
+  }
+
+  async function groupAvailableCount(group){
+    const s = session();
+    if(!s?.company_id || typeof db === "undefined") return 0;
+    const keys = new Set(Array.isArray(group?.member_keys) ? group.member_keys.map(String) : []);
+    if(!keys.size) return 0;
+
+    try{
+      const {data,error} = await db.from("notus_member_status")
+        .select("member_type,member_id,current_status")
+        .eq("company_id",s.company_id);
+      if(error) throw error;
+
+      let count = 0;
+      (data || []).forEach(row=>{
+        const key = String(row.member_type || "").toLowerCase() + ":" + String(row.member_id || "");
+        if(keys.has(key) && String(row.current_status || "").toLowerCase() === "available") count++;
+      });
+      return count;
+    }catch(_){
+      return 0;
+    }
+  }
+
+  function getGroupHost(){
+    const list = $("workspaceChatList");
+    if(!list) return null;
+
+    let host = list.querySelector(":scope > .mobile-group-section");
+    if(!host){
+      host = document.createElement("section");
+      host.className = "mobile-group-section";
+      host.hidden = true;
+      list.prepend(host);
+    }
+    return host;
+  }
+
+  async function paintGroups(){
+    const host = getGroupHost();
+    if(!host) return;
+
+    if(!groups.length){
+      host.hidden = true;
+      host.innerHTML = "";
+      return;
+    }
+
+    const logo = await resolveCompanyLogo();
+
+    const rows = await Promise.all(groups.map(async g=>{
+      const available = await groupAvailableCount(g);
+      return `
+        <button class="mobile-group-row" type="button" data-mobile-group-id="${esc(g.id)}">
+          <span class="mobile-group-avatar">
+            ${logo ? `<img src="${esc(logo)}" alt="Company logo" style="display:block">` : `<span>${esc((g.group_name||"G").charAt(0).toUpperCase())}</span>`}
+          </span>
+          <span class="mobile-group-body">
+            <span class="mobile-group-name">${esc(g.group_name || "Group")}</span>
+            <span class="mobile-group-available">${available > 0 ? `${available} available` : ""}</span>
+          </span>
+        </button>
+      `;
+    }));
+
+    host.innerHTML = `<div class="mobile-group-section-title">Groups</div>${rows.join("")}`;
+    host.hidden = false;
+
+    host.querySelectorAll("[data-mobile-group-id]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const g = groups.find(x=>String(x.id) === String(btn.dataset.mobileGroupId));
+        if(g) openGroup(g);
+      });
+    });
+  }
+
+  function ensureConversationsLabel(){
+    const list = $("workspaceChatList");
+    if(!list) return;
+    const hasDirectRows = !!list.querySelector(":scope > .chat-item");
+    const existing = list.querySelector(":scope > .mobile-conversations-title");
+
+    if(hasDirectRows && !existing){
+      const label = document.createElement("div");
+      label.className = "mobile-conversations-title";
+      label.textContent = "Conversations";
+      const firstDirect = list.querySelector(":scope > .chat-item");
+      if(firstDirect) list.insertBefore(label, firstDirect);
+    }else if(!hasDirectRows && existing){
+      existing.remove();
+    }
+  }
+
+  async function decorateChatList(){
+    await paintGroups();
+    ensureConversationsLabel();
+  }
+
+  async function loadGroups(){
+    const s = session();
+    const me = memberIdentity();
+    if(!s?.company_id || !me.key || me.key.endsWith(":") || typeof db === "undefined"){
+      groups = [];
+      await decorateChatList();
+      return;
+    }
+
+    try{
+      const {data,error} = await db.from("notus_group_chats")
+        .select("*")
+        .eq("company_id",s.company_id)
+        .contains("member_keys",[me.key])
+        .order("updated_at",{ascending:false});
+
+      if(error) throw error;
+      groups = Array.isArray(data) ? data : [];
+
+      if(activeGroup){
+        const fresh = groups.find(g=>String(g.id) === String(activeGroup.id));
+        if(fresh){
+          activeGroup = fresh;
+          paintActiveGroup();
+        }else{
+          closeGroup();
+        }
+      }
+
+      await decorateChatList();
+    }catch(err){
+      console.warn("Mobile groups load:",err);
+      groups = [];
+      await decorateChatList();
+    }
+  }
+
+  function renderGroupMessages(){
+    if(!groupMessages || !activeGroup) return;
+    const me = memberIdentity();
+    const messages = Array.isArray(activeGroup.messages) ? activeGroup.messages : [];
+
+    groupMessages.innerHTML = '<div class="chat-day"><span>Today</span></div>' +
+      messages.map(msg=>{
+        const out = safe(msg.sender_key) === me.key;
+        return `
+          <div class="mobile-group-message-row ${out ? "out" : "in"}">
+            <div class="mobile-group-message">
+              ${out ? "" : `<span class="mobile-group-sender">${esc(msg.sender_name || "Member")}</span>`}
+              <span>${esc(msg.text || "")}</span>
+              <span class="mobile-group-time">${esc(fmtTime(msg.created_at))}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+    requestAnimationFrame(()=>{ groupMessages.scrollTop = groupMessages.scrollHeight; });
+  }
+
+  async function paintActiveGroup(){
+    if(!activeGroup) return;
+
+    $("mobileGroupChatName").textContent = safe(activeGroup.group_name) || "Group";
+
+    const available = await groupAvailableCount(activeGroup);
+    $("mobileGroupChatSub").textContent = available > 0 ? `${available} available` : "";
+
+    const logo = await resolveCompanyLogo();
+    const logoEl = $("mobileGroupChatLogo");
+    const fallback = $("mobileGroupChatFallback");
+
+    if(logoEl && fallback){
+      if(logo){
+        logoEl.src = logo;
+        logoEl.style.display = "block";
+        fallback.style.display = "none";
+      }else{
+        logoEl.style.display = "none";
+        fallback.style.display = "grid";
+        fallback.textContent = (safe(activeGroup.group_name) || "G").charAt(0).toUpperCase();
+      }
+    }
+
+    renderGroupMessages();
+  }
+
+  async function openGroup(group){
+    activeGroup = group;
+    await paintActiveGroup();
+    groupScreen?.classList.add("show");
+    groupScreen?.setAttribute("aria-hidden","false");
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeGroup(){
+    activeGroup = null;
+    groupScreen?.classList.remove("show");
+    groupScreen?.setAttribute("aria-hidden","true");
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+    if(groupInput) groupInput.value = "";
+  }
+
+  async function sendGroupMessage(){
+    if(!activeGroup || !groupInput || !groupSend) return;
+    const message = safe(groupInput.value);
+    if(!message) return;
+
+    const me = memberIdentity();
+    groupSend.disabled = true;
+    groupInput.value = "";
+
+    try{
+      const {data,error} = await db.rpc("notus_send_group_message",{
+        p_group_id:activeGroup.id,
+        p_sender_key:me.key,
+        p_sender_name:myDisplayName(),
+        p_text:message
+      });
+      if(error) throw error;
+
+      if(data){
+        activeGroup = data;
+        const idx = groups.findIndex(g=>String(g.id) === String(activeGroup.id));
+        if(idx >= 0) groups[idx] = activeGroup;
+        renderGroupMessages();
+      }
+    }catch(err){
+      console.error("Mobile group send:",err);
+      groupInput.value = message;
+    }finally{
+      groupSend.disabled = false;
+      groupInput.focus();
+    }
+  }
+
+  function startGroupRealtime(){
+    const s = session();
+    if(!s?.company_id || typeof db === "undefined") return;
+
+    try{
+      if(groupChannel){
+        db.removeChannel(groupChannel);
+        groupChannel = null;
+      }
+
+      groupChannel = db.channel("notus-mobile-groups-"+s.company_id)
+        .on("postgres_changes",{
+          event:"*",
+          schema:"public",
+          table:"notus_group_chats",
+          filter:`company_id=eq.${s.company_id}`
+        },()=>{ loadGroups(); })
+        .on("postgres_changes",{
+          event:"*",
+          schema:"public",
+          table:"notus_member_status",
+          filter:`company_id=eq.${s.company_id}`
+        },()=>{
+          paintGroups();
+          if(activeGroup) paintActiveGroup();
+        })
+        .subscribe();
+    }catch(err){
+      console.warn("Mobile group realtime:",err);
+    }
+  }
+
+  $("mobileGroupChatBack")?.addEventListener("click",closeGroup);
+  groupSend?.addEventListener("click",sendGroupMessage);
+  groupInput?.addEventListener("keydown",e=>{
+    if(e.key === "Enter" && !e.shiftKey){
+      e.preventDefault();
+      sendGroupMessage();
+    }
+  });
+
+  /* The existing direct-chat renderer owns workspaceChatList.
+     Wrap it once so Groups are restored immediately after every live direct-chat repaint. */
+  try{
+    if(typeof renderPeopleList === "function" && !window.__notusMobileGroupsWrapped){
+      const originalRenderPeopleList = renderPeopleList;
+      renderPeopleList = function(){
+        const result = originalRenderPeopleList.apply(this,arguments);
+        Promise.resolve().then(decorateChatList);
+        return result;
+      };
+      window.__notusMobileGroupsWrapped = true;
+    }
+  }catch(err){
+    console.warn("Group list integration:",err);
+  }
+
+  /* =========================================================
+     DOCUMENTS
+     ========================================================= */
+  const DOC_TABLE = "notus_staff_documents";
+  const DOC_BUCKET = "notus-staff-documents";
+  let myDocs = null;
+  let docChannel = null;
+
+  const docMenuItem = $("mobileDocumentsProfileItem");
+  const docScreen = $("mobileDocumentsScreen");
+
+  function isAdmin(){
+    const s = session() || {};
+    const t = safe(s.user_type || s.login_type).toLowerCase();
+    const r = safe(s.role || s.employee_role).toLowerCase();
+    return ["admin","company_admin","company","administrator"].includes(t) ||
+           ["admin","administrator","company admin","company administrator"].includes(r);
+  }
+
+  function docMessage(text,type){
+    const el = $("mobileDocMessage");
+    if(!el) return;
+    el.textContent = text || "";
+    el.className = "mobile-doc-message" + (text ? ` show ${type || ""}` : "");
+  }
+
+  function fileState(inputId,stateId,path){
+    const input = $(inputId);
+    const state = $(stateId);
+    const card = input?.closest(".mobile-doc-upload");
+    if(!state) return;
+
+    if(input?.files?.[0]){
+      state.textContent = input.files[0].name;
+      card?.classList.add("selected");
+    }else if(path){
+      state.textContent = "Already uploaded ✓";
+      card?.classList.add("selected");
+    }else{
+      state.textContent = inputId === "mobileDocPassport" ? "Choose photo" : "Choose document";
+      card?.classList.remove("selected");
+    }
+  }
+
+  function paintDocuments(){
+    const r = myDocs || {};
+    $("mobileDocFatherName").value = r.father_name || "";
+    $("mobileDocMotherName").value = r.mother_name || "";
+
+    const exp = !!r.has_experience;
+    const radio = document.querySelector(`input[name="mobileDocHasExperience"][value="${exp ? "yes" : "no"}"]`);
+    if(radio) radio.checked = true;
+    $("mobileDocExperienceFields").hidden = !exp;
+    $("mobileDocExperienceYears").value = String(r.experience_years || 0);
+    $("mobileDocExperienceMonths").value = String(r.experience_months || 0);
+
+    fileState("mobileDocPassport","mobileDocPassportState",r.passport_photo_path);
+    fileState("mobileDocAadhaar","mobileDocAadhaarState",r.aadhaar_card_path);
+    fileState("mobileDocTenth","mobileDocTenthState",r.tenth_memo_path);
+    fileState("mobileDocTwelfth","mobileDocTwelfthState",r.twelfth_memo_path);
+    fileState("mobileDocDegree","mobileDocDegreeState",r.degree_certificate_path);
+    fileState("mobileDocPayslip","mobileDocPayslipState",r.payslip_path);
+    fileState("mobileDocExperienceLetter","mobileDocExperienceLetterState",r.experience_letter_path);
+  }
+
+  async function loadDocumentAccess(){
+    const s = session();
+    const me = memberIdentity();
+
+    if(!s?.company_id || !me.id || isAdmin() || typeof db === "undefined"){
+      if(docMenuItem) docMenuItem.hidden = true;
+      return;
+    }
+
+    try{
+      const {data,error} = await db.from(DOC_TABLE)
+        .select("*")
+        .eq("company_id",s.company_id)
+        .eq("member_id",me.id)
+        .eq("member_type",me.type)
+        .maybeSingle();
+
+      if(error) throw error;
+      myDocs = data || null;
+
+      const enabled = !!myDocs?.documents_enabled;
+      if(docMenuItem) docMenuItem.hidden = !enabled;
+
+      if(enabled) paintDocuments();
+      else if(docScreen?.classList.contains("show")) closeDocuments();
+    }catch(err){
+      console.warn("Mobile document access:",err);
+      if(docMenuItem) docMenuItem.hidden = true;
+    }
+  }
+
+  function openDocuments(){
+    if(!myDocs?.documents_enabled) return;
+    if(typeof closeProfilePanel === "function") closeProfilePanel();
+    paintDocuments();
+    docMessage("","");
+    docScreen?.classList.add("show");
+    docScreen?.setAttribute("aria-hidden","false");
+  }
+
+  function closeDocuments(){
+    docScreen?.classList.remove("show");
+    docScreen?.setAttribute("aria-hidden","true");
+    docMessage("","");
+  }
+
+  function extFor(file){
+    const ext = safe(file?.name).split(".").pop().toLowerCase().replace(/[^a-z0-9]/g,"");
+    if(ext) return ext;
+    if(file?.type === "application/pdf") return "pdf";
+    if(file?.type === "image/png") return "png";
+    if(file?.type === "image/webp") return "webp";
+    return "jpg";
+  }
+
+  function validDoc(file,photoOnly=false){
+    if(!file) return true;
+    if(file.size > 10*1024*1024) return false;
+    const allowed = photoOnly
+      ? ["image/jpeg","image/png","image/webp"]
+      : ["image/jpeg","image/png","image/webp","application/pdf"];
+    return allowed.includes(file.type);
+  }
+
+  async function uploadDoc(file,folder,oldPath){
+    if(!file) return oldPath || null;
+    const s = session();
+    const me = memberIdentity();
+    const path = `${s.company_id}/${me.id}/${folder}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${extFor(file)}`;
+
+    const {error} = await db.storage.from(DOC_BUCKET).upload(path,file,{
+      cacheControl:"3600",
+      upsert:false,
+      contentType:file.type || undefined
+    });
+    if(error) throw error;
+
+    if(oldPath && oldPath !== path){
+      try{ await db.storage.from(DOC_BUCKET).remove([oldPath]); }catch(_){}
+    }
+    return path;
+  }
+
+  function requiredMissing(oldPath,inputId){
+    return !oldPath && !$(inputId)?.files?.[0];
+  }
+
+  async function submitDocuments(){
+    const s = session();
+    const me = memberIdentity();
+    if(!s?.company_id || !me.id || !myDocs?.documents_enabled || isAdmin()) return;
+
+    const father = safe($("mobileDocFatherName")?.value);
+    const mother = safe($("mobileDocMotherName")?.value);
+    const hasExp = document.querySelector('input[name="mobileDocHasExperience"]:checked')?.value === "yes";
+    const years = Number($("mobileDocExperienceYears")?.value || 0);
+    const months = Number($("mobileDocExperienceMonths")?.value || 0);
+
+    if(!father){ docMessage("Enter Father Name.","error"); return; }
+    if(!mother){ docMessage("Enter Mother Name.","error"); return; }
+
+    const required = [
+      ["Passport Photo","passport_photo_path","mobileDocPassport",true],
+      ["Aadhaar Card","aadhaar_card_path","mobileDocAadhaar",false],
+      ["10th Class Memo","tenth_memo_path","mobileDocTenth",false],
+      ["12th / Intermediate Memo","twelfth_memo_path","mobileDocTwelfth",false],
+      ["Degree Certificate","degree_certificate_path","mobileDocDegree",false]
+    ];
+
+    for(const [label,key,inputId,photoOnly] of required){
+      if(requiredMissing(myDocs?.[key],inputId)){
+        docMessage(`Upload ${label}.`,"error");
+        return;
+      }
+      const file = $(inputId)?.files?.[0];
+      if(file && !validDoc(file,photoOnly)){
+        docMessage(`${label}: use JPG, PNG, WEBP${photoOnly ? "" : " or PDF"} under 10 MB.`,"error");
+        return;
+      }
+    }
+
+    if(hasExp && years === 0 && months === 0){
+      docMessage("Enter your experience duration.","error");
+      return;
+    }
+
+    for(const id of ["mobileDocPayslip","mobileDocExperienceLetter"]){
+      const file = $(id)?.files?.[0];
+      if(file && !validDoc(file,false)){
+        docMessage("Experience document must be JPG, PNG, WEBP or PDF under 10 MB.","error");
+        return;
+      }
+    }
+
+    const btn = $("mobileDocSubmit");
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Uploading...</span>';
+    docMessage("","");
+
+    try{
+      const passport = await uploadDoc($("mobileDocPassport")?.files?.[0],"passport",myDocs?.passport_photo_path);
+      const aadhaar = await uploadDoc($("mobileDocAadhaar")?.files?.[0],"aadhaar",myDocs?.aadhaar_card_path);
+      const tenth = await uploadDoc($("mobileDocTenth")?.files?.[0],"tenth",myDocs?.tenth_memo_path);
+      const twelfth = await uploadDoc($("mobileDocTwelfth")?.files?.[0],"twelfth",myDocs?.twelfth_memo_path);
+      const degree = await uploadDoc($("mobileDocDegree")?.files?.[0],"degree",myDocs?.degree_certificate_path);
+
+      let payslip = myDocs?.payslip_path || null;
+      let expLetter = myDocs?.experience_letter_path || null;
+
+      if(hasExp){
+        payslip = await uploadDoc($("mobileDocPayslip")?.files?.[0],"payslip",myDocs?.payslip_path);
+        expLetter = await uploadDoc($("mobileDocExperienceLetter")?.files?.[0],"experience-letter",myDocs?.experience_letter_path);
+      }
+
+      const payload = {
+        company_id:s.company_id,
+        member_id:me.id,
+        member_type:me.type,
+        member_name:myDisplayName(),
+        member_email:safe(s.email || s.gmail || s.employee_email || s.hr_email) || myDocs?.member_email || null,
+        role:safe(s.role || s.employee_role || s.user_type || s.login_type) || myDocs?.role || null,
+        designation:safe(s.designation) || myDocs?.designation || null,
+        father_name:father,
+        mother_name:mother,
+        passport_photo_path:passport,
+        aadhaar_card_path:aadhaar,
+        tenth_memo_path:tenth,
+        twelfth_memo_path:twelfth,
+        degree_certificate_path:degree,
+        has_experience:hasExp,
+        experience_years:hasExp ? years : 0,
+        experience_months:hasExp ? months : 0,
+        payslip_path:hasExp ? payslip : null,
+        experience_letter_path:hasExp ? expLetter : null,
+        documents_submitted:true,
+        submitted_at:new Date().toISOString()
+      };
+
+      const {data,error} = await db.from(DOC_TABLE)
+        .upsert(payload,{onConflict:"company_id,member_id,member_type"})
+        .select("*")
+        .single();
+
+      if(error) throw error;
+
+      myDocs = data || {...myDocs,...payload};
+      paintDocuments();
+      docMessage("Documents submitted successfully ✓","success");
+
+      [
+        "mobileDocPassport","mobileDocAadhaar","mobileDocTenth","mobileDocTwelfth",
+        "mobileDocDegree","mobileDocPayslip","mobileDocExperienceLetter"
+      ].forEach(id=>{ if($(id)) $(id).value = ""; });
+
+    }catch(err){
+      console.error("Mobile documents submit:",err);
+      docMessage(err?.message || "Unable to upload documents.","error");
+    }finally{
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i><span>Submit Documents</span>';
+    }
+  }
+
+  function startDocumentRealtime(){
+    const s = session();
+    const me = memberIdentity();
+    if(!s?.company_id || !me.id || isAdmin() || typeof db === "undefined") return;
+
+    try{
+      if(docChannel){
+        db.removeChannel(docChannel);
+        docChannel = null;
+      }
+
+      docChannel = db.channel("notus-mobile-documents-"+s.company_id+"-"+me.id)
+        .on("postgres_changes",{
+          event:"*",
+          schema:"public",
+          table:DOC_TABLE,
+          filter:`company_id=eq.${s.company_id}`
+        },payload=>{
+          const row = payload.new || payload.old || {};
+          if(String(row.member_id || "") !== me.id) return;
+          if(String(row.member_type || "") !== me.type) return;
+          loadDocumentAccess();
+        })
+        .subscribe();
+    }catch(err){
+      console.warn("Mobile document realtime:",err);
+    }
+  }
+
+  [
+    ["mobileDocPassport","mobileDocPassportState","passport_photo_path"],
+    ["mobileDocAadhaar","mobileDocAadhaarState","aadhaar_card_path"],
+    ["mobileDocTenth","mobileDocTenthState","tenth_memo_path"],
+    ["mobileDocTwelfth","mobileDocTwelfthState","twelfth_memo_path"],
+    ["mobileDocDegree","mobileDocDegreeState","degree_certificate_path"],
+    ["mobileDocPayslip","mobileDocPayslipState","payslip_path"],
+    ["mobileDocExperienceLetter","mobileDocExperienceLetterState","experience_letter_path"]
+  ].forEach(([inputId,stateId,key])=>{
+    $(inputId)?.addEventListener("change",()=>fileState(inputId,stateId,myDocs?.[key]));
+  });
+
+  document.querySelectorAll('input[name="mobileDocHasExperience"]').forEach(radio=>{
+    radio.addEventListener("change",()=>{
+      $("mobileDocExperienceFields").hidden =
+        document.querySelector('input[name="mobileDocHasExperience"]:checked')?.value !== "yes";
+    });
+  });
+
+  $("mobileDocumentsBack")?.addEventListener("click",closeDocuments);
+  $("mobileDocSubmit")?.addEventListener("click",submitDocuments);
+
+  /* Existing profile-action listeners were registered before this patch.
+     Add the new Documents action without changing the old menu behavior. */
+  docMenuItem?.addEventListener("click",e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    openDocuments();
+  },true);
+
+  /* =========================================================
+     START / RESUME
+     ========================================================= */
+  async function initExtras(){
+    const s = session();
+    if(!s?.company_id) return;
+    await Promise.allSettled([
+      loadGroups(),
+      loadDocumentAccess()
+    ]);
+    startGroupRealtime();
+    startDocumentRealtime();
+  }
+
+  /* Hook the real workspace open so no manual refresh is required. */
+  try{
+    if(typeof showWorkspace === "function" && !window.__notusMobileExtrasWorkspaceWrapped){
+      const originalShowWorkspace = showWorkspace;
+      showWorkspace = async function(s){
+        const result = await originalShowWorkspace.apply(this,arguments);
+        requestAnimationFrame(()=>{ initExtras(); });
+        return result;
+      };
+      window.__notusMobileExtrasWorkspaceWrapped = true;
+    }
+  }catch(err){
+    console.warn("Mobile extras workspace hook:",err);
+  }
+
+  window.addEventListener("focus",()=>{
+    if(session()?.company_id){
+      loadGroups();
+      loadDocumentAccess();
+    }
+  });
+
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState === "visible" && session()?.company_id){
+      loadGroups();
+      loadDocumentAccess();
+    }
+  });
+
+  /* Restored-session fallback: executes once; no interval/repaint loop. */
+  requestAnimationFrame(()=>{
+    if(session()?.company_id) initExtras();
+  });
 })();
 </script>
 
