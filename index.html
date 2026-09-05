@@ -7208,35 +7208,59 @@ function updateChatViewportHeight(){
   if(!companyChatScreen) return;
 
   const vv = window.visualViewport;
-  const height = Math.max(
+
+  /* Keep the CHAT SCREEN itself fixed in the original layout viewport.
+     Keyboard opening must NOT shrink/move the whole chat upward.
+     Only the composer is lifted above the keyboard. */
+  const layoutHeight = Math.max(
     320,
-    Math.round(vv ? vv.height : (window.innerHeight || document.documentElement.clientHeight))
+    Math.round(
+      window.innerHeight ||
+      document.documentElement.clientHeight ||
+      (vv ? vv.height : 0)
+    )
   );
 
-  const layoutHeight = Math.round(
-    window.innerHeight ||
-    document.documentElement.clientHeight ||
-    height
+  const visualHeight = Math.max(
+    0,
+    Math.round(vv ? vv.height : layoutHeight)
   );
 
-  const keyboardOpen = (layoutHeight - height) > 120;
+  const visualTop = Math.max(
+    0,
+    Math.round(vv ? vv.offsetTop : 0)
+  );
 
-  /* IMPORTANT:
-     Do not apply visualViewport.offsetTop.
-     On iPhone/WebView it can temporarily become non-zero and create
-     a visible blank gap above the chat screen. */
-  companyChatScreen.style.setProperty("--chat-viewport-height", height + "px");
+  let keyboardInset = Math.max(
+    0,
+    layoutHeight - visualHeight - visualTop
+  );
+
+  const keyboardOpen = keyboardInset > 120;
+  if(!keyboardOpen) keyboardInset = 0;
+
+  companyChatScreen.style.setProperty("--chat-viewport-height", layoutHeight + "px");
   companyChatScreen.style.setProperty("--chat-viewport-top", "0px");
+  companyChatScreen.style.setProperty("--chat-keyboard-inset", keyboardInset + "px");
   companyChatScreen.style.setProperty(
     "--chat-safe-bottom",
     keyboardOpen ? "0px" : "env(safe-area-inset-bottom)"
   );
 
+  companyChatScreen.classList.toggle("keyboard-open", keyboardOpen);
   companyChatScreen.style.top = "0px";
 
+  /* Browser/WebView can try to scroll the document when textarea gets focus.
+     Keep the page anchored; do not move the header/chat screen. */
   if(companyChatScreen.classList.contains("show")){
+    try{
+      if(window.scrollY !== 0) window.scrollTo(0,0);
+    }catch(_e){}
+
     requestAnimationFrame(()=>{
-      if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+      if(chatMessages){
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
     });
   }
 }
@@ -14697,6 +14721,67 @@ html,body{
 
   document.getElementById("workspaceProfileBtn")?.addEventListener("click",()=>{
     setTimeout(refreshShift,40);
+  });
+})();
+</script>
+
+
+<style id="notus-direct-chat-keyboard-no-jump-final">
+/* Keep current chat design exactly as-is.
+   Keyboard changes ONLY composer position; full chat/header never jumps. */
+
+.chat-screen{
+  height:var(--chat-viewport-height,100dvh)!important;
+  max-height:var(--chat-viewport-height,100dvh)!important;
+  overflow:hidden!important;
+}
+
+/* When keyboard opens, lift only the composer. */
+.chat-screen.keyboard-open .chat-compose-wrap{
+  transform:translate3d(0,calc(-1 * var(--chat-keyboard-inset,0px)),0)!important;
+  will-change:transform;
+}
+
+/* Give messages room for the lifted composer + keyboard without moving header. */
+.chat-screen.keyboard-open .chat-messages{
+  padding-bottom:calc(66px + var(--chat-keyboard-inset,0px))!important;
+}
+
+/* No extra safe-area white strip while keyboard is visible. */
+.chat-screen.keyboard-open .chat-compose-wrap{
+  padding-bottom:7px!important;
+}
+
+/* Prevent body/document motion while typing in chat. */
+html:has(.chat-screen.show),
+body:has(.chat-screen.show){
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
+</style>
+
+
+<script id="notus-direct-chat-focus-no-jump">
+(function(){
+  const input=document.getElementById("chatMessageInput");
+  if(!input) return;
+
+  input.addEventListener("focus",()=>{
+    requestAnimationFrame(()=>{
+      try{ window.scrollTo(0,0); }catch(_e){}
+      if(typeof updateChatViewportHeight==="function"){
+        updateChatViewportHeight();
+      }
+    });
+  });
+
+  input.addEventListener("blur",()=>{
+    setTimeout(()=>{
+      if(typeof updateChatViewportHeight==="function"){
+        updateChatViewportHeight();
+      }
+      try{ window.scrollTo(0,0); }catch(_e){}
+    },40);
   });
 })();
 </script>
