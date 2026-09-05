@@ -4605,21 +4605,66 @@ form.addEventListener("submit", async function(e){
     localStorage.setItem("notus_company_session", JSON.stringify(session));
     window.notusSession = session;
 
-    /* SAME attendance engine as desktop: create one exact login session row. */
+    /* =======================================================
+       SHIFT GATE BEFORE LOGIN
+       - Admin: unrestricted
+       - No assigned shift: old behavior
+       - Assigned shift + outside duty hours: BLOCK login
+       ======================================================= */
     try{
+      if(typeof window.notusMobileEnforceShiftDutyHours === "function"){
+        const duty = await window.notusMobileEnforceShiftDutyHours({
+          showMessage:false
+        });
+
+        if(duty && duty.allowed === false){
+          const start = (typeof notusMobileFormatShiftTime === "function")
+            ? notusMobileFormatShiftTime(duty.shift?.shift_start_time)
+            : String(duty.shift?.shift_start_time || "");
+
+          const end = (typeof notusMobileFormatShiftTime === "function")
+            ? notusMobileFormatShiftTime(duty.shift?.shift_end_time)
+            : String(duty.shift?.shift_end_time || "");
+
+          const shiftName = String(duty.shift?.shift_name || "").trim();
+
+          let msg = "Out of duty hours.";
+          if(start && end){
+            msg += ` Your shift timing is ${start} - ${end}.`;
+          }else if(start){
+            msg += ` Your shift starts at ${start}.`;
+          }
+          if(shiftName){
+            msg += ` (${shiftName})`;
+          }
+
+          /* Do not keep a logged-in session when duty time has not started. */
+          try{
+            localStorage.removeItem("notus_company_session");
+            localStorage.removeItem("notus_workspace_status");
+          }catch(_e){}
+          window.notusSession = null;
+
+          /* Login-screen message + toast-style floating message. */
+          showStatus(msg, "error");
+
+          if(typeof showLoginDutyToast === "function"){
+            showLoginDutyToast(msg);
+          }
+
+          return;
+        }
+      }
+
+      /* Only INSIDE shift (or no shift assigned) create attendance. */
       if(typeof notusMobileStartAttendanceOnlyInsideShift === "function"){
         await notusMobileStartAttendanceOnlyInsideShift();
       }else if(typeof window.notusAttendanceRecordLogin === "function"){
         await window.notusAttendanceRecordLogin();
       }
 
-      /* Successful login must NOT auto-set Available.
-         Shift timing only decides whether the user may be active. */
-      if(typeof window.notusMobileEnforceShiftDutyHours === "function"){
-        await window.notusMobileEnforceShiftDutyHours({showMessage:false});
-      }
     }catch(attErr){
-      console.warn("Mobile attendance/login status save:",attErr);
+      console.warn("Mobile attendance/login shift check:",attErr);
     }
 
     showStatus("Login successful", "success");
@@ -11022,6 +11067,76 @@ window.addEventListener("DOMContentLoaded",()=>{
   text-align:left!important;
 }
 </style>
+
+
+<div class="login-duty-toast" id="loginDutyToast" role="status" aria-live="polite">
+  <i class="fa-solid fa-clock"></i>
+  <span id="loginDutyToastText"></span>
+</div>
+
+
+<style id="notus-login-duty-toast-css">
+.login-duty-toast{
+  position:fixed;
+  left:50%;
+  top:max(18px,env(safe-area-inset-top));
+  z-index:12000;
+  width:min(calc(100% - 28px),390px);
+  min-height:48px;
+  padding:12px 14px;
+  border-radius:13px;
+  background:#2f3337;
+  color:#fff;
+  box-shadow:0 14px 38px rgba(18,24,28,.22);
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  opacity:0;
+  visibility:hidden;
+  transform:translate(-50%,-10px);
+  transition:opacity .2s ease,transform .24s cubic-bezier(.2,.8,.2,1),visibility .2s ease;
+  pointer-events:none;
+}
+.login-duty-toast.show{
+  opacity:1;
+  visibility:visible;
+  transform:translate(-50%,0);
+}
+.login-duty-toast i{
+  flex:0 0 auto;
+  margin-top:2px;
+  font-size:14px;
+  color:#ffd7d7;
+}
+.login-duty-toast span{
+  min-width:0;
+  font-family:"Inter",sans-serif;
+  font-size:11px;
+  font-weight:600;
+  line-height:1.5;
+}
+</style>
+
+
+<script id="notus-login-duty-toast-js">
+let __notusLoginDutyToastTimer=null;
+function showLoginDutyToast(message){
+  const box=document.getElementById("loginDutyToast");
+  const text=document.getElementById("loginDutyToastText");
+  if(!box||!text)return;
+
+  text.textContent=String(message||"Out of duty hours.");
+  box.classList.add("show");
+
+  if(__notusLoginDutyToastTimer){
+    clearTimeout(__notusLoginDutyToastTimer);
+  }
+
+  __notusLoginDutyToastTimer=setTimeout(()=>{
+    box.classList.remove("show");
+  },5000);
+}
+</script>
 
 </body>
 </html>
