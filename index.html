@@ -14237,5 +14237,160 @@ html,body{
 }
 </style>
 
+
+<script id="notus-employee-real-image-resolver-final">
+(function(){
+  const FALLBACK_ICON = '<i class="fa-regular fa-user"></i>';
+
+  window.notusResolvePersonImage = function(p){
+    if(!p) return "";
+    return (
+      p.profile_image ||
+      p.profile_image_url ||
+      p.profile_url ||
+      p.profile_pic ||
+      p.profile_picture ||
+      p.profile_photo ||
+      p.photo ||
+      p.photo_url ||
+      p.image ||
+      p.image_url ||
+      p.avatar ||
+      p.avatar_url ||
+      p.employee_image ||
+      p.employee_image_url ||
+      p.employee_photo ||
+      p.employee_photo_url ||
+      p.member_image ||
+      p.member_image_url ||
+      p.user_image ||
+      p.user_image_url ||
+      p.admin_profile_url ||
+      p.hr_profile_url ||
+      p.manager_profile_url ||
+      p.team_lead_profile_url ||
+      ""
+    );
+  };
+
+  window.notusPersonAvatarHtml = function(p, cls){
+    const klass = cls || "mobile-person-avatar";
+    const img = window.notusResolvePersonImage(p);
+    if(img){
+      const safe = String(img)
+        .replace(/&/g,"&amp;")
+        .replace(/"/g,"&quot;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;");
+      return `<div class="${klass}"><img src="${safe}" alt="" loading="lazy" decoding="async" onerror="this.remove();this.parentElement.innerHTML='${FALLBACK_ICON.replace(/'/g,"&#39;")}';"></div>`;
+    }
+    return `<div class="${klass}">${FALLBACK_ICON}</div>`;
+  };
+})();
+</script>
+
+
+<style id="notus-employee-real-images-no-initials-final">
+.mobile-person-avatar,
+.mobile-member-avatar,
+.mobile-role-person-avatar,
+.mobile-task-assignee-avatar,
+.mobile-employee-avatar,
+.workspace-person-avatar,
+.people-avatar{
+  overflow:hidden!important;
+  display:grid!important;
+  place-items:center!important;
+  background:#f2f4f3!important;
+  color:#8a928f!important;
+  border:1px solid #e2e7e4!important;
+}
+
+/* actual profile photo */
+.mobile-person-avatar img,
+.mobile-member-avatar img,
+.mobile-role-person-avatar img,
+.mobile-task-assignee-avatar img,
+.mobile-employee-avatar img,
+.workspace-person-avatar img,
+.people-avatar img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  display:block!important;
+}
+
+/* absolutely no initials / letter fallback */
+.mobile-person-avatar > span,
+.mobile-member-avatar > span,
+.mobile-role-person-avatar > span,
+.mobile-task-assignee-avatar > span,
+.mobile-employee-avatar > span,
+.workspace-person-avatar > span,
+.people-avatar > span{
+  display:none!important;
+}
+</style>
+
+
+<script id="notus-employee-avatar-dom-enhancer">
+(function(){
+  function getDataFromRow(row){
+    if(!row) return null;
+    const img =
+      row.dataset.profileImage ||
+      row.dataset.profileImageUrl ||
+      row.dataset.image ||
+      row.dataset.imageUrl ||
+      row.dataset.avatar ||
+      row.dataset.avatarUrl ||
+      "";
+    return img ? {profile_image_url:img} : null;
+  }
+
+  function cleanAvatar(el){
+    if(!el) return;
+    const existing = el.querySelector("img");
+    if(existing){
+      existing.style.display="block";
+      return;
+    }
+
+    // Remove any raw letter/initial text.
+    [...el.childNodes].forEach(n=>{
+      if(n.nodeType===Node.TEXT_NODE && n.textContent.trim()) n.remove();
+    });
+
+    const row = el.closest(
+      ".mobile-person-row,.mobile-member-option,.mobile-role-person,.mobile-task-assignee-option,.mobile-employee-row,.workspace-person-row,.people-row"
+    );
+    const data = getDataFromRow(row);
+    const url = window.notusResolvePersonImage ? window.notusResolvePersonImage(data) : "";
+
+    if(url){
+      const img=document.createElement("img");
+      img.alt="";
+      img.loading="lazy";
+      img.decoding="async";
+      img.src=url;
+      img.onerror=()=>{ img.remove(); if(!el.querySelector("i")) el.innerHTML='<i class="fa-regular fa-user"></i>'; };
+      el.replaceChildren(img);
+    }else if(!el.querySelector("i")){
+      el.innerHTML='<i class="fa-regular fa-user"></i>';
+    }
+  }
+
+  window.notusRefreshEmployeeAvatars=function(){
+    document.querySelectorAll(
+      ".mobile-person-avatar,.mobile-member-avatar,.mobile-role-person-avatar,.mobile-task-assignee-avatar,.mobile-employee-avatar,.workspace-person-avatar,.people-avatar"
+    ).forEach(cleanAvatar);
+  };
+
+  document.addEventListener("DOMContentLoaded",()=>setTimeout(window.notusRefreshEmployeeAvatars,0));
+  document.addEventListener("click",()=>setTimeout(window.notusRefreshEmployeeAvatars,50),true);
+  document.addEventListener("notus:people-rendered",()=>setTimeout(window.notusRefreshEmployeeAvatars,0));
+})();
+</script>
+
 </body>
 </html>
