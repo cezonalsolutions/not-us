@@ -4554,26 +4554,38 @@ html,body{
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
     </button>
 
-    <button class="profile-quick-item" type="button" data-profile-action="meetings">
+    <button class="profile-quick-item mobile-role-tool" id="mobileWorkReportAction" type="button" data-profile-action="work-report" hidden>
+      <span class="profile-quick-icon"><i class="fa-regular fa-clipboard"></i></span>
+      <span class="profile-quick-text">Work Report</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
+    <button class="profile-quick-item mobile-role-tool" id="mobileAnnouncementsAction" type="button" data-profile-action="announcements" hidden>
+      <span class="profile-quick-icon"><i class="fa-solid fa-bullhorn"></i></span>
+      <span class="profile-quick-text">Announcements</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
+    <button class="profile-quick-item" id="mobileMeetingsAction" type="button" data-profile-action="meetings">
       <span class="profile-quick-icon"><i class="fa-solid fa-video"></i></span>
       <span class="profile-quick-text">Upcoming Meetings</span>
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
     </button>
 
-    <button class="profile-quick-item" type="button" data-profile-action="leave">
+    <button class="profile-quick-item" id="mobileLeaveAction" type="button" data-profile-action="leave">
       <span class="profile-quick-icon"><i class="fa-regular fa-calendar-check"></i></span>
       <span class="profile-quick-text">Leave</span>
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
     </button>
 
 
-    <button class="profile-quick-item" type="button" data-profile-action="attendance">
+    <button class="profile-quick-item" id="mobileAttendanceAction" type="button" data-profile-action="attendance">
       <span class="profile-quick-icon"><i class="fa-regular fa-clock"></i></span>
       <span class="profile-quick-text">Attendance</span>
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
     </button>
 
-    <button class="profile-quick-item" type="button" data-profile-action="payslip">
+    <button class="profile-quick-item" id="mobilePayslipAction" type="button" data-profile-action="payslip">
       <span class="profile-quick-icon"><i class="fa-regular fa-file-lines"></i></span>
       <span class="profile-quick-text">Pay Slip</span>
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
@@ -4585,7 +4597,7 @@ html,body{
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
     </button>
 
-    <button class="profile-quick-item" type="button" data-profile-action="help">
+    <button class="profile-quick-item" id="mobileHelpAction" type="button" data-profile-action="help">
       <span class="profile-quick-icon"><i class="fa-regular fa-circle-question"></i></span>
       <span class="profile-quick-text">Help &amp; Support</span>
       <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
@@ -4815,66 +4827,15 @@ form.addEventListener("submit", async function(e){
     localStorage.setItem("notus_company_session", JSON.stringify(session));
     window.notusSession = session;
 
-    /* =======================================================
-       SHIFT GATE BEFORE LOGIN
-       - Admin: unrestricted
-       - No assigned shift: old behavior
-       - Assigned shift + outside duty hours: BLOCK login
-       ======================================================= */
+    /* Login itself is NOT blocked by shift timing.
+       Shift timing is checked only when the user changes work status
+       (Available / Break / Meeting / Busy etc.), same as the web flow. */
     try{
-      if(typeof window.notusMobileEnforceShiftDutyHours === "function"){
-        const duty = await window.notusMobileEnforceShiftDutyHours({
-          showMessage:false
-        });
-
-        if(duty && duty.allowed === false){
-          const start = (typeof notusMobileFormatShiftTime === "function")
-            ? notusMobileFormatShiftTime(duty.shift?.shift_start_time)
-            : String(duty.shift?.shift_start_time || "");
-
-          const end = (typeof notusMobileFormatShiftTime === "function")
-            ? notusMobileFormatShiftTime(duty.shift?.shift_end_time)
-            : String(duty.shift?.shift_end_time || "");
-
-          const shiftName = String(duty.shift?.shift_name || "").trim();
-
-          let msg = "Out of duty hours.";
-          if(start && end){
-            msg += ` Your shift timing is ${start} - ${end}.`;
-          }else if(start){
-            msg += ` Your shift starts at ${start}.`;
-          }
-          if(shiftName){
-            msg += ` (${shiftName})`;
-          }
-
-          /* Do not keep a logged-in session when duty time has not started. */
-          try{
-            localStorage.removeItem("notus_company_session");
-            localStorage.removeItem("notus_workspace_status");
-          }catch(_e){}
-          window.notusSession = null;
-
-          /* Login-screen message + toast-style floating message. */
-          showStatus(msg, "error");
-
-          if(typeof showLoginDutyToast === "function"){
-            showLoginDutyToast(msg);
-          }
-
-          return;
-        }
-      }
-
-      /* Only INSIDE shift (or no shift assigned) create attendance. */
-      if(typeof notusMobileStartAttendanceOnlyInsideShift === "function"){
-        await notusMobileStartAttendanceOnlyInsideShift();
-      }else if(typeof window.notusAttendanceRecordLogin === "function"){
+      if(typeof window.notusAttendanceRecordLogin === "function"){
         await window.notusAttendanceRecordLogin();
       }
-
     }catch(attErr){
-      console.warn("Mobile attendance/login shift check:",attErr);
+      console.warn("Mobile attendance login save:",attErr);
     }
 
     showStatus("Login successful", "success");
@@ -5060,10 +5021,8 @@ async function loadMyWorkspaceStatus(){
 
     paintWorkspaceStatus(status,statusLabels[status]);
 
-    /* Shift can replace a stale Available/Busy/etc. with Offline. */
-    if(typeof window.notusMobileEnforceShiftDutyHours === "function"){
-      await window.notusMobileEnforceShiftDutyHours({showMessage:false});
-    }
+    /* Do not change status just because the app loaded.
+       Duty-hours validation happens when the user selects a new status. */
   }catch(err){
     console.warn("Workspace status load failed:",err);
   }
@@ -5313,7 +5272,7 @@ async function notusMobileForceOffline({closeAttendance=true}={}){
   }
 }
 
-window.notusMobileEnforceShiftDutyHours = async function({showMessage=false,statusAttempt=null}={}){
+window.notusMobileEnforceShiftDutyHours = async function({showMessage=false,statusAttempt=null,forceOutside=false}={}){
   const s = window.notusSession || getNotusSession?.() || {};
   const member = getCurrentMobileAttendanceMember(s);
 
@@ -5331,31 +5290,45 @@ window.notusMobileEnforceShiftDutyHours = async function({showMessage=false,stat
   const inside = notusMobileInsideShift(shift);
 
   if(!inside){
-    await notusMobileForceOffline({closeAttendance:true});
+    /*
+      IMPORTANT:
+      Login/opening the app does NOT block or force status.
+      We enforce duty hours only when:
+      - the user actively tries to change status, or
+      - an explicit caller asks forceOutside=true.
+    */
+    const shouldEnforce = !!statusAttempt || !!forceOutside;
 
-    if(showMessage && statusAttempt && statusAttempt !== "offline"){
-      const start = notusMobileFormatShiftTime(shift.shift_start_time);
-      const end = notusMobileFormatShiftTime(shift.shift_end_time);
-      const msg = (start && end)
-        ? `Out of duty hours. Your shift is ${start} - ${end}.`
-        : "Out of duty hours.";
+    if(shouldEnforce){
+      await notusMobileForceOffline({closeAttendance:false});
 
-      /* Use existing toast if available; otherwise a small non-blocking status message. */
-      if(typeof toast === "function"){
-        toast(msg);
-      }else{
-        console.info(msg);
+      if(showMessage && statusAttempt && statusAttempt !== "offline"){
+        const start = notusMobileFormatShiftTime(shift.shift_start_time);
+        const end = notusMobileFormatShiftTime(shift.shift_end_time);
+
+        let msg = "Out of duty hours.";
+        if(start && end){
+          msg += ` Your shift timing is ${start} - ${end}.`;
+        }else if(start){
+          msg += ` Your shift starts at ${start}.`;
+        }
+
+        if(typeof showWorkspaceDutyToast === "function"){
+          showWorkspaceDutyToast(msg);
+        }else if(typeof showLoginDutyToast === "function"){
+          showLoginDutyToast(msg);
+        }else if(typeof toast === "function"){
+          toast(msg);
+        }else{
+          console.info(msg);
+        }
       }
     }
 
     return {allowed:false,shift};
   }
 
-  /*
-    IMPORTANT:
-    Inside duty hours we DO NOT auto-set Available.
-    The user stays on the saved/manual status until they select one.
-  */
+  /* Inside duty hours, user can manually select status. */
   return {allowed:true,shift};
 };
 
@@ -5390,29 +5363,25 @@ function startNotusMobileShiftWatcher(){
     notusMobileShiftTimer = null;
   }
 
-  /* Initial check; no page refresh / no full list repaint. */
-  window.notusMobileEnforceShiftDutyHours({showMessage:false}).catch(()=>{});
+  /* Refresh assigned shift silently; do not alter status on app open. */
+  notusMobileLoadMyShift(true).catch(()=>{});
 
   /* Check the duty boundary once per minute. */
   notusMobileShiftTimer = setInterval(()=>{
     if(document.visibilityState !== "visible") return;
-    window.notusMobileEnforceShiftDutyHours({showMessage:false}).catch(()=>{});
+    notusMobileLoadMyShift(true).catch(()=>{});
   },60000);
 }
 
 window.addEventListener("focus",()=>{
   if((window.notusSession || getNotusSession?.())?.company_id){
-    notusMobileLoadMyShift(true)
-      .then(()=>window.notusMobileEnforceShiftDutyHours({showMessage:false}))
-      .catch(()=>{});
+    notusMobileLoadMyShift(true).catch(()=>{});
   }
 });
 
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState === "visible" && (window.notusSession || getNotusSession?.())?.company_id){
-    notusMobileLoadMyShift(true)
-      .then(()=>window.notusMobileEnforceShiftDutyHours({showMessage:false}))
-      .catch(()=>{});
+    notusMobileLoadMyShift(true).catch(()=>{});
   }
 });
 
@@ -11505,14 +11474,22 @@ function showLoginDutyToast(message){
   }
 
   function actorType(){
-    const s=session(),t=norm(s.user_type||s.login_type),r=norm(s.role||s.employee_role);
-    if(t==="hr"||t==="hr_member") return "hr";
+    const s=session();
+    const t=norm(s.user_type||s.login_type).replace(/[_-]+/g," ");
+    const r=norm(s.role||s.employee_role||s.designation).replace(/[_-]+/g," ");
+
+    if(t==="hr"||t==="hr member"||r==="hr") return "hr";
     if(t==="manager"||r==="manager") return "manager";
-    if(t==="team_lead"||t==="teamlead"||r==="team lead"||r==="teamlead") return "team_lead";
+    if(t==="team lead"||t==="teamlead"||r==="team lead"||r==="teamlead") return "team_lead";
+    if(t==="recruiter"||r==="recruiter") return "recruiter";
+    if(["it admin","it supporter","it administrator"].includes(t) ||
+       ["it supporter","it administrator"].includes(r)) return "it_admin";
+    if(["technical supporter","technical support","technical support executive"].includes(t) ||
+       ["technical supporter","technical support","technical support executive"].includes(r)) return "technical_supporter";
     if(t==="employee"||r==="employee") return "employee";
-    if(["admin","company_admin","administrator"].includes(t)||
+    if(["admin","company admin","administrator"].includes(t)||
        ["admin","administrator","company admin"].includes(r)) return "admin";
-    return t||r||"employee";
+    return (t||r||"employee").replace(/\s+/g,"_");
   }
 
   function actorId(){
@@ -11590,18 +11567,53 @@ function showLoginDutyToast(message){
     const t=actorType();
     const show=(id,yes)=>{const el=$(id);if(el)el.hidden=!yes};
 
+    /* Web-role parity for modules that exist in this mobile build. */
+    const fullStaff=["employee","hr","team_lead","manager"];
+    const supportStaff=["it_admin","technical_supporter"];
+    const allCore=[...fullStaff,"recruiter",...supportStaff];
+
+    /* Team Lead */
     show("mobileCreateGroupAction",t==="team_lead");
     show("mobileTeamMembersAction",t==="team_lead");
+
+    /* Meeting create: web allows HR / Manager / Team Lead / Admin.
+       Employees, Recruiter, IT and Technical Supporter can only view. */
     show("mobileCreateMeetingAction",canCreateMeeting());
-    show("mobileTasksAction",["employee","team_lead","manager","hr"].includes(t));
-    show("mobileEmployeesAction",t==="manager");
+
+    /* Tasks */
+    show("mobileTasksAction",["employee","hr","team_lead","manager"].includes(t));
+
+    /* Manager sees Employees + HR. HR sees Employees. Recruiter sees Employees onboarding list. */
+    show("mobileEmployeesAction",["manager","hr","recruiter"].includes(t));
     show("mobileHrAction",t==="manager");
-    show("mobilePayrollAction",t==="manager");
+
+    /* Work Report + Announcements follow the web workspace visibility. */
+    show("mobileWorkReportAction",allCore.includes(t));
+    show("mobileAnnouncementsAction",["employee","hr","team_lead","manager","it_admin","recruiter"].includes(t));
+
+    /* Existing mobile modules */
+    show("mobileMeetingsAction",allCore.includes(t));
+    show("mobileLeaveAction",["employee","hr","team_lead","manager","technical_supporter"].includes(t));
+    show("mobileAttendanceAction",["employee","hr","team_lead","manager","technical_supporter"].includes(t));
+
+    /* Payroll is visible on web for HR, Manager, Team Lead/Employee workspace,
+       plus IT / Technical Supporter limited workspaces. */
+    show("mobilePayrollAction",[
+      "employee","hr","team_lead","manager","it_admin","technical_supporter"
+    ].includes(t));
+
+    /* Payslip is visible to every logged-in web role. */
+    show("mobilePayslipAction",allCore.includes(t));
+
+    /* Help & Support remains available for every app role. */
+    show("mobileHelpAction",true);
 
     const any=[
-      t==="team_lead",canCreateMeeting(),
-      ["employee","team_lead","manager","hr"].includes(t),
-      t==="manager"
+      t==="team_lead",
+      canCreateMeeting(),
+      ["employee","hr","team_lead","manager"].includes(t),
+      ["manager","hr","recruiter"].includes(t),
+      allCore.includes(t)
     ].some(Boolean);
     show("mobileRoleToolsLabel",any);
   }
@@ -11619,7 +11631,9 @@ function showLoginDutyToast(message){
     if(title)title.textContent=mode==="hr"?"HR":"Employees";
     if(sub)sub.textContent=mode==="hr"?"Company HR members":"Company employees";
 
-    list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading</b></div>';
+    if(!list.children.length){
+      list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading</b></div>';
+    }
 
     try{
       let rows=[];
@@ -11978,7 +11992,9 @@ function showLoginDutyToast(message){
   async function loadTasks(){
     const s=session(),list=$("mobileTaskList");
     if(!s.company_id||!list)return;
-    list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading tasks</b></div>';
+    if(!list.children.length){
+      list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading tasks</b></div>';
+    }
     try{
       const {data,error}=await db.rpc("notus_list_tasks_for_me",{
         p_company_id:s.company_id,
@@ -12128,6 +12144,16 @@ function showLoginDutyToast(message){
     else if(action==="employees"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openPeople("employees")}
     else if(action==="hr"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openPeople("hr")}
     else if(action==="payroll"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openScreen("mobilePayrollScreen")}
+    else if(action==="work-report"){
+      e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();
+      const tab=document.getElementById("workspaceTabWorkReport");
+      if(tab) tab.click();
+    }
+    else if(action==="announcements"){
+      e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();
+      const bell=document.getElementById("workspaceAnnouncementBtn");
+      if(bell) bell.click();
+    }
   },true);
 
   $("workspaceProfileBtn")?.addEventListener("click",applyRoleTools);
@@ -12141,6 +12167,254 @@ function showLoginDutyToast(message){
   window.notusMobileOpenCreateGroup=openCreateGroup;
   window.notusMobileOpenTasks=openTasks;
 })();
+</script>
+
+
+<style id="notus-mobile-extra-swipe-css">
+.mobile-swipe-active{
+  will-change:transform;
+}
+</style>
+
+
+<script id="notus-mobile-extra-swipe-js">
+(function(){
+  "use strict";
+
+  const EDGE=30;
+  const TRIGGER=82;
+  const MAX_VERTICAL=62;
+
+  /*
+    Only screens without their own swipe logic are registered here.
+    Chat, Leave, Meetings and Announcements already have dedicated swipe code.
+  */
+  const screens=[
+    ["mobileAttendanceScreen","mobileAttendanceBack"],
+    ["mobileDocumentsScreen","mobileDocumentsBack"],
+    ["mobileGroupChatScreen","mobileGroupChatBack"],
+    ["mobilePeopleScreen","mobilePeopleBack"],
+    ["mobileTasksScreen","mobileTasksBack"],
+    ["mobilePayrollScreen","mobilePayrollBack"]
+  ];
+
+  function bindScreen(screenId,backId){
+    const screen=document.getElementById(screenId);
+    const back=document.getElementById(backId);
+    if(!screen||!back||screen.dataset.notusSwipeBound==="1") return;
+
+    screen.dataset.notusSwipeBound="1";
+
+    let active=false;
+    let horizontal=false;
+    let sx=0,sy=0,dx=0;
+
+    screen.addEventListener("touchstart",e=>{
+      if(!screen.classList.contains("show")) return;
+      if(e.touches?.length!==1) return;
+
+      const t=e.touches[0];
+      if(t.clientX>EDGE) return;
+
+      sx=t.clientX;
+      sy=t.clientY;
+      dx=0;
+      active=true;
+      horizontal=false;
+      screen.classList.add("mobile-swipe-active");
+    },{passive:true});
+
+    screen.addEventListener("touchmove",e=>{
+      if(!active||e.touches?.length!==1) return;
+
+      const t=e.touches[0];
+      const x=t.clientX-sx;
+      const y=t.clientY-sy;
+
+      if(!horizontal){
+        if(Math.abs(x)<8&&Math.abs(y)<8) return;
+        if(Math.abs(y)>Math.abs(x) || Math.abs(y)>MAX_VERTICAL){
+          active=false;
+          screen.style.transition="";
+          screen.style.transform="";
+          screen.classList.remove("mobile-swipe-active");
+          return;
+        }
+        horizontal=true;
+      }
+
+      if(x<=0) return;
+
+      dx=Math.min(x,window.innerWidth);
+      screen.style.transition="none";
+      screen.style.transform=`translate3d(${dx}px,0,0)`;
+      e.preventDefault();
+    },{passive:false});
+
+    function finish(cancelled=false){
+      if(!active){
+        screen.classList.remove("mobile-swipe-active");
+        return;
+      }
+
+      active=false;
+      const close=!cancelled&&horizontal&&dx>=TRIGGER;
+
+      if(close){
+        screen.style.transition="transform .20s cubic-bezier(.2,.8,.2,1)";
+        screen.style.transform="translate3d(100%,0,0)";
+
+        setTimeout(()=>{
+          screen.style.transition="";
+          screen.style.transform="";
+          screen.classList.remove("mobile-swipe-active");
+          back.click();
+        },205);
+      }else{
+        screen.style.transition="transform .20s cubic-bezier(.2,.8,.2,1)";
+        screen.style.transform="translate3d(0,0,0)";
+
+        setTimeout(()=>{
+          screen.style.transition="";
+          screen.style.transform="";
+          screen.classList.remove("mobile-swipe-active");
+        },205);
+      }
+    }
+
+    screen.addEventListener("touchend",()=>finish(false),{passive:true});
+    screen.addEventListener("touchcancel",()=>finish(true),{passive:true});
+  }
+
+  screens.forEach(([s,b])=>bindScreen(s,b));
+
+  /* Profile drawer: swipe RIGHT anywhere on the drawer to close smoothly. */
+  const panel=document.getElementById("workspaceProfilePanel");
+  const close=document.getElementById("profilePanelClose");
+
+  if(panel&&close&&panel.dataset.notusSwipeBound!=="1"){
+    panel.dataset.notusSwipeBound="1";
+
+    let active=false,sx=0,sy=0,dx=0,horizontal=false;
+
+    panel.addEventListener("touchstart",e=>{
+      if(!panel.classList.contains("show")||e.touches?.length!==1) return;
+      const t=e.touches[0];
+      sx=t.clientX;sy=t.clientY;dx=0;active=true;horizontal=false;
+    },{passive:true});
+
+    panel.addEventListener("touchmove",e=>{
+      if(!active||e.touches?.length!==1) return;
+      const t=e.touches[0];
+      const x=t.clientX-sx,y=t.clientY-sy;
+
+      if(!horizontal){
+        if(Math.abs(x)<8&&Math.abs(y)<8) return;
+        if(Math.abs(y)>Math.abs(x)){active=false;return}
+        horizontal=true;
+      }
+      if(x<=0)return;
+
+      dx=Math.min(x,panel.offsetWidth||window.innerWidth);
+      panel.style.transition="none";
+      panel.style.transform=`translate3d(${dx}px,0,0)`;
+      e.preventDefault();
+    },{passive:false});
+
+    panel.addEventListener("touchend",()=>{
+      if(!active)return;
+      active=false;
+
+      if(horizontal&&dx>=70){
+        panel.style.transition="transform .20s cubic-bezier(.2,.8,.2,1)";
+        panel.style.transform="translate3d(105%,0,0)";
+        setTimeout(()=>{
+          panel.style.transition="";
+          panel.style.transform="";
+          close.click();
+        },205);
+      }else{
+        panel.style.transition="transform .20s cubic-bezier(.2,.8,.2,1)";
+        panel.style.transform="translate3d(0,0,0)";
+        setTimeout(()=>{
+          panel.style.transition="";
+          panel.style.transform="";
+        },205);
+      }
+    },{passive:true});
+
+    panel.addEventListener("touchcancel",()=>{
+      active=false;
+      panel.style.transition="";
+      panel.style.transform="";
+    },{passive:true});
+  }
+})();
+</script>
+
+
+<style id="notus-workspace-duty-toast-css">
+.workspace-duty-toast{
+  position:fixed;
+  left:50%;
+  top:max(16px,env(safe-area-inset-top));
+  z-index:16000;
+  width:min(calc(100% - 28px),390px);
+  padding:12px 14px;
+  border-radius:13px;
+  background:#2f3337;
+  color:#fff;
+  box-shadow:0 14px 38px rgba(18,24,28,.22);
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  opacity:0;
+  visibility:hidden;
+  transform:translate(-50%,-10px);
+  transition:opacity .18s ease,transform .22s cubic-bezier(.2,.8,.2,1),visibility .18s ease;
+  pointer-events:none;
+}
+.workspace-duty-toast.show{
+  opacity:1;
+  visibility:visible;
+  transform:translate(-50%,0);
+}
+.workspace-duty-toast i{
+  margin-top:2px;
+  flex:0 0 auto;
+  font-size:14px;
+  color:#ffd7d7;
+}
+.workspace-duty-toast span{
+  min-width:0;
+  font-family:"Inter",sans-serif;
+  font-size:11px;
+  font-weight:600;
+  line-height:1.5;
+}
+</style>
+<div class="workspace-duty-toast" id="workspaceDutyToast" role="status" aria-live="polite">
+  <i class="fa-solid fa-clock"></i>
+  <span id="workspaceDutyToastText"></span>
+</div>
+<script id="notus-workspace-duty-toast-js">
+let __notusWorkspaceDutyToastTimer=null;
+function showWorkspaceDutyToast(message){
+  const box=document.getElementById("workspaceDutyToast");
+  const txt=document.getElementById("workspaceDutyToastText");
+  if(!box||!txt)return;
+
+  txt.textContent=String(message||"Out of duty hours.");
+  box.classList.add("show");
+
+  if(__notusWorkspaceDutyToastTimer){
+    clearTimeout(__notusWorkspaceDutyToastTimer);
+  }
+
+  __notusWorkspaceDutyToastTimer=setTimeout(()=>{
+    box.classList.remove("show");
+  },4500);
+}
 </script>
 
 </body>
