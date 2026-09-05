@@ -4331,6 +4331,171 @@ html,body{
   </div>
 </div>
 
+
+<!-- ================= MOBILE ROLE TOOLS ================= -->
+
+<section class="mobile-role-screen" id="mobilePeopleScreen" aria-hidden="true">
+  <header class="mobile-role-head">
+    <button class="mobile-role-back" id="mobilePeopleBack" type="button"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="mobile-role-head-copy">
+      <h2 id="mobilePeopleTitle">People</h2>
+      <p id="mobilePeopleSub">Company members</p>
+    </div>
+  </header>
+  <div class="mobile-role-body">
+    <div class="mobile-role-list" id="mobilePeopleList"></div>
+  </div>
+</section>
+
+<section class="mobile-role-screen" id="mobileTasksScreen" aria-hidden="true">
+  <header class="mobile-role-head">
+    <button class="mobile-role-back" id="mobileTasksBack" type="button"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="mobile-role-head-copy">
+      <h2>Tasks</h2>
+      <p>Assigned work and task updates</p>
+    </div>
+    <button class="mobile-role-head-action" id="mobileAddTaskBtn" type="button" hidden>
+      <i class="fa-solid fa-plus"></i> Add Task
+    </button>
+  </header>
+  <div class="mobile-role-body">
+    <div class="mobile-task-list" id="mobileTaskList"></div>
+  </div>
+</section>
+
+<section class="mobile-role-screen" id="mobilePayrollScreen" aria-hidden="true">
+  <header class="mobile-role-head">
+    <button class="mobile-role-back" id="mobilePayrollBack" type="button"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="mobile-role-head-copy">
+      <h2>Payroll</h2>
+      <p>Salary and payroll workspace</p>
+    </div>
+  </header>
+  <div class="mobile-role-body">
+    <div class="mobile-role-empty">
+      <i class="fa-regular fa-credit-card"></i>
+      <b>Payroll</b>
+      <span>This module is ready for the next step.</span>
+    </div>
+  </div>
+</section>
+
+<div class="mobile-role-overlay" id="mobileCreateGroupOverlay" aria-hidden="true">
+  <div class="mobile-role-sheet">
+    <div class="mobile-role-sheet-head">
+      <div>
+        <h3>Create Group</h3>
+        <p>Add employees, HR and managers from your company.</p>
+      </div>
+      <button type="button" id="mobileCreateGroupClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="mobile-role-sheet-body">
+      <div class="mobile-role-field">
+        <label>Group Name</label>
+        <input id="mobileGroupNameInput" maxlength="80" placeholder="Enter group name">
+      </div>
+      <div class="mobile-role-field">
+        <label>Select Members</label>
+        <div class="mobile-member-picker" id="mobileGroupMemberPicker"></div>
+      </div>
+    </div>
+    <div class="mobile-role-sheet-foot">
+      <button class="mobile-role-secondary" type="button" id="mobileCreateGroupCancel">Cancel</button>
+      <button class="mobile-role-primary" type="button" id="mobileCreateGroupSave">Create Group</button>
+    </div>
+  </div>
+</div>
+
+<div class="mobile-role-overlay" id="mobileCreateMeetingOverlay" aria-hidden="true">
+  <div class="mobile-role-sheet mobile-role-sheet-tall">
+    <div class="mobile-role-sheet-head">
+      <div>
+        <h3>Create Meeting</h3>
+        <p>Schedule a meeting for your branch, team or a person.</p>
+      </div>
+      <button type="button" id="mobileCreateMeetingClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="mobileCreateMeetingForm">
+      <div class="mobile-role-sheet-body">
+        <div class="mobile-role-field">
+          <label>Branch</label>
+          <select id="mobileMeetingBranch"></select>
+        </div>
+        <div class="mobile-role-field">
+          <label>Title</label>
+          <input id="mobileMeetingTitle" maxlength="120" placeholder="Meeting title" required>
+        </div>
+        <div class="mobile-role-grid-2">
+          <div class="mobile-role-field">
+            <label>Date</label>
+            <input id="mobileMeetingDate" type="date" required>
+          </div>
+          <div class="mobile-role-field">
+            <label>Time</label>
+            <input id="mobileMeetingTime" type="time" required>
+          </div>
+        </div>
+        <div class="mobile-role-field">
+          <label>Who should attend?</label>
+          <select id="mobileMeetingAudience" required></select>
+        </div>
+        <div class="mobile-role-field" id="mobileMeetingPersonWrap" hidden>
+          <label>Specific Person</label>
+          <select id="mobileMeetingPerson"></select>
+        </div>
+        <div class="mobile-role-field">
+          <label>Meeting Link</label>
+          <input id="mobileMeetingLink" type="url" placeholder="https://meet.google.com/...">
+        </div>
+        <div class="mobile-role-field">
+          <label>Description</label>
+          <textarea id="mobileMeetingDescription" maxlength="1000" placeholder="Meeting details" required></textarea>
+        </div>
+      </div>
+      <div class="mobile-role-sheet-foot">
+        <button class="mobile-role-secondary" type="button" id="mobileCreateMeetingCancel">Cancel</button>
+        <button class="mobile-role-primary" type="submit" id="mobileCreateMeetingSave">Create Meeting</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="mobile-role-overlay" id="mobileCreateTaskOverlay" aria-hidden="true">
+  <div class="mobile-role-sheet">
+    <div class="mobile-role-sheet-head">
+      <div>
+        <h3>Assign Task</h3>
+        <p>Assign work to a member in your branch.</p>
+      </div>
+      <button type="button" id="mobileCreateTaskClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="mobileCreateTaskForm">
+      <div class="mobile-role-sheet-body">
+        <div class="mobile-role-field">
+          <label>Task Title</label>
+          <input id="mobileTaskTitle" maxlength="120" placeholder="Task title" required>
+        </div>
+        <div class="mobile-role-field">
+          <label>Description</label>
+          <textarea id="mobileTaskDescription" maxlength="1000" placeholder="Task details" required></textarea>
+        </div>
+        <div class="mobile-role-field">
+          <label>Assign To</label>
+          <select id="mobileTaskAssignee" required></select>
+        </div>
+        <div class="mobile-role-field">
+          <label>Due Date & Time</label>
+          <input id="mobileTaskDue" type="datetime-local">
+        </div>
+      </div>
+      <div class="mobile-role-sheet-foot">
+        <button class="mobile-role-secondary" type="button" id="mobileCreateTaskCancel">Cancel</button>
+        <button class="mobile-role-primary" type="submit" id="mobileCreateTaskSave">Assign Task</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="workspace-profile-overlay" id="workspaceProfileOverlay"></div>
 <aside class="workspace-profile-panel" id="workspaceProfilePanel" aria-hidden="true">
   <div class="profile-panel-top"><div class="profile-panel-head"><div class="profile-panel-title">Profile</div><button class="profile-panel-close" id="profilePanelClose" type="button" aria-label="Close profile"><i class="fa-solid fa-xmark"></i></button></div></div>
@@ -4344,6 +4509,51 @@ html,body{
   </div>
 
   <div class="profile-quick-menu">
+
+    <div class="mobile-role-tools-label" id="mobileRoleToolsLabel" hidden>Work Tools</div>
+
+    <button class="profile-quick-item mobile-role-tool" id="mobileCreateGroupAction" type="button" data-profile-action="create-group" hidden>
+      <span class="profile-quick-icon"><i class="fa-solid fa-user-group"></i></span>
+      <span class="profile-quick-text">Create Group</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
+    <button class="profile-quick-item mobile-role-tool" id="mobileTeamMembersAction" type="button" data-profile-action="team-members" hidden>
+      <span class="profile-quick-icon"><i class="fa-solid fa-people-group"></i></span>
+      <span class="profile-quick-text">Team Members</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
+    <button class="profile-quick-item mobile-role-tool" id="mobileCreateMeetingAction" type="button" data-profile-action="create-meeting" hidden>
+      <span class="profile-quick-icon"><i class="fa-solid fa-calendar-plus"></i></span>
+      <span class="profile-quick-text">Create Meeting</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
+    <button class="profile-quick-item mobile-role-tool" id="mobileTasksAction" type="button" data-profile-action="tasks" hidden>
+      <span class="profile-quick-icon"><i class="fa-solid fa-list-check"></i></span>
+      <span class="profile-quick-text">Tasks</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
+    <button class="profile-quick-item mobile-role-tool" id="mobileEmployeesAction" type="button" data-profile-action="employees" hidden>
+      <span class="profile-quick-icon"><i class="fa-solid fa-users"></i></span>
+      <span class="profile-quick-text">Employees</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
+    <button class="profile-quick-item mobile-role-tool" id="mobileHrAction" type="button" data-profile-action="hr" hidden>
+      <span class="profile-quick-icon"><i class="fa-solid fa-user-tie"></i></span>
+      <span class="profile-quick-text">HR</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
+    <button class="profile-quick-item mobile-role-tool" id="mobilePayrollAction" type="button" data-profile-action="payroll" hidden>
+      <span class="profile-quick-icon"><i class="fa-regular fa-credit-card"></i></span>
+      <span class="profile-quick-text">Payroll</span>
+      <i class="fa-solid fa-chevron-right profile-quick-arrow"></i>
+    </button>
+
     <button class="profile-quick-item" type="button" data-profile-action="meetings">
       <span class="profile-quick-icon"><i class="fa-solid fa-video"></i></span>
       <span class="profile-quick-text">Upcoming Meetings</span>
@@ -11136,6 +11346,801 @@ function showLoginDutyToast(message){
     box.classList.remove("show");
   },5000);
 }
+</script>
+
+
+<style id="notus-mobile-role-tools-css">
+.mobile-role-tools-label{
+  padding:12px 0 7px;
+  font-size:8px;font-weight:800;letter-spacing:.8px;
+  color:#9aa2a0;text-transform:uppercase;
+}
+.mobile-role-tool[hidden],.mobile-role-tools-label[hidden]{display:none!important}
+
+.mobile-role-screen{
+  position:fixed;inset:0;z-index:735;
+  display:flex;flex-direction:column;
+  background:#f5f7f8;
+  transform:translate3d(100%,0,0);
+  visibility:hidden;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s ease;
+}
+.mobile-role-screen.show{transform:translate3d(0,0,0);visibility:visible}
+.mobile-role-head{
+  flex:0 0 auto;min-height:94px;
+  padding:max(18px,env(safe-area-inset-top)) 15px 13px;
+  display:flex;align-items:flex-end;gap:10px;
+  background:#fff;border-bottom:1px solid #e7ebe9;
+}
+.mobile-role-back{
+  width:38px;height:38px;flex:0 0 38px;border:0;border-radius:11px;background:transparent;
+  display:grid;place-items:center;color:#303634;font-size:17px;
+}
+.mobile-role-head-copy{min-width:0;flex:1;padding-bottom:3px}
+.mobile-role-head-copy h2{margin:0;font-family:"Outfit",sans-serif;font-size:18px;font-weight:600;color:#171717}
+.mobile-role-head-copy p{margin:3px 0 0;font-size:9px;color:#8a9390}
+.mobile-role-head-action{
+  height:37px;padding:0 11px;border:0;border-radius:10px;background:#171717;color:#fff;
+  display:flex;align-items:center;gap:6px;font-family:"Inter",sans-serif;font-size:9px;font-weight:700;
+}
+.mobile-role-body{
+  flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:12px 14px calc(24px + env(safe-area-inset-bottom));
+}
+.mobile-role-list,.mobile-task-list{background:#fff;border:1px solid #e7ebe9;border-radius:14px;overflow:hidden}
+.mobile-role-person{
+  min-height:68px;padding:11px 13px;display:flex;align-items:center;gap:11px;border-bottom:1px solid #eef1ef;
+}
+.mobile-role-person:last-child{border-bottom:0}
+.mobile-role-avatar{
+  width:42px;height:42px;flex:0 0 42px;border-radius:50%;overflow:hidden;background:#edf5f2;
+  color:#0f766e;display:grid;place-items:center;font-size:13px;font-weight:800;
+}
+.mobile-role-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.mobile-role-person-info{min-width:0;flex:1}
+.mobile-role-person-info b{display:block;font-size:11px;color:#202523;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mobile-role-person-info span{display:block;margin-top:4px;font-size:8.5px;color:#7d8783;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mobile-role-empty{
+  min-height:230px;background:#fff;border:1px solid #e7ebe9;border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:26px;color:#929a97;
+}
+.mobile-role-empty i{font-size:23px;color:#aeb6b2;margin-bottom:10px}
+.mobile-role-empty b{font-size:11px;color:#3b423f}
+.mobile-role-empty span{margin-top:5px;font-size:8.5px;line-height:1.5}
+
+.mobile-role-overlay{
+  position:fixed;inset:0;z-index:900;background:rgba(17,24,39,.3);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .2s ease,visibility .2s ease;
+}
+.mobile-role-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
+.mobile-role-sheet{
+  width:100%;max-height:88dvh;background:#fff;border-radius:22px 22px 0 0;
+  overflow:hidden;display:flex;flex-direction:column;
+  transform:translateY(18px);transition:transform .24s cubic-bezier(.2,.8,.2,1);
+}
+.mobile-role-overlay.show .mobile-role-sheet{transform:none}
+.mobile-role-sheet-tall{max-height:94dvh}
+.mobile-role-sheet-head{
+  flex:0 0 auto;padding:16px;border-bottom:1px solid #edf0ef;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+}
+.mobile-role-sheet-head h3{font-family:"Outfit",sans-serif;font-size:16px;color:#171717}
+.mobile-role-sheet-head p{margin-top:4px;font-size:8.5px;line-height:1.45;color:#8a9390}
+.mobile-role-sheet-head button{
+  width:34px;height:34px;flex:0 0 34px;border:0;border-radius:10px;background:#f4f6f5;color:#5f6965;
+}
+.mobile-role-sheet-body{
+  overflow-y:auto;-webkit-overflow-scrolling:touch;padding:15px 16px;
+}
+.mobile-role-sheet-foot{
+  flex:0 0 auto;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top:1px solid #edf0ef;display:flex;justify-content:flex-end;gap:8px;background:#fff;
+}
+.mobile-role-secondary,.mobile-role-primary{
+  min-width:92px;height:40px;border-radius:10px;font-family:"Inter",sans-serif;font-size:9px;font-weight:700;
+}
+.mobile-role-secondary{border:1px solid #dfe5e2;background:#fff;color:#59635f}
+.mobile-role-primary{border:0;background:#171717;color:#fff}
+.mobile-role-primary:disabled{opacity:.55}
+.mobile-role-field{margin-bottom:12px}
+.mobile-role-field label{display:block;margin-bottom:6px;font-size:8.5px;font-weight:700;color:#4b5551}
+.mobile-role-field input,.mobile-role-field select,.mobile-role-field textarea{
+  width:100%;border:1px solid #dfe5e2;border-radius:11px;outline:0;background:#fff;
+  font-family:"Inter",sans-serif;font-size:11px;color:#202523;
+}
+.mobile-role-field input,.mobile-role-field select{height:44px;padding:0 11px}
+.mobile-role-field textarea{min-height:92px;padding:11px;resize:vertical;line-height:1.5}
+.mobile-role-field input:focus,.mobile-role-field select:focus,.mobile-role-field textarea:focus{border-color:#0f766e}
+.mobile-role-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.mobile-member-picker{
+  max-height:330px;overflow-y:auto;border:1px solid #e4e8e6;border-radius:12px;background:#fbfcfc;
+}
+.mobile-member-option{
+  min-height:58px;padding:8px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #edf0ef;
+}
+.mobile-member-option:last-child{border-bottom:0}
+.mobile-member-option input{width:15px;height:15px;flex:0 0 15px}
+.mobile-member-option .mobile-role-avatar{width:36px;height:36px;flex-basis:36px;font-size:11px}
+.mobile-member-option-copy{min-width:0;flex:1}
+.mobile-member-option-copy b{display:block;font-size:9.5px;color:#252b28}
+.mobile-member-option-copy span{display:block;margin-top:3px;font-size:7.5px;color:#8a9390}
+
+.mobile-task-card{padding:14px;border-bottom:1px solid #eef1ef}
+.mobile-task-card:last-child{border-bottom:0}
+.mobile-task-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.mobile-task-title{font-size:11px;font-weight:800;color:#202523}
+.mobile-task-status{flex:0 0 auto;padding:5px 7px;border-radius:999px;background:#f2f4f5;color:#59635f;font-size:6.5px;font-weight:800;text-transform:uppercase}
+.mobile-task-status.submitted,.mobile-task-status.completed{background:#eef7f0;color:#4b7658}
+.mobile-task-desc{margin-top:7px;font-size:8.5px;line-height:1.5;color:#68736e}
+.mobile-task-meta{margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.mobile-task-meta div{border:1px solid #edf0ef;border-radius:9px;padding:8px;background:#fafbfb}
+.mobile-task-meta span{display:block;font-size:6.5px;color:#969e9a}
+.mobile-task-meta b{display:block;margin-top:4px;font-size:8px;color:#333936;word-break:break-word}
+@media(max-width:390px){.mobile-role-grid-2{grid-template-columns:1fr}}
+</style>
+
+
+<script id="notus-mobile-web-role-tools-js">
+(function(){
+  "use strict";
+  const $=id=>document.getElementById(id);
+  const norm=v=>String(v??"").trim().toLowerCase();
+  const safe=v=>String(v??"").trim();
+  const esc=v=>String(v??"")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+
+  let peopleMode="employees";
+  let roleRealtime=null;
+  let taskRealtime=null;
+
+  function session(){
+    try{
+      return window.notusSession ||
+        JSON.parse(localStorage.getItem("notus_company_session")||"null") ||
+        {};
+    }catch(_){return window.notusSession||{}}
+  }
+
+  function actorType(){
+    const s=session(),t=norm(s.user_type||s.login_type),r=norm(s.role||s.employee_role);
+    if(t==="hr"||t==="hr_member") return "hr";
+    if(t==="manager"||r==="manager") return "manager";
+    if(t==="team_lead"||t==="teamlead"||r==="team lead"||r==="teamlead") return "team_lead";
+    if(t==="employee"||r==="employee") return "employee";
+    if(["admin","company_admin","administrator"].includes(t)||
+       ["admin","administrator","company admin"].includes(r)) return "admin";
+    return t||r||"employee";
+  }
+
+  function actorId(){
+    const s=session();
+    return safe(s.employee_id||s.member_id||s.hr_id||s.id||s.user_id);
+  }
+
+  function actorName(){
+    const s=session();
+    return safe(s.full_name||s.name||s.employee_name||s.email||s.gmail)||"User";
+  }
+
+  function canCreateMeeting(){
+    return ["admin","hr","manager","team_lead"].includes(actorType());
+  }
+
+  function canAssignTasks(){
+    return ["hr","manager","team_lead"].includes(actorType());
+  }
+
+  function showToast(message){
+    const msg=safe(message);
+    if(!msg)return;
+    if(typeof showLoginDutyToast==="function"){
+      showLoginDutyToast(msg);
+      return;
+    }
+    let el=$("mobileRoleToast");
+    if(!el){
+      el=document.createElement("div");
+      el.id="mobileRoleToast";
+      el.style.cssText="position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:15000;max-width:calc(100% - 28px);background:#22282b;color:#fff;padding:10px 13px;border-radius:11px;font:600 10px Inter,sans-serif;box-shadow:0 12px 32px rgba(0,0,0,.2);";
+      document.body.appendChild(el);
+    }
+    el.textContent=msg;
+    el.hidden=false;
+    clearTimeout(el._timer);
+    el._timer=setTimeout(()=>el.hidden=true,3500);
+  }
+
+  function openScreen(id){
+    closeProfilePanel?.();
+    const el=$(id);
+    el?.classList.add("show");
+    el?.setAttribute("aria-hidden","false");
+  }
+
+  function closeScreen(id){
+    const el=$(id);
+    el?.classList.remove("show");
+    el?.setAttribute("aria-hidden","true");
+  }
+
+  function openOverlay(id){
+    const el=$(id);
+    el?.classList.add("show");
+    el?.setAttribute("aria-hidden","false");
+  }
+
+  function closeOverlay(id){
+    const el=$(id);
+    el?.classList.remove("show");
+    el?.setAttribute("aria-hidden","true");
+  }
+
+  function roleLabel(){
+    const t=actorType();
+    return t==="team_lead"?"Team Lead":
+      t==="manager"?"Manager":
+      t==="hr"?"HR":
+      t==="admin"?"Company Admin":"Employee";
+  }
+
+  function applyRoleTools(){
+    const t=actorType();
+    const show=(id,yes)=>{const el=$(id);if(el)el.hidden=!yes};
+
+    show("mobileCreateGroupAction",t==="team_lead");
+    show("mobileTeamMembersAction",t==="team_lead");
+    show("mobileCreateMeetingAction",canCreateMeeting());
+    show("mobileTasksAction",["employee","team_lead","manager","hr"].includes(t));
+    show("mobileEmployeesAction",t==="manager");
+    show("mobileHrAction",t==="manager");
+    show("mobilePayrollAction",t==="manager");
+
+    const any=[
+      t==="team_lead",canCreateMeeting(),
+      ["employee","team_lead","manager","hr"].includes(t),
+      t==="manager"
+    ].some(Boolean);
+    show("mobileRoleToolsLabel",any);
+  }
+
+  /* ===================== PEOPLE ===================== */
+  async function loadPeople(mode){
+    const s=session();
+    if(!s.company_id)return;
+    peopleMode=mode;
+    const list=$("mobilePeopleList");
+    const title=$("mobilePeopleTitle");
+    const sub=$("mobilePeopleSub");
+    if(!list)return;
+
+    if(title)title.textContent=mode==="hr"?"HR":"Employees";
+    if(sub)sub.textContent=mode==="hr"?"Company HR members":"Company employees";
+
+    list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading</b></div>';
+
+    try{
+      let rows=[];
+      if(mode==="hr"){
+        const {data,error}=await db.rpc("list_company_hr",{p_company_id:s.company_id});
+        if(error)throw error;
+        rows=Array.isArray(data)?data:[];
+      }else{
+        const {data,error}=await db.rpc("list_company_employees",{p_company_id:s.company_id});
+        if(error)throw error;
+        rows=Array.isArray(data)?data:[];
+      }
+
+      rows=rows.filter(r=>norm(r.status||"active")==="active");
+
+      if(!rows.length){
+        list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-users"></i><b>No members found</b></div>';
+        return;
+      }
+
+      list.innerHTML=rows.map(r=>{
+        const name=safe(r.full_name||r.name||r.email)||"Member";
+        const role=safe(r.designation||r.role)||(mode==="hr"?"HR":"Employee");
+        const image=safe(r.profile_image_url||r.profile_image||r.avatar_url||r.photo_url);
+        return `<div class="mobile-role-person">
+          <div class="mobile-role-avatar">
+            ${image?`<img src="${esc(image)}" alt="${esc(name)}">`:`${esc(name.charAt(0).toUpperCase())}`}
+          </div>
+          <div class="mobile-role-person-info">
+            <b>${esc(name)}</b>
+            <span>${esc(role)}${r.branch_name?` · ${esc(r.branch_name)}`:""}</span>
+          </div>
+        </div>`;
+      }).join("");
+    }catch(err){
+      console.error("Mobile people:",err);
+      list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-triangle-exclamation"></i><b>Unable to load</b><span>Check company people access.</span></div>';
+    }
+  }
+
+  function openPeople(mode){
+    openScreen("mobilePeopleScreen");
+    loadPeople(mode);
+  }
+
+  /* ===================== TEAM MEMBERS ===================== */
+  async function openTeamMembers(){
+    const s=session();
+    if(actorType()!=="team_lead")return;
+    openScreen("mobilePeopleScreen");
+    peopleMode="team";
+    $("mobilePeopleTitle").textContent="Team Members";
+    $("mobilePeopleSub").textContent="Members assigned to your team";
+    const list=$("mobilePeopleList");
+    list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading team</b></div>';
+    try{
+      const {data,error}=await db.rpc("list_team_members",{
+        p_company_id:s.company_id,
+        p_team_lead_id:actorId()
+      });
+      if(error)throw error;
+      const rows=Array.isArray(data)?data:[];
+      if(!rows.length){
+        list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-people-group"></i><b>No team members</b></div>';
+        return;
+      }
+      list.innerHTML=rows.map(r=>{
+        const name=safe(r.full_name||r.name)||"Employee";
+        const role=safe(r.designation||r.role)||"Employee";
+        const image=safe(r.profile_image_url||r.profile_image||r.avatar_url||r.photo_url);
+        return `<div class="mobile-role-person">
+          <div class="mobile-role-avatar">${image?`<img src="${esc(image)}" alt="${esc(name)}">`:esc(name.charAt(0).toUpperCase())}</div>
+          <div class="mobile-role-person-info"><b>${esc(name)}</b><span>${esc(role)}</span></div>
+        </div>`;
+      }).join("");
+    }catch(err){
+      console.error(err);
+      list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-triangle-exclamation"></i><b>Unable to load team</b></div>';
+    }
+  }
+
+  /* ===================== CREATE GROUP ===================== */
+  async function companyGroupPeople(){
+    const s=session(),out=[],seen=new Set();
+    const add=(key,name,sub,image)=>{
+      key=safe(key);
+      if(!key||seen.has(key))return;
+      seen.add(key);
+      out.push({key,name:safe(name)||"Member",sub:safe(sub)||"Member",image:safe(image)});
+    };
+
+    try{
+      const {data}=await db.from("employees").select("*").eq("company_id",s.company_id).eq("status","active").limit(500);
+      (data||[]).forEach(x=>add(
+        "employee:"+x.id,
+        x.full_name||x.email,
+        x.designation||x.role,
+        x.profile_image_url||x.profile_image||x.avatar_url||x.photo_url
+      ));
+    }catch(_){}
+
+    try{
+      const {data}=await db.from("hr_members").select("*").eq("company_id",s.company_id).eq("status","active").limit(250);
+      (data||[]).forEach(x=>add(
+        "hr:"+x.id,
+        x.full_name||x.name||x.email||x.gmail,
+        x.designation||x.role||"HR",
+        x.profile_image_url||x.profile_image||x.avatar_url||x.photo_url
+      ));
+    }catch(_){}
+
+    try{
+      const {data}=await db.from("companies").select("*").eq("id",s.company_id).maybeSingle();
+      if(data)add("admin:"+s.company_id,data.admin_name||data.company_admin_name||"Company Admin","Company Admin",data.logo_url);
+    }catch(_){}
+
+    const mine="employee:"+actorId();
+    return out.filter(x=>x.key!==mine);
+  }
+
+  async function openCreateGroup(){
+    if(actorType()!=="team_lead")return;
+    $("mobileGroupNameInput").value="";
+    const box=$("mobileGroupMemberPicker");
+    box.innerHTML='<div class="mobile-role-empty" style="min-height:130px"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading members</b></div>';
+    openOverlay("mobileCreateGroupOverlay");
+
+    const rows=await companyGroupPeople();
+    if(!rows.length){
+      box.innerHTML='<div class="mobile-role-empty" style="min-height:130px"><b>No members found</b></div>';
+      return;
+    }
+
+    box.innerHTML=rows.map((p,i)=>`
+      <label class="mobile-member-option">
+        <input type="checkbox" value="${esc(p.key)}" data-name="${esc(p.name)}" data-sub="${esc(p.sub)}" data-image="${esc(p.image)}">
+        <span class="mobile-role-avatar">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}">`:esc(p.name.charAt(0).toUpperCase())}</span>
+        <span class="mobile-member-option-copy"><b>${esc(p.name)}</b><span>${esc(p.sub)}</span></span>
+      </label>
+    `).join("");
+  }
+
+  async function saveGroup(){
+    if(actorType()!=="team_lead")return;
+    const s=session();
+    const name=safe($("mobileGroupNameInput").value);
+    const chosen=[...$("mobileGroupMemberPicker").querySelectorAll('input[type="checkbox"]:checked')];
+    if(!name)return showToast("Enter group name.");
+    if(!chosen.length)return showToast("Select at least one member.");
+
+    const btn=$("mobileCreateGroupSave");
+    btn.disabled=true;
+    try{
+      const creatorKey="employee:"+actorId();
+      const member_keys=[creatorKey,...chosen.map(x=>x.value)];
+      const member_profiles=[
+        {key:creatorKey,name:actorName(),sub:"Team Lead",image:safe(session().profile_image_url||session().profile_image||session().avatar_url)},
+        ...chosen.map(x=>({key:x.value,name:x.dataset.name||"Member",sub:x.dataset.sub||"",image:x.dataset.image||""}))
+      ];
+
+      const {error}=await db.from("notus_group_chats").insert({
+        company_id:s.company_id,
+        group_name:name,
+        created_by_key:creatorKey,
+        created_by_name:actorName(),
+        member_keys,
+        member_profiles,
+        messages:[]
+      });
+      if(error)throw error;
+
+      closeOverlay("mobileCreateGroupOverlay");
+      showToast("Group created successfully.");
+      if(typeof loadGroups==="function")loadGroups();
+    }catch(err){
+      console.error("Create group:",err);
+      showToast(err?.message||"Unable to create group.");
+    }finally{
+      btn.disabled=false;
+    }
+  }
+
+  /* ===================== MEETING CREATE ===================== */
+  async function listBranches(){
+    const s=session(),t=actorType(),sel=$("mobileMeetingBranch");
+    if(!sel)return;
+
+    if(["hr","team_lead"].includes(t)){
+      sel.innerHTML=`<option value="${esc(s.branch_id||"")}">${esc(s.branch_name||"Assigned Branch")}</option>`;
+      sel.value=s.branch_id||"";
+      sel.disabled=true;
+      return;
+    }
+
+    sel.disabled=false;
+    const {data,error}=await db.rpc("list_company_branches",{p_company_id:s.company_id});
+    if(error)throw error;
+    const rows=(data||[]).filter(x=>norm(x.status||"active")==="active");
+    sel.innerHTML='<option value="">Select branch</option>'+rows.map(b=>
+      `<option value="${esc(b.id)}">${esc(b.branch_name||"Branch")}${b.location?` — ${esc(b.location)}`:""}</option>`
+    ).join("");
+    if(s.branch_id)sel.value=s.branch_id;
+  }
+
+  async function meetingEmployees(branchId){
+    const {data,error}=await db.rpc("list_company_employees",{p_company_id:session().company_id});
+    if(error)throw error;
+    let rows=(data||[]).filter(x=>norm(x.status||"active")==="active");
+    if(branchId)rows=rows.filter(x=>String(x.branch_id||"")===String(branchId));
+    return rows;
+  }
+
+  async function meetingHr(branchId){
+    try{
+      const {data,error}=await db.rpc("list_company_hr",{p_company_id:session().company_id});
+      if(error)throw error;
+      let rows=(data||[]).filter(x=>norm(x.status||"active")==="active");
+      if(branchId)rows=rows.filter(x=>String(x.branch_id||"")===String(branchId));
+      return rows;
+    }catch(_){return[]}
+  }
+
+  async function populateMeetingPeople(){
+    const branchId=$("mobileMeetingBranch").value||session().branch_id||"";
+    const [employees,hrs]=await Promise.all([meetingEmployees(branchId),meetingHr(branchId)]);
+    const sel=$("mobileMeetingPerson");
+    sel.innerHTML='<option value="">Select person</option>'+
+      employees.map(x=>`<option value="employee:${esc(x.id||x.employee_id)}">${esc(x.full_name||"Employee")} — ${esc(x.designation||x.role||"Employee")}</option>`).join("")+
+      hrs.map(x=>`<option value="hr:${esc(x.id||x.hr_id)}">${esc(x.full_name||"HR")} — ${esc(x.designation||x.role||"HR")}</option>`).join("");
+  }
+
+  async function openCreateMeeting(){
+    if(!canCreateMeeting())return showToast("You can view meetings, but cannot create meetings.");
+    const form=$("mobileCreateMeetingForm");
+    form?.reset();
+
+    const audience=$("mobileMeetingAudience");
+    audience.innerHTML='<option value="">Select who should attend</option>'+
+      '<option value="branch">Entire Branch</option>'+
+      (actorType()==="team_lead"?'<option value="team">My Team</option>':'')+
+      '<option value="employee">Specific Person</option>';
+
+    const now=new Date();
+    const when=new Date(now.getTime()+2*60*1000);
+    $("mobileMeetingDate").min=now.toISOString().slice(0,10);
+    $("mobileMeetingDate").value=when.toISOString().slice(0,10);
+    $("mobileMeetingTime").value=`${String(when.getHours()).padStart(2,"0")}:${String(when.getMinutes()).padStart(2,"0")}`;
+
+    try{
+      await listBranches();
+      await populateMeetingPeople();
+      $("mobileMeetingPersonWrap").hidden=true;
+      openOverlay("mobileCreateMeetingOverlay");
+    }catch(err){
+      console.error(err);
+      showToast(err?.message||"Unable to open meeting form.");
+    }
+  }
+
+  async function resolveMeetingAttendees(audience,branchId,selected){
+    const rows=[],seen=new Set();
+    const add=(type,id,name,role)=>{
+      if(type!=="hr"&&type!=="admin")type="employee";
+      id=safe(id);if(!id)return;
+      const key=`${type}:${id}`;if(seen.has(key))return;seen.add(key);
+      rows.push({member_type:type,member_id:id,name:safe(name),role:safe(role)});
+    };
+
+    if(audience==="employee"){
+      const [kind,id]=safe(selected).split(":");
+      if(!id)throw new Error("Select a person.");
+      if(kind==="hr"){
+        const hrs=await meetingHr(branchId),p=hrs.find(x=>String(x.id||x.hr_id)===String(id));
+        add("hr",id,p?.full_name||"HR",p?.role||"HR");
+      }else{
+        const es=await meetingEmployees(branchId),p=es.find(x=>String(x.id||x.employee_id)===String(id));
+        add("employee",id,p?.full_name||"Employee",p?.role||"Employee");
+      }
+    }else if(audience==="branch"){
+      (await meetingEmployees(branchId)).forEach(p=>add("employee",p.id||p.employee_id,p.full_name||"Employee",p.role||"Employee"));
+      (await meetingHr(branchId)).forEach(p=>add("hr",p.id||p.hr_id,p.full_name||"HR",p.role||"HR"));
+    }else if(audience==="team"){
+      if(actorType()!=="team_lead")throw new Error("My Team is available only for Team Lead.");
+      const {data,error}=await db.rpc("list_team_members",{p_company_id:session().company_id,p_team_lead_id:actorId()});
+      if(error)throw error;
+      (data||[]).forEach(p=>add("employee",p.id||p.employee_id,p.full_name||"Employee",p.role||"Employee"));
+    }
+    return rows;
+  }
+
+  async function submitMeeting(e){
+    e.preventDefault();
+    const s=session(),branchId=$("mobileMeetingBranch").value||s.branch_id||null;
+    const title=safe($("mobileMeetingTitle").value);
+    const date=$("mobileMeetingDate").value;
+    const time=$("mobileMeetingTime").value;
+    const audience=$("mobileMeetingAudience").value;
+    const person=$("mobileMeetingPerson").value;
+    const link=safe($("mobileMeetingLink").value);
+    const description=safe($("mobileMeetingDescription").value);
+    const btn=$("mobileCreateMeetingSave");
+
+    if(!branchId||!title||!date||!time||!audience||!description)return showToast("Fill all meeting details.");
+    if(audience==="employee"&&!person)return showToast("Select a person.");
+    if(link){
+      try{const u=new URL(link);if(!/^https?:$/i.test(u.protocol))throw new Error()}catch(_){return showToast("Enter a valid meeting link.")}
+    }
+    const starts=new Date(`${date}T${time}:00`);
+    if(!Number.isFinite(starts.getTime())||starts.getTime()<=Date.now())return showToast("Meeting date and time must be in the future.");
+
+    btn.disabled=true;
+    try{
+      const attendees=await resolveMeetingAttendees(audience,branchId,person);
+      if(!attendees.length)throw new Error("No attendees found for this meeting.");
+
+      const {error}=await db.rpc("notus_create_meeting",{
+        p_company_id:s.company_id,
+        p_creator_type:actorType(),
+        p_creator_id:actorId()||s.company_id,
+        p_creator_name:actorName(),
+        p_branch_id:branchId,
+        p_title:title,
+        p_description:description,
+        p_meeting_date:date,
+        p_meeting_time:time,
+        p_audience_type:audience,
+        p_meeting_link:link,
+        p_attendees:attendees
+      });
+      if(error)throw error;
+      closeOverlay("mobileCreateMeetingOverlay");
+      showToast("Meeting created successfully.");
+      window.loadMobileMeetings?.();
+    }catch(err){
+      console.error("Create meeting:",err);
+      showToast(err?.message||"Meeting creation failed.");
+    }finally{btn.disabled=false}
+  }
+
+  /* ===================== TASKS ===================== */
+  function taskStatus(v){
+    const n=norm(v);
+    if(n==="submitted")return"Submitted";
+    if(n==="completed")return"Completed";
+    if(n==="in_progress")return"In Progress";
+    if(n==="cancelled")return"Cancelled";
+    return"Assigned";
+  }
+
+  function fmtDate(v){
+    if(!v)return"No due date";
+    const d=new Date(v);
+    return Number.isNaN(d.getTime())?"No due date":d.toLocaleString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:true});
+  }
+
+  async function loadTasks(){
+    const s=session(),list=$("mobileTaskList");
+    if(!s.company_id||!list)return;
+    list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading tasks</b></div>';
+    try{
+      const {data,error}=await db.rpc("notus_list_tasks_for_me",{
+        p_company_id:s.company_id,
+        p_actor_type:actorType(),
+        p_actor_id:actorId(),
+        p_branch_id:s.branch_id||null
+      });
+      if(error)throw error;
+      const rows=Array.isArray(data)?data:[];
+      if(!rows.length){
+        list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-list-check"></i><b>No tasks</b><span>Assigned tasks will appear here.</span></div>';
+        return;
+      }
+      list.innerHTML=rows.map(r=>`
+        <article class="mobile-task-card">
+          <div class="mobile-task-top">
+            <div class="mobile-task-title">${esc(r.title||"Task")}</div>
+            <span class="mobile-task-status ${esc(norm(r.status||"assigned"))}">${esc(taskStatus(r.status))}</span>
+          </div>
+          <div class="mobile-task-desc">${esc(r.description||"")}</div>
+          <div class="mobile-task-meta">
+            <div><span>Assigned To</span><b>${esc(r.assignee_name||"—")}</b></div>
+            <div><span>Assigned By</span><b>${esc(r.assigned_by_name||"—")}</b></div>
+            <div><span>Designation</span><b>${esc(r.assignee_designation||r.assignee_role||"—")}</b></div>
+            <div><span>Due</span><b>${esc(fmtDate(r.due_at))}</b></div>
+          </div>
+        </article>
+      `).join("");
+    }catch(err){
+      console.error(err);
+      list.innerHTML='<div class="mobile-role-empty"><i class="fa-solid fa-triangle-exclamation"></i><b>Unable to load tasks</b></div>';
+    }
+  }
+
+  async function openTasks(){
+    openScreen("mobileTasksScreen");
+    $("mobileAddTaskBtn").hidden=!canAssignTasks();
+    loadTasks();
+    startTaskRealtime();
+  }
+
+  async function loadTaskAssignees(){
+    const s=session(),sel=$("mobileTaskAssignee");
+    let q=db.from("employees")
+      .select("id,full_name,role,designation,branch_id,status")
+      .eq("company_id",s.company_id)
+      .eq("status","active");
+    if(s.branch_id)q=q.eq("branch_id",s.branch_id);
+    const {data,error}=await q.order("full_name",{ascending:true});
+    if(error)throw error;
+    let rows=Array.isArray(data)?data:[];
+    if(actorType()==="team_lead")rows=rows.filter(r=>norm(r.role)==="employee");
+    else if(actorType()==="manager")rows=rows.filter(r=>["employee","team lead","teamlead"].includes(norm(r.role)));
+    else if(actorType()==="hr")rows=rows.filter(r=>["manager","team lead","teamlead","employee"].includes(norm(r.role)));
+
+    sel.innerHTML='<option value="">Select team member</option>';
+    rows.forEach(r=>{
+      const o=document.createElement("option");
+      o.value=String(r.id);o.dataset.name=r.full_name||"Employee";o.dataset.role=r.role||"Employee";o.dataset.designation=r.designation||"";
+      o.textContent=`${r.full_name||"Employee"} — ${norm(r.role)==="employee"?(r.designation||"Employee"):(r.role||r.designation||"Employee")}`;
+      sel.appendChild(o);
+    });
+  }
+
+  async function openCreateTask(){
+    if(!canAssignTasks())return;
+    $("mobileCreateTaskForm").reset();
+    try{
+      await loadTaskAssignees();
+      openOverlay("mobileCreateTaskOverlay");
+    }catch(err){showToast(err?.message||"Unable to load team members.")}
+  }
+
+  async function submitTask(e){
+    e.preventDefault();
+    const s=session(),sel=$("mobileTaskAssignee"),opt=sel.selectedOptions?.[0];
+    const title=safe($("mobileTaskTitle").value),desc=safe($("mobileTaskDescription").value);
+    const assignee=sel.value,due=$("mobileTaskDue").value,btn=$("mobileCreateTaskSave");
+    if(!title||!desc||!assignee)return showToast("Task title, description and assignee are required.");
+    btn.disabled=true;
+    try{
+      const {error}=await db.rpc("notus_create_task",{
+        p_company_id:s.company_id,
+        p_assigned_by_type:actorType(),
+        p_assigned_by_id:actorId(),
+        p_assigned_by_name:actorName(),
+        p_title:title,
+        p_description:desc,
+        p_assignee_id:assignee,
+        p_assignee_name:opt?.dataset?.name||"Employee",
+        p_assignee_role:opt?.dataset?.role||"Employee",
+        p_assignee_designation:opt?.dataset?.designation||"",
+        p_branch_id:s.branch_id||null,
+        p_due_at:due?new Date(due).toISOString():null
+      });
+      if(error)throw error;
+      closeOverlay("mobileCreateTaskOverlay");
+      showToast("Task assigned successfully.");
+      loadTasks();
+    }catch(err){
+      console.error(err);showToast(err?.message||"Unable to assign task.");
+    }finally{btn.disabled=false}
+  }
+
+  async function startTaskRealtime(){
+    const s=session();
+    if(!s.company_id||taskRealtime)return;
+    taskRealtime=db.channel(`notus-mobile-role-tasks-${s.company_id}-${Date.now()}`)
+      .on("postgres_changes",{event:"*",schema:"public",table:"notus_tasks",filter:`company_id=eq.${s.company_id}`},()=>{
+        if($("mobileTasksScreen")?.classList.contains("show"))loadTasks();
+      }).subscribe();
+  }
+
+  /* ===================== EVENTS ===================== */
+  $("mobilePeopleBack")?.addEventListener("click",()=>closeScreen("mobilePeopleScreen"));
+  $("mobileTasksBack")?.addEventListener("click",()=>closeScreen("mobileTasksScreen"));
+  $("mobilePayrollBack")?.addEventListener("click",()=>closeScreen("mobilePayrollScreen"));
+
+  $("mobileCreateGroupClose")?.addEventListener("click",()=>closeOverlay("mobileCreateGroupOverlay"));
+  $("mobileCreateGroupCancel")?.addEventListener("click",()=>closeOverlay("mobileCreateGroupOverlay"));
+  $("mobileCreateGroupSave")?.addEventListener("click",saveGroup);
+
+  $("mobileCreateMeetingClose")?.addEventListener("click",()=>closeOverlay("mobileCreateMeetingOverlay"));
+  $("mobileCreateMeetingCancel")?.addEventListener("click",()=>closeOverlay("mobileCreateMeetingOverlay"));
+  $("mobileCreateMeetingForm")?.addEventListener("submit",submitMeeting);
+  $("mobileMeetingAudience")?.addEventListener("change",async()=>{
+    const employee=$("mobileMeetingAudience").value==="employee";
+    $("mobileMeetingPersonWrap").hidden=!employee;
+    if(employee)await populateMeetingPeople();
+  });
+  $("mobileMeetingBranch")?.addEventListener("change",()=>populateMeetingPeople());
+
+  $("mobileAddTaskBtn")?.addEventListener("click",openCreateTask);
+  $("mobileCreateTaskClose")?.addEventListener("click",()=>closeOverlay("mobileCreateTaskOverlay"));
+  $("mobileCreateTaskCancel")?.addEventListener("click",()=>closeOverlay("mobileCreateTaskOverlay"));
+  $("mobileCreateTaskForm")?.addEventListener("submit",submitTask);
+
+  document.addEventListener("click",e=>{
+    const btn=e.target.closest?.("[data-profile-action]");
+    if(!btn)return;
+    const action=btn.dataset.profileAction;
+
+    if(action==="create-group"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openCreateGroup()}
+    else if(action==="team-members"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openTeamMembers()}
+    else if(action==="create-meeting"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openCreateMeeting()}
+    else if(action==="tasks"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openTasks()}
+    else if(action==="employees"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openPeople("employees")}
+    else if(action==="hr"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openPeople("hr")}
+    else if(action==="payroll"){e.preventDefault();e.stopImmediatePropagation();closeProfilePanel?.();openScreen("mobilePayrollScreen")}
+  },true);
+
+  $("workspaceProfileBtn")?.addEventListener("click",applyRoleTools);
+
+  window.addEventListener("notusSessionReady",applyRoleTools);
+  document.addEventListener("DOMContentLoaded",applyRoleTools);
+  setTimeout(applyRoleTools,300);
+
+  window.notusMobileApplyRoleTools=applyRoleTools;
+  window.notusMobileOpenCreateMeeting=openCreateMeeting;
+  window.notusMobileOpenCreateGroup=openCreateGroup;
+  window.notusMobileOpenTasks=openTasks;
+})();
 </script>
 
 </body>
