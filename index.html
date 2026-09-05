@@ -4231,7 +4231,7 @@ html,body{
     </button>
     <div class="mobile-attendance-head-copy">
       <h2>Attendance</h2>
-      <p>Your daily login &amp; logout attendance</p>
+      <p>Your daily work attendance</p>
     </div>
     <button class="mobile-attendance-refresh" id="mobileAttendanceRefresh" type="button" aria-label="Refresh attendance">
       <i class="fa-solid fa-rotate-right"></i>
@@ -4242,8 +4242,8 @@ html,body{
     <div class="mobile-attendance-today">
       <div class="mobile-attendance-stat"><span>Today</span><b id="mobileAttendanceTodayDate">—</b></div>
       <div class="mobile-attendance-stat"><span>Total Time</span><b id="mobileAttendanceTodayHours">00h 00m</b></div>
-      <div class="mobile-attendance-stat"><span>First Login</span><b id="mobileAttendanceTodayLogin">—</b></div>
-      <div class="mobile-attendance-stat"><span>Last Logout</span><b id="mobileAttendanceTodayLogout">—</b></div>
+      <div class="mobile-attendance-stat"><span>Work Start</span><b id="mobileAttendanceTodayLogin">—</b></div>
+      <div class="mobile-attendance-stat"><span>Work End</span><b id="mobileAttendanceTodayLogout">—</b></div>
     </div>
 
     <div class="mobile-attendance-card">
@@ -4255,7 +4255,7 @@ html,body{
         <div class="mobile-attendance-empty">
           <i class="fa-regular fa-calendar-check"></i>
           <b>No attendance yet</b>
-          <span>Your login and logout history will appear here.</span>
+          <span>Your work attendance history will appear here.</span>
         </div>
       </div>
     </div>
@@ -4834,17 +4834,9 @@ form.addEventListener("submit", async function(e){
     localStorage.setItem("notus_company_session", JSON.stringify(session));
     window.notusSession = session;
 
-    /* Login itself is NOT blocked by shift timing.
-       Shift timing is checked only when the user changes work status
-       (Available / Break / Meeting / Busy etc.), same as the web flow. */
-    try{
-      if(typeof window.notusAttendanceRecordLogin === "function"){
-        await window.notusAttendanceRecordLogin();
-      }
-    }catch(attErr){
-      console.warn("Mobile attendance login save:",attErr);
-    }
-
+    /* App login is only authentication.
+       Attendance must NOT start from app login time.
+       Actual attendance starts only when the user selects Available. */
     showStatus("Login successful", "success");
 
     setTimeout(function(){
@@ -5484,6 +5476,20 @@ document.querySelectorAll(".workspace-status-option").forEach(btn=>{
     if(!saved){
       /* saveMyWorkspaceStatus already restores the real DB status on failure */
       return;
+    }
+
+    /* Attendance is based on work status — NOT app login.
+       Available = actual work start.
+       Break / Meeting / Busy keep the same open work session.
+       Offline = actual work end. */
+    try{
+      if(status === "available" && typeof window.notusAttendanceRecordLogin === "function"){
+        await window.notusAttendanceRecordLogin();
+      }else if(status === "offline" && typeof window.notusAttendanceRecordLogout === "function"){
+        await window.notusAttendanceRecordLogout();
+      }
+    }catch(attErr){
+      console.warn("Mobile attendance status sync:",attErr);
     }
 
     /* Keep local session/cache in sync without touching the chat DOM. */
@@ -9711,8 +9717,8 @@ window.openOutsideApp = function(rawUrl){
    MOBILE — MY DAILY ATTENDANCE
    SAME DATABASE CONTRACT AS DESKTOP:
      public.notus_attendance_logs
-   - actual login => inserts one attendance session row
-   - profile Logout => closes this browser's exact open row
+   - selecting Available => inserts one attendance work session row
+   - selecting Offline / profile Logout => closes this browser's exact open row
    - refresh / pageshow NEVER creates a duplicate login row
    - page shows ONLY the current logged-in member
    - multiple sessions in one day are summed
@@ -9832,7 +9838,7 @@ window.openOutsideApp = function(rawUrl){
     const set=(id,v)=>{const el=$(id);if(el)el.textContent=v};
     set("mobileAttendanceTodayDate",fmtDate(today));
     set("mobileAttendanceTodayLogin",tg?fmtTime(tg.first):"—");
-    set("mobileAttendanceTodayLogout",tg?(tg.active?"Active":fmtTime(tg.last)):"—");
+    set("mobileAttendanceTodayLogout",tg?(tg.active?"Working":fmtTime(tg.last)):"—");
     set("mobileAttendanceTodayHours",tg?fmtDuration(tg.total):"00h 00m");
     const m=currentMember();
     set("mobileAttendanceOwnSub",`${m?.name||"Your"} attendance only • ${groups.length} days`);
@@ -9848,8 +9854,8 @@ window.openOutsideApp = function(rawUrl){
           <span class="mobile-attendance-pill ${g.active?"active":"completed"}">${g.active?"Working":"Completed"}</span>
         </div>
         <div class="mobile-attendance-meta">
-          <div><span>First Login</span><b>${esc(fmtTime(g.first))}</b></div>
-          <div><span>Last Logout</span><b>${esc(g.active?"Active":fmtTime(g.last))}</b></div>
+          <div><span>Work Start</span><b>${esc(fmtTime(g.first))}</b></div>
+          <div><span>Work End</span><b>${esc(g.active?"Working":fmtTime(g.last))}</b></div>
           <div><span>Total Time</span><b>${esc(fmtDuration(g.total))}</b></div>
         </div>
       </div>`).join("");
@@ -9858,7 +9864,7 @@ window.openOutsideApp = function(rawUrl){
   window.loadMobileDailyAttendance=async function(){
     if(loading)return; loading=true;
     const list=$("mobileAttendanceList");
-    if(list)list.innerHTML='<div class="mobile-attendance-empty"><i class="fa-solid fa-spinner fa-spin"></i><b>Loading attendance</b><span>Please wait...</span></div>';
+    if(list)list.innerHTML='<div class="notus-loading-center"><span class="notus-ios-spinner" aria-label="Loading"></span></div>';
     try{paint(groupDaily(await fetchRows()))}
     catch(err){
       console.error("Mobile attendance load:",err);
