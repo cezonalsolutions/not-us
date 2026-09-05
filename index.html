@@ -21,6 +21,7 @@
 />
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 
@@ -3865,6 +3866,134 @@ html,body{
 .mobile-payroll-soft-loading{opacity:.65;pointer-events:none;transition:opacity .16s ease}
 </style>
 
+
+<style id="notus-mobile-payslip-final-css">
+.mobile-payroll-payslip-row{
+  margin-top:12px;padding-top:11px;border-top:1px solid #eef1ef;
+  display:flex;justify-content:flex-end;
+}
+.mobile-payroll-generate{
+  min-width:112px;height:38px;padding:0 13px;border:0;border-radius:10px;
+  background:#171717;color:#fff;font-family:"Inter",sans-serif;font-size:9px;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+}
+.mobile-payroll-generate:disabled{opacity:.6}
+.mobile-payroll-generated{
+  min-height:36px;padding:0 10px;border-radius:10px;background:#eef7f0;color:#477154;
+  display:inline-flex;align-items:center;gap:7px;font-size:8px;font-weight:800;
+}
+.mobile-payslip-body{padding:14px 14px calc(24px + env(safe-area-inset-bottom))!important}
+.mobile-payslip-owner{
+  background:#fff;border:1px solid #e7ebe9;border-radius:14px;padding:14px 15px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;
+}
+.mobile-payslip-owner span{display:block;font-size:8px;color:#8b9490}
+.mobile-payslip-owner b{display:block;margin-top:4px;font-family:"Outfit",sans-serif;font-size:14px;color:#171717}
+.mobile-payslip-owner-count{text-align:right}
+.mobile-payslip-owner-count b{font-size:18px}
+.mobile-payslip-list{display:flex;flex-direction:column;gap:10px}
+.mobile-payslip-card{
+  background:#fff;border:1px solid #e7ebe9;border-radius:14px;padding:14px;
+}
+.mobile-payslip-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.mobile-payslip-card-month{font-family:"Outfit",sans-serif;font-size:14px;font-weight:600;color:#171717}
+.mobile-payslip-card-status{
+  padding:5px 8px;border-radius:999px;background:#eef7f0;color:#477154;font-size:7px;font-weight:800;
+}
+.mobile-payslip-card-grid{
+  margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+}
+.mobile-payslip-card-cell{background:#fafbfb;border:1px solid #eef1ef;border-radius:10px;padding:10px}
+.mobile-payslip-card-cell span{display:block;font-size:7px;color:#929b97}
+.mobile-payslip-card-cell b{display:block;margin-top:4px;font-size:10px;color:#2c3330}
+.mobile-payslip-card-net{
+  margin-top:9px;padding:11px 12px;border-radius:10px;background:#f4f6f5;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.mobile-payslip-card-net span{font-size:8px;color:#69736f}
+.mobile-payslip-card-net b{font-family:"Outfit",sans-serif;font-size:15px;color:#171717}
+.mobile-payslip-view{
+  width:100%;height:39px;margin-top:10px;border:1px solid #dfe5e2;border-radius:10px;background:#fff;
+  color:#303633;font-family:"Inter",sans-serif;font-size:9px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.mobile-payslip-empty{
+  min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:30px;color:#929b97;
+}
+.mobile-payslip-empty i{font-size:22px;color:#adb5b1;margin-bottom:10px}
+.mobile-payslip-empty b{font-size:11px;color:#3a413e}
+.mobile-payslip-empty span{margin-top:5px;font-size:8px;line-height:1.5}
+.mobile-payslip-viewer{
+  position:fixed;inset:0;z-index:900;background:#eef1f2;display:flex;flex-direction:column;
+  transform:translateX(100%);visibility:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s ease;
+}
+.mobile-payslip-viewer.show{transform:translateX(0);visibility:visible}
+.mobile-payslip-viewer-head{
+  flex:0 0 auto;min-height:94px;padding:max(18px,env(safe-area-inset-top)) 15px 13px;
+  display:flex;align-items:flex-end;gap:10px;background:#fff;border-bottom:1px solid #e7ebe9;
+}
+.mobile-payslip-viewer-back{
+  width:38px;height:38px;border:0;background:transparent;color:#303634;display:grid;place-items:center;font-size:17px;
+}
+.mobile-payslip-viewer-title{min-width:0;flex:1;padding-bottom:3px}
+.mobile-payslip-viewer-title h2{font-family:"Outfit",sans-serif;font-size:18px;font-weight:600;color:#171717}
+.mobile-payslip-viewer-title p{margin-top:3px;font-size:9px;color:#8a9390}
+.mobile-payslip-download{
+  height:38px;padding:0 12px;border:0;border-radius:10px;background:#171717;color:#fff;
+  font-family:"Inter",sans-serif;font-size:9px;font-weight:700;display:flex;align-items:center;gap:7px;
+}
+.mobile-payslip-document{
+  flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 10px calc(20px + env(safe-area-inset-bottom));
+}
+.mobile-slip-paper{
+  width:100%;max-width:700px;margin:0 auto;background:#fff;border:1px solid #e0e4e6;
+  padding:22px 18px;color:#171717;font-family:"Inter",sans-serif;
+}
+.mobile-slip-header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding-bottom:14px;border-bottom:1px solid #e5e8ea}
+.mobile-slip-company{display:flex;align-items:flex-start;gap:10px;min-width:0}
+.mobile-slip-logo{width:42px;height:42px;flex:0 0 42px;border:1px solid #e4e7e9;border-radius:10px;overflow:hidden;display:grid;place-items:center;color:#69737d;background:#fafbfb}
+.mobile-slip-logo img{width:100%;height:100%;object-fit:cover}
+.mobile-slip-company-name{
+  font-family:"Manrope","Inter",sans-serif;font-size:19px;font-weight:800;line-height:1.08;letter-spacing:-.55px;color:#111418;
+}
+.mobile-slip-company-location{margin-top:5px;font-size:8px;font-weight:600;line-height:1.4;color:#59636d}
+.mobile-slip-doc{text-align:right;flex:0 0 auto}
+.mobile-slip-doc-title{font-family:"Outfit",sans-serif;font-size:18px;font-weight:700;color:#171717}
+.mobile-slip-doc-month{margin-top:4px;font-size:9px;font-weight:700;color:#505961}
+.mobile-slip-doc-period{margin-top:3px;font-size:7px;color:#89929b}
+.mobile-slip-employee-head{display:flex;justify-content:space-between;gap:12px;margin-top:16px}
+.mobile-slip-employee-name{font-family:"Outfit",sans-serif;font-size:15px;font-weight:600}
+.mobile-slip-employee-role{margin-top:4px;font-size:8px;color:#747e87}
+.mobile-slip-section{margin-top:16px}
+.mobile-slip-section-title{padding:7px 9px;background:#f3f4f5;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#3a4147}
+.mobile-slip-table{width:100%;border-collapse:collapse}
+.mobile-slip-table td,.mobile-slip-table th{padding:8px 7px;border-bottom:1px solid #edf0f2;font-size:7.5px;text-align:left;vertical-align:top}
+.mobile-slip-table td:nth-child(odd){color:#7d8790;width:22%}
+.mobile-slip-table td:nth-child(even){font-weight:700;color:#2b3137;width:28%;word-break:break-word}
+.mobile-slip-salary th{background:#fafbfb;color:#7b858e;font-size:7px}
+.mobile-slip-salary td:last-child,.mobile-slip-salary th:last-child{text-align:right;font-weight:700}
+.mobile-slip-net{
+  margin-top:16px;padding:13px 14px;background:#f3f5f4;border-radius:10px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.mobile-slip-net span{display:block;font-size:8px;font-weight:800;text-transform:uppercase;color:#555f5a}
+.mobile-slip-net small{display:block;margin-top:3px;font-size:6.5px;color:#8c9590}
+.mobile-slip-net b{font-family:"Outfit",sans-serif;font-size:19px}
+.mobile-slip-generated{
+  margin-top:15px;padding-top:12px;border-top:1px solid #edf0f2;display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.mobile-slip-generated span{display:block;font-size:6.5px;color:#8c959e}
+.mobile-slip-generated b{display:block;margin-top:4px;font-size:7.5px;color:#343b42}
+.mobile-slip-note{margin-top:14px;font-size:6.5px;line-height:1.55;color:#969ea5}
+@media(max-width:390px){
+  .mobile-slip-paper{padding:18px 14px}
+  .mobile-slip-company-name{font-size:17px}
+  .mobile-slip-doc-title{font-size:16px}
+  .mobile-slip-table td{padding:7px 5px;font-size:7px}
+}
+</style>
+
 </head>
 
 <body>
@@ -4637,6 +4766,43 @@ html,body{
       </div>
     </section>
   </div>
+</section>
+
+
+<section class="mobile-role-screen" id="mobilePayslipScreen" aria-hidden="true">
+  <header class="mobile-role-head">
+    <button class="mobile-role-back" id="mobilePayslipBack" type="button"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="mobile-role-head-copy">
+      <h2>Payslip</h2>
+      <p>View your generated monthly salary payslips</p>
+    </div>
+  </header>
+  <div class="mobile-role-body mobile-payslip-body">
+    <div class="mobile-payslip-owner">
+      <div><span>My Payslips</span><b id="mobilePayslipOwnerName">—</b></div>
+      <div class="mobile-payslip-owner-count"><span>Generated</span><b id="mobilePayslipCount">0</b></div>
+    </div>
+    <div class="mobile-payslip-list" id="mobilePayslipList"></div>
+    <div class="mobile-payslip-empty" id="mobilePayslipEmpty" hidden>
+      <i class="fa-regular fa-file-lines"></i>
+      <b>No generated payslips</b>
+      <span>Once payroll is finalized, your monthly payslip will appear here.</span>
+    </div>
+  </div>
+</section>
+
+<section class="mobile-payslip-viewer" id="mobilePayslipViewer" aria-hidden="true">
+  <header class="mobile-payslip-viewer-head">
+    <button class="mobile-payslip-viewer-back" id="mobilePayslipViewerBack" type="button"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="mobile-payslip-viewer-title">
+      <h2>Payslip</h2>
+      <p id="mobilePayslipViewerMonth">—</p>
+    </div>
+    <button class="mobile-payslip-download" id="mobilePayslipDownload" type="button">
+      <i class="fa-solid fa-download"></i> PDF
+    </button>
+  </header>
+  <div class="mobile-payslip-document" id="mobilePayslipDocument"></div>
 </section>
 
 <div class="mobile-role-overlay" id="mobileCreateGroupOverlay" aria-hidden="true">
@@ -6420,7 +6586,7 @@ document.querySelectorAll("[data-profile-action]").forEach(btn=>{
 
     if(action==="leave"){ closeProfilePanel(); openMobileLeaveScreen(); }
     else if(action==="attendance"){ closeProfilePanel(); window.openMobileAttendanceScreen?.(); }
-    else if(action==="payslip") alert("Pay Slip");
+    else if(action==="payslip"){ closeProfilePanel(); window.openMobilePayslipScreen?.(); }
     else if(action==="meetings"){ closeProfilePanel(); openMobileMeetingsScreen(); }
     else if(action==="help") alert("Help & Support");
   });
@@ -12527,6 +12693,7 @@ function showLoginDutyToast(message){
   $("mobilePeopleBack")?.addEventListener("click",()=>closeScreen("mobilePeopleScreen"));
   $("mobileTasksBack")?.addEventListener("click",()=>closeScreen("mobileTasksScreen"));
   $("mobilePayrollBack")?.addEventListener("click",()=>closeScreen("mobilePayrollScreen"));
+  $("mobilePayslipBack")?.addEventListener("click",()=>closeScreen("mobilePayslipScreen"));
 
   $("mobileCreateGroupClose")?.addEventListener("click",()=>closeOverlay("mobileCreateGroupOverlay"));
   $("mobileCreateGroupCancel")?.addEventListener("click",()=>closeOverlay("mobileCreateGroupOverlay"));
@@ -12610,7 +12777,8 @@ function showLoginDutyToast(message){
     ["mobileGroupChatScreen","mobileGroupChatBack"],
     ["mobilePeopleScreen","mobilePeopleBack"],
     ["mobileTasksScreen","mobileTasksBack"],
-    ["mobilePayrollScreen","mobilePayrollBack"]
+    ["mobilePayrollScreen","mobilePayrollBack"],
+    ["mobilePayslipScreen","mobilePayslipBack"]
   ];
 
   function bindScreen(screenId,backId){
@@ -15053,7 +15221,7 @@ body:has(.chat-screen.show){
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
   const money=v=>"₹"+Number(v||0).toLocaleString("en-IN",{maximumFractionDigits:2});
   const round=v=>Math.round((Number(v||0)+Number.EPSILON)*100)/100;
-  const state={month:"",people:[],rows:[],bonuses:[],loading:false};
+  const state={month:"",people:[],rows:[],bonuses:[],generated:new Map(),loading:false};
 
   function ses(){
     try{return window.notusSession||window.session||JSON.parse(localStorage.getItem("notus_company_session")||"{}")||{}}
@@ -15174,6 +15342,16 @@ body:has(.chat-screen.show){
     if(r.error)throw r.error;return r.data||[];
   }
 
+  async function generated(k){
+    const s=ses();
+    const r=await db.from("notus_payslips")
+      .select("id,member_type,member_id,generated_at,net_salary")
+      .eq("company_id",s.company_id)
+      .eq("payroll_month",start(k));
+    if(r.error)throw r.error;
+    return r.data||[];
+  }
+
   function aggregate(ps,ats,ts,bs,k){
     const am=new Map(),tm=new Map(),bm=new Map();
     ats.forEach(x=>{const t=norm(x.member_type)==="hr"?"hr":"employee",kk=pkey(t,x.member_id);am.set(kk,(am.get(kk)||0)+worked(x,k))});
@@ -15218,8 +15396,19 @@ body:has(.chat-screen.show){
           <div class="mobile-payroll-task-bar"><span style="width:${pct}%"></span></div>
         </div>
         <div class="mobile-payroll-total"><span>Estimated Pay</span><b>${money(x.total)}</b></div>
+        <div class="mobile-payroll-payslip-row">
+          ${state.generated.has(pkey(x.member_type,x.id))
+            ? `<span class="mobile-payroll-generated"><i class="fa-solid fa-check"></i> Generated</span>`
+            : `<button class="mobile-payroll-generate" type="button" data-mobile-generate-payslip="${esc(x.member_type)}|${esc(x.id)}"><i class="fa-regular fa-file-lines"></i> Generate Payslip</button>`}
+        </div>
       </article>`;
     }).join("");
+    list.querySelectorAll("[data-mobile-generate-payslip]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const [mt,id]=String(btn.dataset.mobileGeneratePayslip||"").split("|");
+        generateOnePayslip(mt,id,btn);
+      });
+    });
   }
 
   function summary(){
@@ -15270,8 +15459,11 @@ body:has(.chat-screen.show){
     state.loading=(async()=>{
       try{
         const ps=await people();
-        const [a,t,b]=await Promise.all([attendance(state.month),tasks(state.month),bonuses(state.month)]);
-        state.people=ps;state.bonuses=b;state.rows=aggregate(ps,a,t,b,state.month);
+        const [a,t,b,g]=await Promise.all([attendance(state.month),tasks(state.month),bonuses(state.month),generated(state.month)]);
+        state.people=ps;
+        state.bonuses=b;
+        state.generated=new Map((g||[]).map(x=>[pkey(norm(x.member_type)==="hr"?"hr":"employee",x.member_id),x]));
+        state.rows=aggregate(ps,a,t,b,state.month);
         summary();memberOptions();bonusHistory();render();
       }catch(err){
         console.error("Mobile payroll:",err);
@@ -15324,6 +15516,152 @@ body:has(.chat-screen.show){
     }finally{btn.disabled=false;btn.innerHTML=old}
   }
 
+
+  async function companySnapshot(person){
+    const s=ses();
+    let companyName=safe(s.company_name||s.company||s.name),
+        companyBrandName=safe(s.brand_name||s.company_brand_name||s.display_name||s.company_name||s.company),
+        companyEmail=safe(s.company_email||s.email||s.gmail),
+        companyMobile=safe(s.company_mobile||s.mobile||s.phone||s.mobile_number),
+        companyAddress=safe(s.company_address||s.address||s.office_address||s.registered_address),
+        companyLocation=safe(s.company_location||s.location),
+        companyLogo=safe(s.company_logo_url||s.logo_url||s.logo||s.company_logo),
+        branchId=safe(person?.branch_id),
+        branchName="",
+        branchLocation="";
+
+    try{
+      const mt=person?.member_type==="hr"?"hr_members":"employees";
+      const mr=await db.from(mt).select("*").eq("company_id",s.company_id).eq("id",String(person.id)).maybeSingle();
+      if(!mr.error&&mr.data)branchId=branchId||safe(mr.data.branch_id);
+    }catch(_){}
+
+    try{
+      const c=await db.from("companies").select("*").eq("id",s.company_id).maybeSingle();
+      if(!c.error&&c.data){
+        companyName=companyName||safe(c.data.company_name||c.data.name||c.data.legal_name);
+        companyBrandName=companyBrandName||safe(c.data.brand_name||c.data.company_brand_name||c.data.display_name||c.data.company_name||c.data.name);
+        companyEmail=companyEmail||safe(c.data.company_email||c.data.email||c.data.gmail);
+        companyMobile=companyMobile||safe(c.data.company_mobile||c.data.mobile||c.data.phone||c.data.mobile_number);
+        companyAddress=companyAddress||safe(c.data.company_address||c.data.address||c.data.registered_address||c.data.office_address);
+        companyLocation=companyLocation||safe(c.data.company_location||c.data.location||c.data.city||companyAddress);
+        companyLogo=companyLogo||safe(c.data.company_logo_url||c.data.logo_url||c.data.logo||c.data.company_logo||c.data.profile_image_url||c.data.image_url||c.data.brand_logo_url);
+      }
+    }catch(_){}
+
+    if(branchId){
+      try{
+        const br=await db.rpc("list_company_branches",{p_company_id:s.company_id});
+        const arr=!br.error&&Array.isArray(br.data)?br.data:[];
+        const exact=arr.find(b=>safe(b.id)===branchId);
+        if(exact){
+          branchName=safe(exact.branch_name||exact.name);
+          branchLocation=safe(exact.location||exact.branch_location||exact.city||exact.address);
+        }
+      }catch(_){}
+      if(!branchName&&!branchLocation){
+        try{
+          const b=await db.from("branches").select("*").eq("company_id",s.company_id).eq("id",branchId).maybeSingle();
+          if(!b.error&&b.data){
+            branchName=safe(b.data.branch_name||b.data.name);
+            branchLocation=safe(b.data.location||b.data.branch_location||b.data.city||b.data.address);
+          }
+        }catch(_){}
+      }
+    }
+    return{
+      companyName,
+      companyBrandName:companyBrandName||companyName,
+      companyEmail,companyMobile,companyAddress,
+      companyLocation:companyLocation||companyAddress,
+      companyLogo,branchId,branchName,branchLocation
+    };
+  }
+
+  async function bankSnapshot(person){
+    const s=ses(),blank={bankName:"",bankBranchName:"",accountHolderName:"",bankAccountNumber:"",bankIfscCode:""};
+    try{
+      const q=await db.from("notus_staff_documents")
+        .select("bank_name,bank_branch_name,account_holder_name,bank_account_number,bank_ifsc_code")
+        .eq("company_id",s.company_id)
+        .eq("member_type",person.member_type==="hr"?"hr":"employee")
+        .eq("member_id",String(person.id))
+        .maybeSingle();
+      if(q.error||!q.data)return blank;
+      return{
+        bankName:safe(q.data.bank_name),
+        bankBranchName:safe(q.data.bank_branch_name),
+        accountHolderName:safe(q.data.account_holder_name),
+        bankAccountNumber:safe(q.data.bank_account_number),
+        bankIfscCode:safe(q.data.bank_ifsc_code).toUpperCase()
+      };
+    }catch(_){return blank}
+  }
+
+  async function generateOnePayslip(memberType,memberId,btn){
+    if(!allowed()||!state.month)return;
+    const person=state.rows.find(r=>r.member_type===memberType&&safe(r.id)===safe(memberId));
+    if(!person)return;
+    if(state.generated.has(pkey(person.member_type,person.id))){
+      window.showToast?.("This payslip is already generated.");
+      return;
+    }
+    const s=ses(),old=btn?.innerHTML||"";
+    if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Generating'}
+    try{
+      const [info,bank]=await Promise.all([companySnapshot(person),bankSnapshot(person)]);
+      const payload={
+        company_id:String(s.company_id),
+        company_name:info.companyName||null,
+        company_brand_name:info.companyBrandName||info.companyName||null,
+        company_location:info.branchLocation||info.companyLocation||info.companyAddress||null,
+        company_email:info.companyEmail||null,
+        company_mobile:info.companyMobile||null,
+        company_address:info.companyAddress||null,
+        company_logo_url:info.companyLogo||null,
+        branch_id:info.branchId?String(info.branchId):null,
+        branch_name:info.branchName||null,
+        branch_location:info.branchLocation||null,
+        bank_name:bank.bankName||null,
+        bank_branch_name:bank.bankBranchName||null,
+        account_holder_name:bank.accountHolderName||null,
+        bank_account_number:bank.bankAccountNumber||null,
+        bank_ifsc_code:bank.bankIfscCode||null,
+        payroll_month:start(state.month),
+        member_type:person.member_type,
+        member_id:String(person.id),
+        member_name:person.full_name||null,
+        member_email:person.email||null,
+        member_role:person.displayRole||null,
+        job_type:person.job_type||null,
+        monthly_salary:Number(person.salary||0),
+        worked_hours:Number(person.wh||0),
+        expected_hours:Number(person.expected||0),
+        hourly_rate:Number(person.hourly||0),
+        attendance_earned:Number(person.earned||0),
+        task_total:Number(person.task?.total||0),
+        task_completed:Number(person.task?.completed||0),
+        bonus_amount:Number(person.bonus||0),
+        net_salary:Number(person.total||0),
+        status:"generated",
+        generated_by_type:actorType(),
+        generated_by_id:actorId()||null,
+        generated_by_name:actorName()||null,
+        generated_by_email:safe(s.email||s.gmail||s.login_email)||null,
+        generated_at:new Date().toISOString()
+      };
+      const ins=await db.from("notus_payslips").insert(payload);
+      if(ins.error)throw ins.error;
+      window.showToast?.((person.full_name||"Employee")+" payslip generated.");
+      await load(true);
+    }catch(err){
+      console.error("Mobile generate payslip:",err);
+      window.showToast?.(err?.message||"Unable to generate payslip.");
+    }finally{
+      if(btn&&document.body.contains(btn)){btn.disabled=false;btn.innerHTML=old}
+    }
+  }
+
   document.addEventListener("DOMContentLoaded",()=>{
     buildMonths("mobilePayrollMonth");
     buildMonths("mobilePayrollBonusMonth");
@@ -15337,6 +15675,207 @@ body:has(.chat-screen.show){
   });
 
   window.loadMobilePayroll=load;
+})();
+</script>
+
+
+<script id="notus-mobile-payslip-final-js">
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const safe=v=>String(v??"").trim();
+const norm=v=>safe(v).toLowerCase().replace(/[_-]+/g," ");
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+const money=v=>"₹"+Number(v||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+let rows=[],active=null;
+
+function ses(){try{return window.notusSession||window.session||JSON.parse(localStorage.getItem("notus_company_session")||"{}")||{}}catch(_){return{}}}
+function openScreen(){const s=$("mobilePayslipScreen");if(!s)return;s.classList.add("show");s.setAttribute("aria-hidden","false");load()}
+function closeScreen(){const s=$("mobilePayslipScreen");if(!s)return;s.classList.remove("show");s.setAttribute("aria-hidden","true")}
+async function ident(){
+  const s=ses(),cid=safe(s.company_id);if(!cid)return null;
+  const t=norm(s.user_type||s.login_type),r=norm(s.role);
+  if(["hr","hr member"].includes(t)||r==="hr"){
+    let id=safe(s.hr_id||s.member_id||s.id);
+    if(id)return{member_type:"hr",member_id:id,name:s.full_name||"HR"};
+    const email=safe(s.email||s.gmail||s.login_email);
+    if(email){
+      let q=await db.from("hr_members").select("id,full_name").eq("company_id",cid).ilike("email",email).maybeSingle();
+      if((q.error||!q.data))q=await db.from("hr_members").select("id,full_name").eq("company_id",cid).ilike("gmail",email).maybeSingle();
+      if(!q.error&&q.data)return{member_type:"hr",member_id:String(q.data.id),name:q.data.full_name||"HR"};
+    }
+    return null;
+  }
+  let id=safe(s.employee_id||s.member_id);
+  if(id)return{member_type:"employee",member_id:id,name:s.full_name||"Employee"};
+  const email=safe(s.email||s.gmail||s.login_email);
+  if(email){
+    let q=await db.from("employees").select("id,full_name").eq("company_id",cid).ilike("email",email).maybeSingle();
+    if((q.error||!q.data))q=await db.from("employees").select("id,full_name").eq("company_id",cid).ilike("gmail",email).maybeSingle();
+    if(!q.error&&q.data)return{member_type:"employee",member_id:String(q.data.id),name:q.data.full_name||"Employee"};
+  }
+  return null;
+}
+function monthLabel(v){if(!v)return"—";const d=new Date(String(v).slice(0,10)+"T00:00:00");return Number.isNaN(d.getTime())?String(v):d.toLocaleDateString("en-IN",{month:"long",year:"numeric"})}
+function generatedAt(v){if(!v)return"—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:true})}
+function fileMonth(v){const d=new Date(String(v).slice(0,10)+"T00:00:00");return Number.isNaN(d.getTime())?"Payslip":d.toLocaleDateString("en-US",{month:"short",year:"numeric"}).replace(/\s+/g,"-")}
+
+function render(){
+  const list=$("mobilePayslipList"),empty=$("mobilePayslipEmpty");
+  if($("mobilePayslipCount"))$("mobilePayslipCount").textContent=String(rows.length);
+  if(!list)return;
+  if(!rows.length){list.innerHTML="";if(empty)empty.hidden=false;return}
+  if(empty)empty.hidden=true;
+  list.innerHTML=rows.map(x=>`
+    <article class="mobile-payslip-card">
+      <div class="mobile-payslip-card-top">
+        <div class="mobile-payslip-card-month">${esc(monthLabel(x.payroll_month))}</div>
+        <span class="mobile-payslip-card-status"><i class="fa-solid fa-check"></i> Generated</span>
+      </div>
+      <div class="mobile-payslip-card-grid">
+        <div class="mobile-payslip-card-cell"><span>Monthly Salary</span><b>${money(x.monthly_salary)}</b></div>
+        <div class="mobile-payslip-card-cell"><span>Attendance Earned</span><b>${money(x.attendance_earned)}</b></div>
+        <div class="mobile-payslip-card-cell"><span>Bonus</span><b>${money(x.bonus_amount)}</b></div>
+        <div class="mobile-payslip-card-cell"><span>Generated On</span><b>${esc(generatedAt(x.generated_at))}</b></div>
+      </div>
+      <div class="mobile-payslip-card-net"><span>Net Salary</span><b>${money(x.net_salary)}</b></div>
+      <button class="mobile-payslip-view" type="button" data-mobile-payslip-view="${esc(x.id)}"><i class="fa-regular fa-eye"></i> View Payslip</button>
+    </article>`).join("");
+  list.querySelectorAll("[data-mobile-payslip-view]").forEach(b=>b.addEventListener("click",()=>openPayslip(b.dataset.mobilePayslipView)));
+}
+async function load(){
+  try{
+    const i=await ident();
+    if($("mobilePayslipOwnerName"))$("mobilePayslipOwnerName").textContent=i?.name||"My Payslips";
+    if(!i){rows=[];render();return}
+    const s=ses();
+    const q=await db.from("notus_payslips").select("*")
+      .eq("company_id",s.company_id)
+      .eq("member_type",i.member_type)
+      .eq("member_id",i.member_id)
+      .order("payroll_month",{ascending:false});
+    if(q.error)throw q.error;
+    rows=q.data||[];render();
+  }catch(err){
+    console.error("Mobile payslip:",err);
+    const list=$("mobilePayslipList");
+    if(list)list.innerHTML='<div class="mobile-payslip-empty"><i class="fa-solid fa-triangle-exclamation"></i><b>Payslip database is not ready</b><span>Run the updated Payslip SQL once.</span></div>';
+  }
+}
+function documentHtml(x){
+  const d=new Date(String(x.payroll_month||"").slice(0,10)+"T00:00:00");
+  const y=d.getFullYear(),m=d.getMonth();
+  const f=n=>n.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+  const period=`${f(new Date(y,m,1))} - ${f(new Date(y,m+1,0))}`;
+  return `<div class="mobile-slip-paper" id="mobilePayslipPdfPaper">
+    <div class="mobile-slip-header">
+      <div class="mobile-slip-company">
+        <div class="mobile-slip-logo">
+          ${x.company_logo_url?`<img src="${esc(x.company_logo_url)}" alt="Company logo" crossorigin="anonymous" onerror="this.style.display='none'">`:`<i class="fa-regular fa-building"></i>`}
+        </div>
+        <div>
+          <div class="mobile-slip-company-name">${esc(x.company_brand_name||x.company_name||"Company")}</div>
+          <div class="mobile-slip-company-location">${esc(x.branch_location||x.company_location||x.company_address||"")}</div>
+        </div>
+      </div>
+      <div class="mobile-slip-doc">
+        <div class="mobile-slip-doc-title">PAYSLIP</div>
+        <div class="mobile-slip-doc-month">${esc(monthLabel(x.payroll_month))}</div>
+        <div class="mobile-slip-doc-period">${esc(period)}</div>
+      </div>
+    </div>
+
+    <div class="mobile-slip-employee-head">
+      <div>
+        <div class="mobile-slip-employee-name">${esc(x.member_name||"—")}</div>
+        <div class="mobile-slip-employee-role">${esc(x.member_role||"—")}${x.job_type?` · ${esc(x.job_type)}`:""}</div>
+      </div>
+    </div>
+
+    <section class="mobile-slip-section">
+      <div class="mobile-slip-section-title">Employee Details</div>
+      <table class="mobile-slip-table"><tbody>
+        <tr><td>Employee Name</td><td>${esc(x.member_name||"—")}</td><td>Designation</td><td>${esc(x.member_role||"—")}</td></tr>
+        <tr><td>Email</td><td>${esc(x.member_email||"—")}</td><td>Employment Type</td><td>${esc(x.job_type||"—")}</td></tr>
+        <tr><td>Company Email</td><td>${esc(x.company_email||"—")}</td><td>Company Mobile</td><td>${esc(x.company_mobile||"—")}</td></tr>
+      </tbody></table>
+    </section>
+
+    <section class="mobile-slip-section">
+      <div class="mobile-slip-section-title">Bank Details</div>
+      <table class="mobile-slip-table"><tbody>
+        <tr><td>Bank Name</td><td>${esc(x.bank_name||"—")}</td><td>Branch Name</td><td>${esc(x.bank_branch_name||"—")}</td></tr>
+        <tr><td>Account Holder</td><td>${esc(x.account_holder_name||"—")}</td><td>Account Number</td><td>${esc(x.bank_account_number||"—")}</td></tr>
+        <tr><td>IFSC Code</td><td>${esc(String(x.bank_ifsc_code||"—").toUpperCase())}</td><td>Transfer Type</td><td>Bank Transfer</td></tr>
+      </tbody></table>
+    </section>
+
+    <section class="mobile-slip-section">
+      <div class="mobile-slip-section-title">Salary Details</div>
+      <table class="mobile-slip-table mobile-slip-salary">
+        <thead><tr><th>Description</th><th>Amount</th></tr></thead>
+        <tbody>
+          <tr><td>Monthly Salary</td><td>${money(x.monthly_salary)}</td></tr>
+          <tr><td>Attendance Earned</td><td>${money(x.attendance_earned)}</td></tr>
+          <tr><td>Bonus</td><td>${money(x.bonus_amount)}</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="mobile-slip-net">
+      <div><span>Net Salary Payable</span><small>For ${esc(period)}</small></div>
+      <b>${money(x.net_salary)}</b>
+    </div>
+
+    <div class="mobile-slip-generated">
+      <div><span>Generated On</span><b>${esc(generatedAt(x.generated_at))}</b></div>
+      <div><span>Generated By</span><b>${esc(x.generated_by_name||"Company")}</b></div>
+    </div>
+
+    <div class="mobile-slip-note">
+      This is a computer-generated payslip and does not require a signature.
+      Salary information is based on the payroll and attendance records available for the stated period.
+    </div>
+  </div>`;
+}
+function openPayslip(id){
+  const x=rows.find(r=>String(r.id)===String(id));if(!x)return;
+  active=x;
+  $("mobilePayslipViewerMonth").textContent=monthLabel(x.payroll_month);
+  $("mobilePayslipDocument").innerHTML=documentHtml(x);
+  const v=$("mobilePayslipViewer");v.classList.add("show");v.setAttribute("aria-hidden","false");
+}
+function closeViewer(){
+  const v=$("mobilePayslipViewer");v.classList.remove("show");v.setAttribute("aria-hidden","true");active=null;
+}
+async function download(){
+  const paper=$("mobilePayslipPdfPaper"),btn=$("mobilePayslipDownload");if(!paper||!active)return;
+  if(typeof html2pdf!=="function"){window.showToast?.("PDF library could not load.");return}
+  const old=btn.innerHTML;btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> PDF';
+  try{
+    const logo=paper.querySelector("img");
+    if(logo&&!logo.complete)await new Promise(r=>{const done=()=>r();logo.addEventListener("load",done,{once:true});logo.addEventListener("error",done,{once:true});setTimeout(done,1600)});
+    const name=(safe(active.member_name)||"Employee").replace(/[^a-z0-9_-]+/gi,"-");
+    await html2pdf().set({
+      margin:[8,8,8,8],
+      filename:`${name}-${fileMonth(active.payroll_month)}-Payslip.pdf`,
+      image:{type:"jpeg",quality:.98},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff"},
+      jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
+      pagebreak:{mode:["avoid-all","css","legacy"]}
+    }).from(paper).save();
+  }catch(err){
+    console.error("Mobile payslip PDF:",err);
+    window.showToast?.("Unable to download PDF.");
+  }finally{btn.disabled=false;btn.innerHTML=old}
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  $("mobilePayslipBack")?.addEventListener("click",closeScreen);
+  $("mobilePayslipViewerBack")?.addEventListener("click",closeViewer);
+  $("mobilePayslipDownload")?.addEventListener("click",download);
+});
+window.openMobilePayslipScreen=openScreen;
+window.loadMobilePayslips=load;
 })();
 </script>
 
