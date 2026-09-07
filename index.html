@@ -4040,6 +4040,39 @@ html,body{
 }
 </style>
 
+
+<style id="notus-chat-image-render-final-fix">
+.notus-chat-image-wrap{
+  position:relative;
+  min-width:120px;
+  min-height:90px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  border-radius:8px;
+}
+.notus-chat-image-spinner{
+  width:20px;
+  height:20px;
+  border:2px solid rgba(15,118,110,.18);
+  border-top-color:#0f766e;
+  border-radius:50%;
+  animation:notusChatImageSpin .7s linear infinite;
+}
+@keyframes notusChatImageSpin{
+  to{transform:rotate(360deg)}
+}
+.notus-chat-file-load-error{
+  display:block;
+  padding:18px 12px;
+  min-width:150px;
+  text-align:center;
+  font-size:9px;
+  color:#8a9390;
+}
+</style>
+
 </head>
 
 <body>
@@ -7746,14 +7779,139 @@ function appendCompanyMessageBubble(message){
   const bubble = document.createElement("div");
   bubble.className = "message-bubble";
 
-  const textNode = document.createElement("span");
-  textNode.textContent = message.text || "";
+  const rawText = String(message.text || "");
+  const ATTACH_TOKEN = "__NOTUS_CHAT_FILE_V1__";
+
+  function decodeAttachmentMeta(value){
+    if(!value || !value.startsWith(ATTACH_TOKEN)) return null;
+    try{
+      const encoded = value.slice(ATTACH_TOKEN.length);
+      const binary = atob(encoded);
+      const bytes = Uint8Array.from(binary, c=>c.charCodeAt(0));
+      return JSON.parse(new TextDecoder().decode(bytes));
+    }catch(err){
+      console.warn("Chat attachment decode failed:",err);
+      return null;
+    }
+  }
+
+  function prettyFileSize(n){
+    n=Number(n)||0;
+    if(n < 1024) return n + " B";
+    if(n < 1024*1024) return (n/1024).toFixed(1) + " KB";
+    return (n/1024/1024).toFixed(1) + " MB";
+  }
+
+  async function loadSignedAttachmentUrl(meta, target, isImg){
+    try{
+      if(!meta?.path || typeof db==="undefined") throw new Error("Missing file path");
+
+      const {data,error}=await db.storage
+        .from("notus-chat-files")
+        .createSignedUrl(meta.path,120);
+
+      if(error) throw error;
+
+      const url=data?.signedUrl||"";
+      if(!url) throw new Error("Signed URL not created");
+
+      if(isImg){
+        target.onload=()=>{
+          target.style.display="block";
+          target.dataset.loaded="1";
+        };
+        target.onerror=async ()=>{
+          /* one clean retry */
+          if(target.dataset.retry==="1") return;
+          target.dataset.retry="1";
+          try{
+            const retry=await db.storage
+              .from("notus-chat-files")
+              .createSignedUrl(meta.path,120);
+            if(retry.error) throw retry.error;
+            if(retry.data?.signedUrl) target.src=retry.data.signedUrl;
+          }catch(err){
+            console.warn("Chat image retry failed:",err);
+          }
+        };
+        target.src=url;
+      }else{
+        target.href=url;
+      }
+    }catch(err){
+      console.warn("Chat attachment URL failed:",err);
+      if(isImg){
+        target.style.display="none";
+        const fail=document.createElement("span");
+        fail.className="notus-chat-file-load-error";
+        fail.textContent="Image unavailable";
+        target.parentNode?.insertBefore(fail,target);
+      }else{
+        target.removeAttribute("href");
+        target.style.pointerEvents="none";
+        const small=target.querySelector("small");
+        if(small) small.textContent="File unavailable";
+      }
+    }
+  }
+
+  const meta = decodeAttachmentMeta(rawText);
+
+  if(meta && meta.path){
+    bubble.classList.add("notus-chat-file-card");
+
+    if(meta.kind === "image" || String(meta.mime_type||"").startsWith("image/")){
+      const wrap=document.createElement("div");
+      wrap.className="notus-chat-image-wrap";
+
+      const spinner=document.createElement("div");
+      spinner.className="notus-chat-image-spinner";
+
+      const img=document.createElement("img");
+      img.className="notus-chat-image";
+      img.alt=meta.file_name || "Image";
+      img.loading="lazy";
+      img.style.display="none";
+
+      img.addEventListener("load",()=>{
+        spinner.remove();
+      },{once:true});
+
+      wrap.appendChild(spinner);
+      wrap.appendChild(img);
+      bubble.appendChild(wrap);
+
+      loadSignedAttachmentUrl(meta,img,true);
+    }else{
+      const link=document.createElement("a");
+      link.className="notus-chat-file-link";
+      link.target="_blank";
+      link.rel="noopener";
+      link.innerHTML=`
+        <span class="notus-chat-file-icon"><i class="fa-regular fa-file"></i></span>
+        <span class="notus-chat-file-copy">
+          <b></b>
+          <small></small>
+        </span>
+      `;
+
+      link.querySelector("b").textContent = meta.file_name || "File";
+      link.querySelector("small").textContent = prettyFileSize(meta.size);
+      bubble.appendChild(link);
+
+      loadSignedAttachmentUrl(meta,link,false);
+    }
+  }else{
+    /* Normal messages remain exactly as before. */
+    const textNode = document.createElement("span");
+    textNode.textContent = rawText;
+    bubble.appendChild(textNode);
+  }
 
   const timeNode = document.createElement("span");
   timeNode.className = "message-time";
   timeNode.textContent = message.time || "";
 
-  bubble.appendChild(textNode);
   bubble.appendChild(timeNode);
   row.appendChild(bubble);
   chatMessages.appendChild(row);
@@ -16524,73 +16682,7 @@ html.notus-mobile-login-transition #workspaceScreen{
     }
   }
 
-  /* Extend existing message bubble renderer without changing plain text messages. */
-  const originalAppend=window.appendCompanyMessageBubble ||
-    (typeof appendCompanyMessageBubble==="function" ? appendCompanyMessageBubble : null);
-
-  if(originalAppend){
-    const wrapped=function(message){
-      const meta=decodeMeta(message?.text);
-      if(!meta) return originalAppend(message);
-
-      const messages=$("chatMessages");
-      if(!messages||!message) return;
-
-      messages.querySelectorAll(".chat-load-state,.workspace-empty-chat").forEach(el=>el.remove());
-      if(!messages.querySelector(".chat-day")){
-        messages.insertAdjacentHTML("afterbegin",'<div class="chat-day"><span>Today</span></div>');
-      }
-
-      const row=document.createElement("div");
-      row.className="message-row "+(message.side==="out"?"out":"in");
-
-      const bubble=document.createElement("div");
-      bubble.className="message-bubble notus-chat-file-card";
-
-      const time=document.createElement("span");
-      time.className="message-time";
-      time.textContent=message.time||"";
-
-      if(meta.kind==="image"){
-        const img=document.createElement("img");
-        img.className="notus-chat-image";
-        img.alt=meta.file_name||"Image";
-        img.loading="lazy";
-        signed(meta.path).then(url=>{ if(url) img.src=url; }).catch(()=>{});
-        bubble.appendChild(img);
-      }else{
-        const link=document.createElement("a");
-        link.className="notus-chat-file-link";
-        link.href="#";
-        link.innerHTML=`
-          <span class="notus-chat-file-icon"><i class="fa-regular fa-file"></i></span>
-          <span class="notus-chat-file-copy">
-            <b></b>
-            <small></small>
-          </span>`;
-        link.querySelector("b").textContent=meta.file_name||"File";
-        link.querySelector("small").textContent=fileSize(meta.size);
-        link.addEventListener("click",async e=>{
-          e.preventDefault();
-          try{
-            const url=await signed(meta.path);
-            if(url) window.open(url,"_blank","noopener");
-          }catch(err){
-            alert("Unable to open file.");
-          }
-        });
-        bubble.appendChild(link);
-      }
-
-      bubble.appendChild(time);
-      row.appendChild(bubble);
-      messages.appendChild(row);
-      requestAnimationFrame(()=>messages.scrollTop=messages.scrollHeight);
-    };
-
-    try{ window.appendCompanyMessageBubble=wrapped; }catch(_){}
-    try{ appendCompanyMessageBubble=wrapped; }catch(_){}
-  }
+  /* Attachment rendering is handled directly by appendCompanyMessageBubble(). */
 
   function init(){
     $("chatAttachBtn")?.addEventListener("click",()=>{
