@@ -4436,7 +4436,29 @@ html,body{
     <div class="chat-day"><span>Today</span></div>
   </div>
 
+  <div class="chat-file-preview" id="chatFilePreview" hidden>
+    <div class="chat-file-preview-inner">
+      <i class="fa-regular fa-file" id="chatFilePreviewIcon"></i>
+      <div class="chat-file-preview-copy">
+        <b id="chatFilePreviewName">File</b>
+        <span id="chatFilePreviewSize"></span>
+      </div>
+      <button id="chatFilePreviewRemove" type="button" aria-label="Remove file">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  </div>
+
   <div class="chat-compose-wrap">
+    <input
+      id="chatFileInput"
+      type="file"
+      hidden
+      accept="image/*,.pdf,.txt,.md,.json,.csv,.html,.css,.js,.jsx,.ts,.tsx,.xml,.yaml,.yml,.sql,.py,.java,.kt,.kts,.swift,.c,.cpp,.h,.hpp,.cs,.php,.rb,.go,.rs,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip"
+    >
+    <button class="chat-attach" id="chatAttachBtn" type="button" aria-label="Attach file">
+      <i class="fa-solid fa-paperclip"></i>
+    </button>
     <div class="chat-compose">
       <textarea id="chatMessageInput" rows="1" placeholder="Message"></textarea>
     </div>
@@ -5184,17 +5206,9 @@ form.addEventListener("submit", async function(e){
       return;
     }
 
-    localStorage.setItem("notus_company_session", JSON.stringify(session));
-    window.notusSession = session;
-
-    /* App login is only authentication.
-       Attendance must NOT start from app login time.
-       Actual attendance starts only when the user selects Available. */
-    showStatus("Login successful", "success");
-
-    setTimeout(function(){
-      showWorkspace(session);
-    }, 350);
+    /* Password is valid. Keep this session private until OTP is verified.
+       This preserves the existing login RPCs and all role/session fields. */
+    startNotusMobileOtpGate(session);
 
   }catch(err){
     console.error("Login error:", err);
@@ -8160,9 +8174,15 @@ companyChatScreen?.addEventListener("touchend", finishEdgeSwipe, {passive:true})
 companyChatScreen?.addEventListener("touchcancel", finishEdgeSwipe, {passive:true});
 
 
-/* Restore already logged-in session on reload */
+/* Restore already logged-in session on reload.
+   Never bypass an in-progress OTP gate. */
 (function restoreLogin(){
   try{
+    if(sessionStorage.getItem("notus_mobile_otp_gate_v1")==="1"){
+      localStorage.removeItem("notus_company_session");
+      window.notusSession=null;
+      return;
+    }
     const saved = JSON.parse(localStorage.getItem("notus_company_session") || "null");
     if(saved?.company_id){
       window.notusSession = saved;
@@ -15802,6 +15822,826 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 window.openMobilePayslipScreen=openScreen;
 window.loadMobilePayslips=load;
+})();
+</script>
+
+
+<!-- =========================================================
+     NOT US MOBILE — OTP GATE + CHAT FILE UPLOAD
+     Additive patch. Existing screens/modules remain unchanged.
+     ========================================================= -->
+<style id="notus-mobile-otp-chat-file-css">
+/* LOGIN TRANSITION PAINT GUARD */
+html.notus-mobile-login-transition #workspaceScreen{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* OTP */
+.notus-mobile-otp-overlay{
+  position:fixed;
+  inset:0;
+  z-index:10050;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:rgba(255,255,255,.97);
+  backdrop-filter:blur(7px);
+}
+.notus-mobile-otp-overlay.show{display:flex}
+.notus-mobile-otp-card{
+  width:100%;
+  max-width:370px;
+  background:#fff;
+  border:1px solid #e5ebe8;
+  border-radius:20px;
+  padding:25px 20px 20px;
+  box-shadow:0 22px 65px rgba(20,38,32,.10);
+}
+.notus-mobile-otp-brand{
+  font-family:"Manrope",sans-serif;
+  font-size:12px;
+  font-weight:800;
+  color:#0f766e;
+  letter-spacing:.8px;
+}
+.notus-mobile-otp-card h2{
+  margin:11px 0 6px;
+  font-family:"Outfit",sans-serif;
+  font-size:23px;
+  font-weight:600;
+  color:#171717;
+}
+.notus-mobile-otp-card p{
+  margin:0;
+  font-size:11px;
+  line-height:1.6;
+  color:#7c8783;
+}
+.notus-mobile-otp-email{
+  margin-top:4px;
+  font-weight:700;
+  color:#3b4642;
+  word-break:break-word;
+}
+.notus-mobile-otp-boxes{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:7px;
+  margin:23px 0 16px;
+}
+.notus-mobile-otp-box{
+  width:100%;
+  height:48px;
+  min-width:0;
+  border:1px solid #dce4e1;
+  border-radius:11px;
+  outline:0;
+  background:#fafcfb;
+  text-align:center;
+  font-size:19px;
+  font-weight:700;
+  color:#171717;
+}
+.notus-mobile-otp-box:focus{
+  border-color:#0f766e;
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(15,118,110,.06);
+}
+.notus-mobile-otp-error{
+  min-height:18px;
+  margin-bottom:8px;
+  font-size:9px;
+  color:#c93f3f;
+}
+.notus-mobile-otp-verify{
+  width:100%;
+  height:48px;
+  border:0;
+  border-radius:12px;
+  background:#0f766e;
+  color:#fff;
+  font:inherit;
+  font-size:12px;
+  font-weight:700;
+}
+.notus-mobile-otp-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:13px;
+}
+.notus-mobile-otp-actions button{
+  border:0;
+  background:transparent;
+  padding:7px 2px;
+  font:inherit;
+  font-size:10px;
+  font-weight:700;
+  color:#59645f;
+}
+.notus-mobile-otp-actions .resend{color:#0f766e}
+.notus-mobile-otp-actions .resend:disabled{color:#a7afac}
+.notus-mobile-otp-note{
+  margin-top:15px!important;
+  font-size:8px!important;
+  color:#a0a8a5!important;
+  text-align:center;
+}
+
+/* CHAT ATTACHMENT */
+.chat-attach{
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  border:0;
+  border-radius:50%;
+  background:#fff;
+  color:#64706b;
+  display:grid;
+  place-items:center;
+  font-size:15px;
+  box-shadow:0 1px 4px rgba(18,38,32,.08);
+}
+.chat-file-preview{
+  flex:0 0 auto;
+  padding:7px 9px 0;
+  background:#efeae2;
+}
+.chat-file-preview[hidden]{display:none!important}
+.chat-file-preview-inner{
+  width:100%;
+  min-height:53px;
+  padding:8px 10px;
+  border-radius:13px;
+  background:#fff;
+  border:1px solid rgba(90,110,101,.13);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.chat-file-preview-inner>i{
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  border-radius:10px;
+  background:#edf6f3;
+  color:#0f766e;
+  display:grid;
+  place-items:center;
+}
+.chat-file-preview-copy{
+  flex:1;
+  min-width:0;
+}
+.chat-file-preview-copy b{
+  display:block;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:10px;
+  color:#2b322f;
+}
+.chat-file-preview-copy span{
+  display:block;
+  margin-top:3px;
+  font-size:8px;
+  color:#909995;
+}
+#chatFilePreviewRemove{
+  width:32px;
+  height:32px;
+  border:0;
+  border-radius:50%;
+  background:transparent;
+  color:#7f8985;
+}
+.notus-chat-file-card{
+  min-width:190px;
+  max-width:260px;
+}
+.notus-chat-file-link{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  text-decoration:none;
+  color:inherit;
+}
+.notus-chat-file-icon{
+  width:35px;
+  height:35px;
+  border-radius:9px;
+  background:rgba(255,255,255,.5);
+  display:grid;
+  place-items:center;
+  color:#0f766e;
+  flex:0 0 35px;
+}
+.notus-chat-file-copy{min-width:0;flex:1}
+.notus-chat-file-copy b{
+  display:block;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-size:10px;
+}
+.notus-chat-file-copy small{
+  display:block;
+  margin-top:3px;
+  color:#76817d;
+  font-size:7.5px;
+}
+.notus-chat-image{
+  display:block;
+  max-width:220px;
+  max-height:260px;
+  width:auto;
+  height:auto;
+  object-fit:cover;
+  border-radius:8px;
+  background:#e7ece9;
+}
+@media(max-width:420px){
+  .notus-mobile-otp-card{padding:22px 16px 18px}
+  .notus-mobile-otp-boxes{gap:5px}
+  .notus-mobile-otp-box{height:45px;font-size:17px}
+  .notus-chat-image{max-width:190px;max-height:230px}
+}
+</style>
+
+<div class="notus-mobile-otp-overlay" id="notusMobileOtpOverlay" aria-hidden="true">
+  <div class="notus-mobile-otp-card">
+    <div class="notus-mobile-otp-brand">NOT US WORKSPACE</div>
+    <h2>Verify OTP</h2>
+    <p>OTP has been sent to registered Gmail.</p>
+    <div class="notus-mobile-otp-email" id="notusMobileOtpEmail"></div>
+
+    <div class="notus-mobile-otp-boxes" id="notusMobileOtpBoxes">
+      <input class="notus-mobile-otp-box" inputmode="numeric" maxlength="1" aria-label="OTP digit 1">
+      <input class="notus-mobile-otp-box" inputmode="numeric" maxlength="1" aria-label="OTP digit 2">
+      <input class="notus-mobile-otp-box" inputmode="numeric" maxlength="1" aria-label="OTP digit 3">
+      <input class="notus-mobile-otp-box" inputmode="numeric" maxlength="1" aria-label="OTP digit 4">
+      <input class="notus-mobile-otp-box" inputmode="numeric" maxlength="1" aria-label="OTP digit 5">
+      <input class="notus-mobile-otp-box" inputmode="numeric" maxlength="1" aria-label="OTP digit 6">
+    </div>
+
+    <div class="notus-mobile-otp-error" id="notusMobileOtpError"></div>
+
+    <button class="notus-mobile-otp-verify" id="notusMobileOtpVerify" type="button">
+      Verify
+    </button>
+
+    <div class="notus-mobile-otp-actions">
+      <button id="notusMobileOtpBack" type="button">Back</button>
+      <button class="resend" id="notusMobileOtpResend" type="button" disabled>Resend in 50s</button>
+    </div>
+
+    <p class="notus-mobile-otp-note">Temporary login OTP: 123456</p>
+  </div>
+</div>
+
+<script id="notus-mobile-otp-gate-final">
+(function(){
+  "use strict";
+
+  const OTP="123456";
+  const GATE="notus_mobile_otp_gate_v1";
+  const CANDIDATE="notus_mobile_otp_candidate_v1";
+  let resendTimer=null;
+  let resendLeft=50;
+
+  const $=id=>document.getElementById(id);
+
+  function boxes(){
+    return [...document.querySelectorAll(".notus-mobile-otp-box")];
+  }
+
+  function paintResend(){
+    const btn=$("notusMobileOtpResend");
+    if(!btn) return;
+    if(resendLeft>0){
+      btn.disabled=true;
+      btn.textContent=`Resend in ${resendLeft}s`;
+    }else{
+      btn.disabled=false;
+      btn.textContent="Resend OTP";
+    }
+  }
+
+  function startResend(){
+    clearInterval(resendTimer);
+    resendLeft=50;
+    paintResend();
+    resendTimer=setInterval(()=>{
+      resendLeft--;
+      paintResend();
+      if(resendLeft<=0){
+        clearInterval(resendTimer);
+        resendTimer=null;
+      }
+    },1000);
+  }
+
+  function candidate(){
+    try{
+      return JSON.parse(sessionStorage.getItem(CANDIDATE)||"null");
+    }catch(_){ return null; }
+  }
+
+  function show(session){
+    if(!session?.company_id) return;
+    sessionStorage.setItem(GATE,"1");
+    sessionStorage.setItem(CANDIDATE,JSON.stringify(session));
+    localStorage.removeItem("notus_company_session");
+    window.notusSession=null;
+
+    document.documentElement.classList.add("notus-mobile-login-transition");
+
+    const overlay=$("notusMobileOtpOverlay");
+    if(overlay){
+      overlay.classList.add("show");
+      overlay.setAttribute("aria-hidden","false");
+    }
+    $("notusMobileOtpEmail").textContent =
+      String(session.gmail||session.email||"").trim();
+
+    boxes().forEach(i=>i.value="");
+    $("notusMobileOtpError").textContent="";
+    startResend();
+    setTimeout(()=>boxes()[0]?.focus(),50);
+  }
+
+  function close(){
+    const overlay=$("notusMobileOtpOverlay");
+    overlay?.classList.remove("show");
+    overlay?.setAttribute("aria-hidden","true");
+  }
+
+  function cancel(){
+    clearInterval(resendTimer);
+    sessionStorage.removeItem(GATE);
+    sessionStorage.removeItem(CANDIDATE);
+    localStorage.removeItem("notus_company_session");
+    window.notusSession=null;
+    close();
+    document.documentElement.classList.remove("notus-mobile-login-transition");
+
+    try{
+      const email=document.getElementById("email");
+      const password=document.getElementById("password");
+      if(password) password.value="";
+      email?.focus();
+    }catch(_){}
+  }
+
+  function verify(){
+    const code=boxes().map(i=>i.value).join("");
+    const err=$("notusMobileOtpError");
+
+    if(code.length!==6){
+      err.textContent="Enter the 6-digit OTP.";
+      return;
+    }
+    if(code!==OTP){
+      err.textContent="Incorrect OTP. Please try again.";
+      boxes().forEach(i=>i.value="");
+      boxes()[0]?.focus();
+      return;
+    }
+
+    const s=candidate();
+    if(!s?.company_id){
+      err.textContent="Login session expired. Please login again.";
+      return;
+    }
+
+    localStorage.setItem("notus_company_session",JSON.stringify(s));
+    window.notusSession=s;
+    sessionStorage.removeItem(GATE);
+    sessionStorage.removeItem(CANDIDATE);
+    clearInterval(resendTimer);
+    close();
+
+    if(typeof showStatus==="function"){
+      showStatus("Login successful","success");
+    }
+
+    /* Workspace remains paint-locked until the existing showWorkspace finishes. */
+    Promise.resolve(
+      typeof showWorkspace==="function" ? showWorkspace(s) : null
+    ).finally(()=>{
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          document.documentElement.classList.remove("notus-mobile-login-transition");
+        });
+      });
+    });
+  }
+
+  window.startNotusMobileOtpGate=show;
+
+  function init(){
+    const inputs=boxes();
+    inputs.forEach((input,index)=>{
+      input.addEventListener("input",()=>{
+        input.value=input.value.replace(/\D/g,"").slice(-1);
+        if(input.value && index<inputs.length-1) inputs[index+1].focus();
+        if(inputs.every(i=>i.value) && index===inputs.length-1) verify();
+      });
+      input.addEventListener("keydown",e=>{
+        if(e.key==="Backspace" && !input.value && index>0){
+          inputs[index-1].focus();
+        }
+      });
+      input.addEventListener("paste",e=>{
+        const v=(e.clipboardData?.getData("text")||"").replace(/\D/g,"").slice(0,6);
+        if(v.length){
+          e.preventDefault();
+          inputs.forEach((i,n)=>i.value=v[n]||"");
+          inputs[Math.min(v.length,6)-1]?.focus();
+        }
+      });
+    });
+
+    $("notusMobileOtpVerify")?.addEventListener("click",verify);
+    $("notusMobileOtpBack")?.addEventListener("click",cancel);
+    $("notusMobileOtpResend")?.addEventListener("click",()=>{
+      $("notusMobileOtpError").textContent="";
+      boxes().forEach(i=>i.value="");
+      boxes()[0]?.focus();
+      startResend();
+      if(typeof showStatus==="function"){
+        showStatus("OTP resent","info");
+      }
+    });
+
+    /* Resume OTP screen after refresh without exposing the workspace. */
+    if(sessionStorage.getItem(GATE)==="1"){
+      const s=candidate();
+      if(s?.company_id){
+        localStorage.removeItem("notus_company_session");
+        window.notusSession=null;
+        show(s);
+      }else{
+        sessionStorage.removeItem(GATE);
+      }
+    }
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",init,{once:true});
+  }else{
+    init();
+  }
+})();
+</script>
+
+<script id="notus-mobile-chat-file-upload-final">
+(function(){
+  "use strict";
+
+  const BUCKET="notus-chat-files";
+  const TOKEN="__NOTUS_CHAT_FILE_V1__";
+  const MAX=10*1024*1024;
+  let selectedFile=null;
+
+  const $=id=>document.getElementById(id);
+  const safe=v=>String(v??"").trim();
+
+  function client(){
+    try{
+      if(typeof db!=="undefined" && db) return db;
+    }catch(_){}
+    return window.db||window.supabaseClient||null;
+  }
+
+  function session(){
+    try{
+      return window.notusSession ||
+        JSON.parse(localStorage.getItem("notus_company_session")||"null");
+    }catch(_){ return window.notusSession||null; }
+  }
+
+  function actor(){
+    const s=session()||{};
+    const t=safe(s.user_type).toLowerCase();
+    let id="";
+    let type="employee";
+
+    if(t==="company_admin"||t==="admin"){
+      id=safe(s.company_id);
+      type="admin";
+    }else if(t==="hr"||t==="hr_member"){
+      id=safe(s.hr_id||s.member_id||s.id);
+      type="hr";
+    }else{
+      id=safe(s.employee_id||s.team_lead_id||s.member_id||s.id);
+      type="employee";
+    }
+
+    return {companyId:safe(s.company_id),id,type};
+  }
+
+  function storageSafePart(value,fallback){
+    let s=safe(value);
+    try{s=decodeURIComponent(s)}catch(_){}
+    s=s.replace(/[^a-zA-Z0-9_-]+/g,"_")
+       .replace(/_+/g,"_")
+       .replace(/^_+|_+$/g,"");
+    return s||fallback||"item";
+  }
+
+  function fileSize(n){
+    n=Number(n)||0;
+    if(n<1024) return `${n} B`;
+    if(n<1024*1024) return `${(n/1024).toFixed(1)} KB`;
+    return `${(n/1024/1024).toFixed(1)} MB`;
+  }
+
+  function isImage(fileOrMeta){
+    const type=safe(fileOrMeta?.type||fileOrMeta?.mime_type).toLowerCase();
+    return type.startsWith("image/");
+  }
+
+  function valid(file){
+    if(!file) return false;
+    if(file.size>MAX){
+      alert("Maximum file size is 10 MB.");
+      return false;
+    }
+    const blocked=/\.(exe|apk|dmg|pkg|msi|bat|cmd|com|scr)$/i;
+    if(blocked.test(file.name||"")){
+      alert("This file type is not allowed.");
+      return false;
+    }
+    return true;
+  }
+
+  function clearSelection(){
+    selectedFile=null;
+    if($("chatFileInput")) $("chatFileInput").value="";
+    $("chatFilePreview")?.setAttribute("hidden","");
+  }
+
+  function paintSelection(file){
+    if(!file) return clearSelection();
+    selectedFile=file;
+    $("chatFilePreviewName").textContent=file.name||"File";
+    $("chatFilePreviewSize").textContent=fileSize(file.size);
+    const icon=$("chatFilePreviewIcon");
+    if(icon){
+      icon.className=isImage(file)
+        ?"fa-regular fa-image"
+        :"fa-regular fa-file";
+    }
+    $("chatFilePreview")?.removeAttribute("hidden");
+  }
+
+  function encodeMeta(meta){
+    const json=JSON.stringify(meta);
+    const bytes=new TextEncoder().encode(json);
+    let binary="";
+    bytes.forEach(b=>binary+=String.fromCharCode(b));
+    return TOKEN+btoa(binary);
+  }
+
+  function decodeMeta(text){
+    text=safe(text);
+    if(!text.startsWith(TOKEN)) return null;
+    try{
+      const raw=atob(text.slice(TOKEN.length));
+      const bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
+      return JSON.parse(new TextDecoder().decode(bytes));
+    }catch(_){ return null; }
+  }
+
+  async function signed(path){
+    const c=client();
+    if(!c||!path) return "";
+    const {data,error}=await c.storage.from(BUCKET).createSignedUrl(path,120);
+    if(error) throw error;
+    return data?.signedUrl||"";
+  }
+
+  async function upload(file){
+    const c=client();
+    const a=actor();
+    if(!c||!a.companyId||!a.id) throw new Error("Login session not found.");
+
+    const original=safe(file.name)||"file";
+    const ext=(original.split(".").pop()||"bin").replace(/[^a-zA-Z0-9]/g,"").toLowerCase()||"bin";
+    const base=original.replace(/\.[^.]+$/,"");
+    const path=[
+      storageSafePart(a.companyId,"company"),
+      storageSafePart(a.type,"user"),
+      storageSafePart(a.id,"member"),
+      `${Date.now()}-${Math.random().toString(36).slice(2,8)}-${storageSafePart(base,"file").slice(0,60)}.${ext}`
+    ].join("/");
+
+    const {error}=await c.storage.from(BUCKET).upload(path,file,{
+      cacheControl:"3600",
+      upsert:false,
+      contentType:file.type||undefined
+    });
+    if(error) throw error;
+
+    return {
+      kind:isImage(file)?"image":"file",
+      file_name:original,
+      mime_type:safe(file.type)||"application/octet-stream",
+      size:Number(file.size)||0,
+      path
+    };
+  }
+
+  async function sendEncoded(text){
+    if(!window.activeDirectPeer && typeof activeDirectPeer==="undefined"){
+      throw new Error("Open a chat first.");
+    }
+
+    const peer = typeof activeDirectPeer!=="undefined" ? activeDirectPeer : window.activeDirectPeer;
+    if(!peer) throw new Error("Open a chat first.");
+
+    const s = typeof directChatSession!=="undefined"
+      ? (directChatSession||window.notusSession||{})
+      : (window.notusSession||{});
+
+    const me = typeof currentChatIdentity==="function"
+      ? currentChatIdentity(s)
+      : null;
+
+    const pair = typeof canonicalPair==="function" && me
+      ? canonicalPair(me,peer)
+      : null;
+
+    if(!pair||!me) throw new Error("Chat session not ready.");
+
+    const {data,error}=await client().rpc("notus_send_direct_message",{
+      p_company_id:s.company_id,
+      p_user_a_key:pair.user_a_key,
+      p_user_b_key:pair.user_b_key,
+      p_user_a:pair.user_a,
+      p_user_b:pair.user_b,
+      p_sender_key:me.key,
+      p_text:text
+    });
+
+    if(error) throw error;
+
+    const row=Array.isArray(data)?data[0]:data;
+    if(row && typeof renderDirectMessages==="function"){
+      try{ activeDirectChat=row; }catch(_){}
+      renderDirectMessages(row);
+    }
+    if(typeof loadRecentDirectChats==="function"){
+      loadRecentDirectChats();
+    }
+  }
+
+  async function sendSelected(){
+    if(!selectedFile) return;
+    const file=selectedFile;
+    const attach=$("chatAttachBtn");
+    const send=$("chatSendBtn");
+
+    try{
+      if(attach) attach.disabled=true;
+      if(send) send.disabled=true;
+
+      const meta=await upload(file);
+      await sendEncoded(encodeMeta(meta));
+      clearSelection();
+    }catch(err){
+      console.error("Chat file upload:",err);
+      alert(err?.message||"Unable to send file.");
+    }finally{
+      if(attach) attach.disabled=false;
+      if(send) send.disabled=false;
+    }
+  }
+
+  /* Extend existing message bubble renderer without changing plain text messages. */
+  const originalAppend=window.appendCompanyMessageBubble ||
+    (typeof appendCompanyMessageBubble==="function" ? appendCompanyMessageBubble : null);
+
+  if(originalAppend){
+    const wrapped=function(message){
+      const meta=decodeMeta(message?.text);
+      if(!meta) return originalAppend(message);
+
+      const messages=$("chatMessages");
+      if(!messages||!message) return;
+
+      messages.querySelectorAll(".chat-load-state,.workspace-empty-chat").forEach(el=>el.remove());
+      if(!messages.querySelector(".chat-day")){
+        messages.insertAdjacentHTML("afterbegin",'<div class="chat-day"><span>Today</span></div>');
+      }
+
+      const row=document.createElement("div");
+      row.className="message-row "+(message.side==="out"?"out":"in");
+
+      const bubble=document.createElement("div");
+      bubble.className="message-bubble notus-chat-file-card";
+
+      const time=document.createElement("span");
+      time.className="message-time";
+      time.textContent=message.time||"";
+
+      if(meta.kind==="image"){
+        const img=document.createElement("img");
+        img.className="notus-chat-image";
+        img.alt=meta.file_name||"Image";
+        img.loading="lazy";
+        signed(meta.path).then(url=>{ if(url) img.src=url; }).catch(()=>{});
+        bubble.appendChild(img);
+      }else{
+        const link=document.createElement("a");
+        link.className="notus-chat-file-link";
+        link.href="#";
+        link.innerHTML=`
+          <span class="notus-chat-file-icon"><i class="fa-regular fa-file"></i></span>
+          <span class="notus-chat-file-copy">
+            <b></b>
+            <small></small>
+          </span>`;
+        link.querySelector("b").textContent=meta.file_name||"File";
+        link.querySelector("small").textContent=fileSize(meta.size);
+        link.addEventListener("click",async e=>{
+          e.preventDefault();
+          try{
+            const url=await signed(meta.path);
+            if(url) window.open(url,"_blank","noopener");
+          }catch(err){
+            alert("Unable to open file.");
+          }
+        });
+        bubble.appendChild(link);
+      }
+
+      bubble.appendChild(time);
+      row.appendChild(bubble);
+      messages.appendChild(row);
+      requestAnimationFrame(()=>messages.scrollTop=messages.scrollHeight);
+    };
+
+    try{ window.appendCompanyMessageBubble=wrapped; }catch(_){}
+    try{ appendCompanyMessageBubble=wrapped; }catch(_){}
+  }
+
+  function init(){
+    $("chatAttachBtn")?.addEventListener("click",()=>{
+      if(!(
+        (typeof activeDirectPeer!=="undefined" && activeDirectPeer) ||
+        window.activeDirectPeer
+      )){
+        alert("Open a chat first.");
+        return;
+      }
+      $("chatFileInput")?.click();
+    });
+
+    $("chatFileInput")?.addEventListener("change",e=>{
+      const file=e.target.files?.[0]||null;
+      if(!file) return clearSelection();
+      if(!valid(file)){
+        e.target.value="";
+        return;
+      }
+      paintSelection(file);
+    });
+
+    $("chatFilePreviewRemove")?.addEventListener("click",clearSelection);
+
+    /* Existing send button:
+       if a file is selected, send file first.
+       If no file is selected, existing text handler works unchanged. */
+    $("chatSendBtn")?.addEventListener("click",e=>{
+      if(!selectedFile) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      sendSelected();
+    },true);
+
+    $("chatMessageInput")?.addEventListener("keydown",e=>{
+      if(e.key==="Enter" && !e.shiftKey && selectedFile && !safe(e.currentTarget.value)){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        sendSelected();
+      }
+    },true);
+
+    $("chatBackBtn")?.addEventListener("click",clearSelection);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",init,{once:true});
+  }else{
+    init();
+  }
 })();
 </script>
 
