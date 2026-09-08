@@ -7349,21 +7349,10 @@ workspaceProfileBtn?.addEventListener("click",e=>{e.stopPropagation();openProfil
       await window.notusAttendanceRecordLogout();
     }
 
-    /* Logout-time status: exact user logout becomes Offline.
-       No refresh; realtime will update other users' availability counters. */
-    const logoutSession = window.notusSession || getNotusSession?.() || {};
-    const logoutMember = (typeof getCurrentMobileAttendanceMember === "function")
-      ? getCurrentMobileAttendanceMember(logoutSession)
-      : null;
-
-    if(typeof db !== "undefined" && logoutSession?.company_id && logoutMember?.member_id){
-      await db.rpc("set_member_attendance_status",{
-        p_company_id:logoutSession.company_id,
-        p_member_type:logoutMember.member_type,
-        p_member_id:logoutMember.member_id,
-        p_status:"offline"
-      });
-    }
+    /* IMPORTANT:
+       Profile Logout must NOT change work availability/status.
+       Keep the last selected status (Available / Break / Busy / etc.) exactly as it is.
+       Attendance logout time is still recorded above. */
   }catch(attErr){
     console.warn("Mobile attendance/logout status save:",attErr);
   }
@@ -18151,6 +18140,9 @@ html.notus-mobile-login-transition #workspaceScreen{
   This allows laptop/web and mobile renderers to open the same DB message.
 */
 </script>
+
+
+<!-- NOT US FIX: profile logout preserves current availability status; only session/attendance logout is handled. -->
 
 </body>
 </html>
