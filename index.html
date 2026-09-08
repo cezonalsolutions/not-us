@@ -16716,7 +16716,25 @@ body:has(.chat-screen.show){
     try{
       const mt=person?.member_type==="hr"?"hr_members":"employees";
       const mr=await db.from(mt).select("*").eq("company_id",s.company_id).eq("id",String(person.id)).maybeSingle();
-      if(!mr.error&&mr.data)branchId=branchId||safe(mr.data.branch_id);
+      if(!mr.error&&mr.data){
+        branchId=branchId||safe(mr.data.branch_id);
+
+        /* Employee/HR direct workplace values, when available. */
+        branchLocation=branchLocation||safe(
+          mr.data.branch_location ||
+          mr.data.location ||
+          mr.data.work_location ||
+          mr.data.office_location ||
+          mr.data.city ||
+          ""
+        );
+
+        branchName=branchName||safe(
+          mr.data.branch_name ||
+          mr.data.branch ||
+          ""
+        );
+      }
     }catch(_){}
 
     try{
@@ -16757,7 +16775,10 @@ body:has(.chat-screen.show){
       companyBrandName:companyBrandName||companyName,
       companyEmail,companyMobile,companyAddress,
       companyLocation:companyLocation||companyAddress,
-      companyLogo,branchId,branchName,branchLocation
+      companyLogo,
+      branchId,
+      branchName,
+      branchLocation:branchLocation||branchName
     };
   }
 
@@ -16960,7 +16981,7 @@ function documentHtml(x){
         </div>
         <div>
           <div class="mobile-slip-company-name">${esc(x.company_brand_name||x.company_name||"Company")}</div>
-          <div class="mobile-slip-company-location">${esc(x.branch_location||x.branch_name||x.company_location||x.company_address||"—")}</div>
+          <div class="mobile-slip-company-location">${esc(x.branch_location||x.branch_name||x.company_location||x.company_address||"")}</div>
         </div>
       </div>
       <div class="mobile-slip-doc">
@@ -18143,6 +18164,24 @@ html.notus-mobile-login-transition #workspaceScreen{
 
 
 <!-- NOT US FIX: profile logout preserves current availability status; only session/attendance logout is handled. -->
+
+
+<script id="notus-payslip-location-blank-hide-final">
+(function(){
+  function sync(){
+    const loc=document.querySelector("#mobilePayslipDocument .mobile-slip-company-location");
+    if(!loc) return;
+    loc.style.display=String(loc.textContent||"").trim() ? "" : "none";
+  }
+
+  document.addEventListener("DOMContentLoaded",()=>{
+    const host=document.getElementById("mobilePayslipDocument");
+    if(!host) return;
+    new MutationObserver(sync).observe(host,{childList:true,subtree:true});
+    sync();
+  });
+})();
+</script>
 
 </body>
 </html>
