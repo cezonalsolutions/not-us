@@ -4073,6 +4073,430 @@ html,body{
 }
 </style>
 
+
+<style id="notus-login-loading-final-css">
+#loginBtn.loading .loader{display:inline-block!important}
+#loginBtn.loading span{display:none!important}
+</style>
+
+
+<style id="notus-inline-otp-final-css">
+/* Inline OTP replaces the login controls in the same place. */
+.login-form-box.notus-otp-active .login-mini,
+.login-form-box.notus-otp-active h2,
+.login-form-box.notus-otp-active .login-sub,
+.login-form-box.notus-otp-active > label,
+.login-form-box.notus-otp-active > input,
+.login-form-box.notus-otp-active .single-password-wrap,
+.login-form-box.notus-otp-active .forgot-row,
+.login-form-box.notus-otp-active .single-terms,
+.login-form-box.notus-otp-active .single-signin,
+.login-form-box.notus-otp-active .login-btn,
+.login-form-box.notus-otp-active .divider,
+.login-form-box.notus-otp-active .otp-btn,
+.login-form-box.notus-otp-active .single-secure,
+.login-form-box.notus-otp-active .terms,
+.login-form-box.notus-otp-active .powered,
+.login-form.notus-otp-active .field,
+.login-form.notus-otp-active .forgot-row,
+.login-form.notus-otp-active .login-btn,
+.login-form.notus-otp-active .divider,
+.login-form.notus-otp-active .otp-btn{
+  display:none!important;
+}
+
+.notus-inline-otp{
+  width:100%;
+  max-width:350px;
+  margin:0 auto;
+}
+.notus-inline-otp[hidden]{display:none!important}
+.notus-inline-otp-head{
+  text-align:center;
+  margin-bottom:20px;
+}
+.notus-inline-otp-head h3{
+  margin:0;
+  font-family:"Manrope",sans-serif;
+  font-size:22px;
+  font-weight:700;
+  color:#1b1b1b;
+}
+.notus-inline-otp-head p{
+  margin:7px 0 0;
+  font-size:11px;
+  line-height:1.55;
+  color:#8a949f;
+}
+.notus-inline-otp-head span{
+  display:block;
+  margin-top:4px;
+  font-size:10px;
+  font-weight:700;
+  color:#4f5a55;
+  word-break:break-word;
+}
+.notus-inline-otp-input{
+  width:100%;
+  height:52px;
+  border:1px solid #e4e4e4;
+  border-radius:12px;
+  outline:none;
+  background:#fafafa;
+  padding:0 15px;
+  text-align:center;
+  letter-spacing:5px;
+  font-family:"Inter",sans-serif;
+  font-size:17px;
+  font-weight:700;
+  color:#171717;
+}
+.notus-inline-otp-input::placeholder{
+  letter-spacing:0;
+  font-size:12px;
+  font-weight:500;
+  color:#aaa;
+}
+.notus-inline-otp-input:focus{
+  background:#fff;
+  border-color:#0f766e;
+  box-shadow:0 0 0 3px rgba(15,118,110,.06);
+}
+.notus-inline-otp-error{
+  min-height:18px;
+  margin-top:7px;
+  font-size:9px;
+  color:#dc2626;
+  text-align:left;
+}
+.notus-inline-otp-verify{
+  width:100%;
+  height:52px;
+  border:0;
+  border-radius:12px;
+  background:#171717;
+  color:#fff;
+  font-family:"Inter",sans-serif;
+  font-size:13px;
+  font-weight:600;
+}
+.notus-inline-otp-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:12px;
+}
+.notus-inline-otp-actions button{
+  border:0;
+  background:transparent;
+  padding:8px 2px;
+  font-family:"Inter",sans-serif;
+  font-size:10px;
+  font-weight:700;
+  color:#59636e;
+}
+.notus-inline-otp-actions .resend{color:#0f766e}
+.notus-inline-otp-actions .resend:disabled{color:#a7afac}
+
+/* Disable old overlay completely. */
+#notusMobileOtpOverlay{display:none!important}
+</style>
+
+
+<style id="notus-exact-same-place-otp-fix">
+/*
+  EXACT FLOW:
+  Before login = existing login UI stays exactly as-is.
+  After valid Gmail + password = hide Login title, Gmail, password,
+  Show, Forgot password, Log in, OR, Login with OTP, Terms, Powered by.
+  In the SAME login-section show only OTP UI.
+*/
+.login-section.notus-otp-active .login-title,
+.login-section.notus-otp-active #loginForm,
+.login-section.notus-otp-active .terms,
+.login-section.notus-otp-active .powered{
+  display:none!important;
+}
+
+.login-section.notus-otp-active #notusInlineOtp{
+  display:block!important;
+}
+
+#notusInlineOtp{
+  width:100%;
+  max-width:350px;
+  margin:0 auto;
+}
+
+#notusInlineOtp[hidden]{
+  display:none!important;
+}
+
+/* OTP keeps the same spacing/location style as the existing form area */
+.login-section.notus-otp-active{
+  justify-content:flex-start;
+}
+
+.login-section.notus-otp-active #notusInlineOtp{
+  margin-top:0;
+}
+
+.notus-inline-otp-head{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.notus-inline-otp-head h3{
+  margin:0;
+  font-family:"Manrope",sans-serif;
+  font-size:18px;
+  font-weight:700;
+  letter-spacing:-.4px;
+  color:#1b1b1b;
+}
+
+.notus-inline-otp-head p{
+  margin:7px 0 0;
+  font-family:"Inter",sans-serif;
+  font-size:10px;
+  color:#8a9490;
+  line-height:1.5;
+}
+
+.notus-inline-otp-head span{
+  display:block;
+  margin-top:4px;
+  font-family:"Inter",sans-serif;
+  font-size:10px;
+  font-weight:600;
+  color:#0f766e;
+  word-break:break-word;
+}
+
+.notus-inline-otp-input{
+  width:100%;
+  height:52px;
+  border:1px solid #e4e4e4;
+  border-radius:12px;
+  outline:none;
+  background:#fafafa;
+  padding:0 15px;
+  text-align:center;
+  letter-spacing:5px;
+  font-family:"Inter",sans-serif;
+  font-size:16px;
+  font-weight:700;
+  color:#171717;
+}
+
+.notus-inline-otp-input::placeholder{
+  letter-spacing:0;
+  font-size:12px;
+  font-weight:400;
+  color:#aaa;
+}
+
+.notus-inline-otp-input:focus{
+  background:#fff;
+  border-color:#0f766e;
+  box-shadow:0 0 0 3px rgba(15,118,110,.06);
+}
+
+.notus-inline-otp-error{
+  min-height:18px;
+  margin-top:6px;
+  font-family:"Inter",sans-serif;
+  font-size:10px;
+  font-weight:500;
+  color:#dc2626;
+}
+
+.notus-inline-otp-verify{
+  width:100%;
+  height:52px;
+  border:0;
+  border-radius:12px;
+  background:#171717;
+  color:#fff;
+  font-family:"Inter",sans-serif;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.notus-inline-otp-actions{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:12px;
+}
+
+.notus-inline-otp-actions button{
+  border:0;
+  background:transparent;
+  padding:7px 0;
+  font-family:"Inter",sans-serif;
+  font-size:10px;
+  font-weight:600;
+  color:#606966;
+  cursor:pointer;
+}
+
+.notus-inline-otp-actions .resend{
+  color:#0f766e;
+}
+
+.notus-inline-otp-actions .resend:disabled{
+  color:#a7aeab;
+  cursor:default;
+}
+</style>
+
+
+<style id="notus-login-with-otp-same-place-addon">
+#notusOtpEmailStep[hidden],
+#notusOtpVerifyStep[hidden]{
+  display:none!important;
+}
+
+.notus-otp-email-input{
+  width:100%;
+  height:52px;
+  border:1px solid #e4e4e4;
+  border-radius:12px;
+  outline:none;
+  background:#fafafa;
+  padding:0 15px;
+  font-family:"Inter",sans-serif;
+  font-size:13px;
+  font-weight:500;
+  color:#171717;
+}
+
+.notus-otp-email-input::placeholder{
+  color:#aaa;
+  font-weight:400;
+}
+
+.notus-otp-email-input:focus{
+  background:#fff;
+  border-color:#0f766e;
+  box-shadow:0 0 0 3px rgba(15,118,110,.06);
+}
+</style>
+
+
+<script id="notus-auth-first-paint-guard">
+(function(){
+  try{
+    const saved=JSON.parse(localStorage.getItem("notus_company_session")||"null");
+    const otpPending =
+      sessionStorage.getItem("notus_mobile_otp_gate_v1")==="1" ||
+      sessionStorage.getItem("notus_mobile_otp_only_v1")==="1";
+
+    if(saved?.company_id){
+      document.documentElement.classList.add("notus-restoring-session");
+    }else if(otpPending){
+      document.documentElement.classList.add("notus-restoring-otp");
+    }
+  }catch(_){}
+})();
+</script>
+
+<style id="notus-auth-first-paint-guard-css">
+html.notus-restoring-session .page{
+  visibility:hidden!important;
+}
+html.notus-restoring-otp .login-section > .login-title,
+html.notus-restoring-otp .login-section > #loginForm,
+html.notus-restoring-otp .login-section > .terms,
+html.notus-restoring-otp .login-section > .powered{
+  visibility:hidden!important;
+}
+</style>
+
+
+<style id="notus-otp-compact-better-ui-final">
+/* Compact same-place OTP UI */
+#notusInlineOtp{
+  max-width:330px!important;
+}
+
+.notus-inline-otp-head{
+  margin-bottom:14px!important;
+}
+
+.notus-inline-otp-head h3{
+  font-size:17px!important;
+}
+
+.notus-inline-otp-head p{
+  margin-top:5px!important;
+  font-size:9.5px!important;
+}
+
+.notus-otp-email-input,
+.notus-inline-otp-input{
+  height:47px!important;
+  border-radius:11px!important;
+}
+
+.notus-inline-otp-error{
+  min-height:15px!important;
+  margin-top:5px!important;
+}
+
+.notus-inline-otp-verify{
+  position:relative;
+  height:47px!important;
+  border-radius:11px!important;
+  background:#0f766e!important;
+  color:#ffffff!important;
+  box-shadow:0 5px 14px rgba(15,118,110,.14)!important;
+}
+
+.notus-inline-otp-verify:active{
+  transform:scale(.987);
+}
+
+.notus-inline-otp-actions{
+  margin-top:8px!important;
+}
+
+.notus-inline-otp-actions button{
+  color:#65706c!important;
+  font-weight:600!important;
+}
+
+.notus-inline-otp-actions .resend{
+  color:#0f766e!important;
+}
+
+.notus-inline-otp-actions .resend:disabled{
+  color:#a7afac!important;
+}
+
+/* Send OTP loader */
+.notus-send-otp-spinner{
+  display:none;
+  width:17px;
+  height:17px;
+  border:2px solid rgba(255,255,255,.35);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+
+#notusOtpSendBtn.loading .notus-send-otp-spinner{
+  display:inline-block;
+}
+#notusOtpSendBtn.loading .notus-send-otp-label{
+  display:none;
+}
+</style>
+
 </head>
 
 <body>
@@ -4260,9 +4684,7 @@ html,body{
 
       </button>
 
-
-
-      <!-- OR -->
+<!-- OR -->
 
       <div class="divider">
         OR
@@ -4281,9 +4703,81 @@ html,body{
 
     </form>
 
+<div class="notus-inline-otp" id="notusInlineOtp" hidden>
+
+  <!-- LOGIN WITH OTP — STEP 1 -->
+  <div id="notusOtpEmailStep" hidden>
+    <div class="notus-inline-otp-head">
+      <h3>Login with OTP</h3>
+      <p>Enter your Gmail address</p>
+    </div>
+
+    <input
+      id="notusOtpEmailInput"
+      class="notus-otp-email-input"
+      type="email"
+      inputmode="email"
+      autocomplete="email"
+      placeholder="Enter your Gmail address">
+
+    <div class="notus-inline-otp-error" id="notusOtpEmailError"></div>
+
+    <button
+      class="notus-inline-otp-verify"
+      id="notusOtpSendBtn"
+      type="button">
+      <span class="notus-send-otp-label">Send OTP</span>
+      <span class="notus-send-otp-spinner" aria-hidden="true"></span>
+    </button>
+
+    <div class="notus-inline-otp-actions">
+      <button id="notusOtpEmailBack" type="button">Back</button>
+    </div>
+  </div>
+
+  <!-- LOGIN WITH OTP — STEP 2 -->
+  <div id="notusOtpVerifyStep" hidden>
+    <div class="notus-inline-otp-head">
+      <h3>Verify OTP</h3>
+      <p>Enter the OTP sent to</p>
+      <span id="notusInlineOtpEmail"></span>
+    </div>
+
+    <input
+      id="notusInlineOtpInput"
+      class="notus-inline-otp-input"
+      type="text"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      maxlength="6"
+      placeholder="Enter 6-digit OTP"
+      aria-label="Enter OTP">
+
+    <div class="notus-inline-otp-error" id="notusInlineOtpError"></div>
+
+    <button
+      class="notus-inline-otp-verify"
+      id="notusInlineOtpVerify"
+      type="button">
+      Verify OTP
+    </button>
+
+    <div class="notus-inline-otp-actions">
+      <button id="notusInlineOtpBack" type="button">Back</button>
+      <button
+        id="notusInlineOtpResend"
+        class="resend"
+        type="button"
+        disabled>
+        Resend in 50s
+      </button>
+    </div>
+  </div>
+
+</div>
 
 
-    <!-- TERMS -->
+<!-- TERMS -->
 
     <div class="terms">
 
@@ -5239,27 +5733,52 @@ form.addEventListener("submit", async function(e){
       return;
     }
 
-    /* Password is valid. Keep this session private until OTP is verified.
-       This preserves the existing login RPCs and all role/session fields. */
-    startNotusMobileOtpGate(session);
+    /* Password is valid. Keep spinner visible briefly, then open OTP.
+       Existing login RPCs and all role/session fields stay unchanged. */
+    const loginBtnNow = document.getElementById("loginBtn");
+    if(loginBtnNow){
+      loginBtnNow.disabled = true;
+      loginBtnNow.classList.add("loading");
+      const loader = loginBtnNow.querySelector(".loader");
+      const label = loginBtnNow.querySelector("span");
+      if(loader) loader.style.display = "inline-block";
+      if(label) label.style.display = "none";
+    }
+
+    setTimeout(()=>{
+      startNotusMobileOtpGate(session);
+
+      if(loginBtnNow){
+        loginBtnNow.disabled = false;
+        loginBtnNow.classList.remove("loading");
+        const loader = loginBtnNow.querySelector(".loader");
+        const label = loginBtnNow.querySelector("span");
+        if(loader) loader.style.display = "";
+        if(label) label.style.display = "";
+      }
+    },650);
 
   }catch(err){
     console.error("Login error:", err);
     showStatus(err?.message || "Unable to login. Please try again.", "error");
   }finally{
-    stopLoading();
+    /* If OTP gate is about to open, its timeout handles the transition.
+       Otherwise restore the normal login button immediately. */
+    if(sessionStorage.getItem("notus_mobile_otp_gate_v1")!=="1"){
+      stopLoading();
+    }
   }
 });
 
-/* Only normal Login is connected right now */
+/* LOGIN WITH OTP — same-place flow only */
 otpBtn.addEventListener("click", function(){
-  const gmail = email.value.trim();
-  if(!gmail){
-    setError(emailField, emailError, "Please enter your Gmail");
-    email.focus();
-    return;
+  emailField.classList.remove("error");
+  passwordField.classList.remove("error");
+  hideStatus();
+
+  if(typeof window.openNotusLoginWithOtp==="function"){
+    window.openNotusLoginWithOtp();
   }
-  showStatus("OTP login will be connected next.", "info");
 });
 
 forgotBtn.addEventListener("click", function(){
@@ -6545,10 +7064,52 @@ workspaceProfileBtn?.addEventListener("click",e=>{e.stopPropagation();openProfil
   }catch(attErr){
     console.warn("Mobile attendance/logout status save:",attErr);
   }
-  try{localStorage.removeItem("notus_company_session");localStorage.removeItem("notus_workspace_status")}catch(e){}
-  window.notusSession=null;closeProfilePanel();document.getElementById("workspaceScreen")?.classList.remove("show");
-  const loginPage=document.querySelector(".page");if(loginPage)loginPage.style.display="flex";
-  if(email)email.value="";if(password)password.value="";hideStatus();
+  try{
+    localStorage.removeItem("notus_company_session");
+    localStorage.removeItem("notus_workspace_status");
+
+    /* Always leave OTP completely when logging out. */
+    sessionStorage.removeItem("notus_mobile_otp_gate_v1");
+    sessionStorage.removeItem("notus_mobile_otp_candidate_v1");
+    sessionStorage.removeItem("notus_mobile_otp_only_v1");
+    sessionStorage.removeItem("notus_mobile_otp_gate_v2");
+    sessionStorage.removeItem("notus_mobile_otp_candidate_v2");
+    sessionStorage.removeItem("notus_mobile_otp_mode_v2");
+    sessionStorage.removeItem("notus_mobile_otp_email_v2");
+  }catch(e){}
+
+  window.notusSession=null;
+  closeProfilePanel();
+
+  document.documentElement.classList.remove(
+    "notus-restoring-session",
+    "notus-restoring-otp"
+  );
+
+  document.getElementById("workspaceScreen")?.classList.remove("show");
+
+  const otpSection=document.querySelector(".login-section");
+  otpSection?.classList.remove("notus-otp-active","notus-otp-mode");
+
+  const otpWrap=document.getElementById("notusInlineOtp");
+  if(otpWrap) otpWrap.hidden=true;
+
+  const otpEmailStep=document.getElementById("notusOtpEmailStep");
+  if(otpEmailStep) otpEmailStep.hidden=true;
+
+  const otpVerifyStep=document.getElementById("notusOtpVerifyStep");
+  if(otpVerifyStep) otpVerifyStep.hidden=true;
+
+  const loginPage=document.querySelector(".page");
+  if(loginPage){
+    loginPage.style.display="flex";
+    loginPage.style.visibility="visible";
+  }
+
+  if(email)email.value="";
+  if(password)password.value="";
+  hideStatus();
+  requestAnimationFrame(()=>email?.focus());
 });
 
 
@@ -7869,7 +8430,7 @@ function appendCompanyMessageBubble(message){
 
       const img=document.createElement("img");
       img.className="notus-chat-image";
-      img.alt=meta.file_name || "Image";
+      img.alt="";
       img.loading="lazy";
       img.style.display="none";
 
@@ -7902,10 +8463,23 @@ function appendCompanyMessageBubble(message){
       loadSignedAttachmentUrl(meta,link,false);
     }
   }else{
-    /* Normal messages remain exactly as before. */
-    const textNode = document.createElement("span");
-    textNode.textContent = rawText;
-    bubble.appendChild(textNode);
+    /* Never expose attachment token/storage path as visible chat text. */
+    const looksLikeAttachment =
+      rawText.startsWith(ATTACH_TOKEN) ||
+      /notus-chat-files\//i.test(rawText) ||
+      /(?:^|\/)\d{10,}-[a-z0-9]+-[^/]+\.(png|jpe?g|webp|gif|heic)$/i.test(rawText);
+
+    if(looksLikeAttachment){
+      const generic=document.createElement("span");
+      generic.className="notus-chat-file-load-error";
+      generic.textContent="Image unavailable";
+      bubble.appendChild(generic);
+    }else{
+      /* Normal messages remain exactly as before. */
+      const textNode = document.createElement("span");
+      textNode.textContent = rawText;
+      bubble.appendChild(textNode);
+    }
   }
 
   const timeNode = document.createElement("span");
@@ -8336,17 +8910,39 @@ companyChatScreen?.addEventListener("touchcancel", finishEdgeSwipe, {passive:tru
    Never bypass an in-progress OTP gate. */
 (function restoreLogin(){
   try{
-    if(sessionStorage.getItem("notus_mobile_otp_gate_v1")==="1"){
+    const otpPending =
+      sessionStorage.getItem("notus_mobile_otp_gate_v1")==="1" ||
+      sessionStorage.getItem("notus_mobile_otp_only_v1")==="1";
+
+    if(otpPending){
       localStorage.removeItem("notus_company_session");
       window.notusSession=null;
+      document.documentElement.classList.remove("notus-restoring-session");
       return;
     }
+
     const saved = JSON.parse(localStorage.getItem("notus_company_session") || "null");
+
     if(saved?.company_id){
       window.notusSession = saved;
-      showWorkspace(saved);
+
+      Promise.resolve(showWorkspace(saved))
+        .finally(()=>{
+          document.documentElement.classList.remove("notus-restoring-session");
+        });
+      return;
     }
-  }catch(e){}
+
+    document.documentElement.classList.remove(
+      "notus-restoring-session",
+      "notus-restoring-otp"
+    );
+  }catch(e){
+    document.documentElement.classList.remove(
+      "notus-restoring-session",
+      "notus-restoring-otp"
+    );
+  }
 })();
 
 function hideStatus(){
@@ -16044,26 +16640,30 @@ html.notus-mobile-login-transition #workspaceScreen{
   color:#3b4642;
   word-break:break-word;
 }
-.notus-mobile-otp-boxes{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:7px;
+.notus-mobile-otp-single-wrap{
   margin:23px 0 16px;
 }
-.notus-mobile-otp-box{
+.notus-mobile-otp-single{
   width:100%;
-  height:48px;
-  min-width:0;
+  height:50px;
   border:1px solid #dce4e1;
-  border-radius:11px;
+  border-radius:12px;
   outline:0;
   background:#fafcfb;
+  padding:0 14px;
   text-align:center;
-  font-size:19px;
+  letter-spacing:5px;
+  font-size:17px;
   font-weight:700;
   color:#171717;
 }
-.notus-mobile-otp-box:focus{
+.notus-mobile-otp-single::placeholder{
+  letter-spacing:0;
+  font-size:12px;
+  font-weight:500;
+  color:#a0a8a5;
+}
+.notus-mobile-otp-single:focus{
   border-color:#0f766e;
   background:#fff;
   box-shadow:0 0 0 3px rgba(15,118,110,.06);
@@ -16225,62 +16825,71 @@ html.notus-mobile-login-transition #workspaceScreen{
 }
 @media(max-width:420px){
   .notus-mobile-otp-card{padding:22px 16px 18px}
-  .notus-mobile-otp-boxes{gap:5px}
-  .notus-mobile-otp-box{height:45px;font-size:17px}
   .notus-chat-image{max-width:190px;max-height:230px}
 }
 </style>
-
-<div class="notus-mobile-otp-overlay" id="notusMobileOtpOverlay" aria-hidden="true">
-  <div class="notus-mobile-otp-card">
-    <div class="notus-mobile-otp-brand">NOT US WORKSPACE</div>
-    <h2>Verify OTP</h2>
-    <p>OTP has been sent to registered Gmail.</p>
-    <div class="notus-mobile-otp-email" id="notusMobileOtpEmail"></div>
-
-    <div class="notus-mobile-otp-boxes" id="notusMobileOtpBoxes">
-      <input class="notus-mobile-otp-box" inputmode="numeric" maxlength="1" aria-label="OTP digit 1">
-      <input class="notus-mobile-otp-box" inputmode="numeric" maxlength="1" aria-label="OTP digit 2">
-      <input class="notus-mobile-otp-box" inputmode="numeric" maxlength="1" aria-label="OTP digit 3">
-      <input class="notus-mobile-otp-box" inputmode="numeric" maxlength="1" aria-label="OTP digit 4">
-      <input class="notus-mobile-otp-box" inputmode="numeric" maxlength="1" aria-label="OTP digit 5">
-      <input class="notus-mobile-otp-box" inputmode="numeric" maxlength="1" aria-label="OTP digit 6">
-    </div>
-
-    <div class="notus-mobile-otp-error" id="notusMobileOtpError"></div>
-
-    <button class="notus-mobile-otp-verify" id="notusMobileOtpVerify" type="button">
-      Verify
-    </button>
-
-    <div class="notus-mobile-otp-actions">
-      <button id="notusMobileOtpBack" type="button">Back</button>
-      <button class="resend" id="notusMobileOtpResend" type="button" disabled>Resend in 50s</button>
-    </div>
-
-    <p class="notus-mobile-otp-note">Temporary login OTP: 123456</p>
-  </div>
-</div>
-
-<script id="notus-mobile-otp-gate-final">
+<script id="notus-inline-otp-gate-final">
 (function(){
   "use strict";
 
   const OTP="123456";
   const GATE="notus_mobile_otp_gate_v1";
   const CANDIDATE="notus_mobile_otp_candidate_v1";
+  const OTP_ONLY="notus_mobile_otp_only_v1";
+
   let resendTimer=null;
   let resendLeft=50;
 
   const $=id=>document.getElementById(id);
 
-  function boxes(){
-    return [...document.querySelectorAll(".notus-mobile-otp-box")];
+  function loginContainer(){
+    return document.querySelector(".login-section");
+  }
+
+  function candidate(){
+    try{
+      return JSON.parse(sessionStorage.getItem(CANDIDATE)||"null");
+    }catch(_){
+      return null;
+    }
+  }
+
+  function validEmail(v){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||"").trim());
+  }
+
+  function setShellVisible(on){
+    const host=loginContainer();
+    host?.classList.toggle("notus-otp-active",!!on);
+
+    const otp=$("notusInlineOtp");
+    if(otp) otp.hidden=!on;
+  }
+
+  function showEmailStep(prefill=""){
+    setShellVisible(true);
+
+    if($("notusOtpEmailStep")) $("notusOtpEmailStep").hidden=false;
+    if($("notusOtpVerifyStep")) $("notusOtpVerifyStep").hidden=true;
+
+    const emailInput=$("notusOtpEmailInput");
+    if(emailInput){
+      emailInput.value=String(prefill||"").trim();
+    }
+
+    if($("notusOtpEmailError")) $("notusOtpEmailError").textContent="";
+
+    sessionStorage.setItem(OTP_ONLY,"1");
+    sessionStorage.removeItem(GATE);
+    sessionStorage.removeItem(CANDIDATE);
+
+    requestAnimationFrame(()=>emailInput?.focus());
   }
 
   function paintResend(){
-    const btn=$("notusMobileOtpResend");
+    const btn=$("notusInlineOtpResend");
     if(!btn) return;
+
     if(resendLeft>0){
       btn.disabled=true;
       btn.textContent=`Resend in ${resendLeft}s`;
@@ -16294,9 +16903,11 @@ html.notus-mobile-login-transition #workspaceScreen{
     clearInterval(resendTimer);
     resendLeft=50;
     paintResend();
+
     resendTimer=setInterval(()=>{
       resendLeft--;
       paintResend();
+
       if(resendLeft<=0){
         clearInterval(resendTimer);
         resendTimer=null;
@@ -16304,148 +16915,328 @@ html.notus-mobile-login-transition #workspaceScreen{
     },1000);
   }
 
-  function candidate(){
-    try{
-      return JSON.parse(sessionStorage.getItem(CANDIDATE)||"null");
-    }catch(_){ return null; }
-  }
-
-  function show(session){
+  function showVerifyStep(session, gmail){
     if(!session?.company_id) return;
+
     sessionStorage.setItem(GATE,"1");
     sessionStorage.setItem(CANDIDATE,JSON.stringify(session));
+
     localStorage.removeItem("notus_company_session");
     window.notusSession=null;
 
-    document.documentElement.classList.add("notus-mobile-login-transition");
+    setShellVisible(true);
 
-    const overlay=$("notusMobileOtpOverlay");
-    if(overlay){
-      overlay.classList.add("show");
-      overlay.setAttribute("aria-hidden","false");
+    if($("notusOtpEmailStep")) $("notusOtpEmailStep").hidden=true;
+    if($("notusOtpVerifyStep")) $("notusOtpVerifyStep").hidden=false;
+
+    if($("notusInlineOtpEmail")){
+      $("notusInlineOtpEmail").textContent=String(gmail||session.gmail||session.email||"").trim();
     }
-    $("notusMobileOtpEmail").textContent =
-      String(session.gmail||session.email||"").trim();
 
-    boxes().forEach(i=>i.value="");
-    $("notusMobileOtpError").textContent="";
+    if($("notusInlineOtpInput")) $("notusInlineOtpInput").value="";
+    if($("notusInlineOtpError")) $("notusInlineOtpError").textContent="";
+
     startResend();
-    setTimeout(()=>boxes()[0]?.focus(),50);
+
+    requestAnimationFrame(()=>$("notusInlineOtpInput")?.focus());
   }
 
-  function close(){
-    const overlay=$("notusMobileOtpOverlay");
-    overlay?.classList.remove("show");
-    overlay?.setAttribute("aria-hidden","true");
-  }
+  async function resolveSessionByEmail(gmail){
+    gmail=String(gmail||"").trim().toLowerCase();
 
-  function cancel(){
-    clearInterval(resendTimer);
-    sessionStorage.removeItem(GATE);
-    sessionStorage.removeItem(CANDIDATE);
-    localStorage.removeItem("notus_company_session");
-    window.notusSession=null;
-    close();
-    document.documentElement.classList.remove("notus-mobile-login-transition");
-
+    /* Employee / Team Lead / Manager / Recruiter / IT / Support */
     try{
-      const email=document.getElementById("email");
-      const password=document.getElementById("password");
-      if(password) password.value="";
-      email?.focus();
+      let q=await db
+        .from("employees")
+        .select("*")
+        .ilike("email",gmail)
+        .limit(1);
+
+      if((q.error || !q.data?.length)){
+        q=await db
+          .from("employees")
+          .select("*")
+          .ilike("gmail",gmail)
+          .limit(1);
+      }
+
+      const e=q?.data?.[0];
+
+      if(e){
+        const role=String(e.role||e.employee_role||e.designation||"Employee").trim();
+        const key=role.toLowerCase().replace(/[_-]+/g," ").replace(/\s+/g," ").trim();
+
+        let userType="employee";
+        if(key==="team lead") userType="team_lead";
+        else if(key==="manager") userType="manager";
+        else if(key==="recruiter" || key.includes("recruit")) userType="recruiter";
+        else if(key==="it administrator") userType="it_admin";
+        else if(key==="technical supporter") userType="technical_supporter";
+
+        return {
+          user_type:userType,
+          employee_id:e.id||e.employee_id,
+          team_lead_id:e.id||e.employee_id,
+          company_id:e.company_id,
+          company_name:e.company_name||"",
+          branch_id:e.branch_id||"",
+          branch_name:e.branch_name||"",
+          branch_location:e.branch_location||e.location||"",
+          full_name:e.full_name||e.name||"",
+          gmail:e.email||e.gmail||gmail,
+          designation:e.designation||"",
+          profile_image_url:e.profile_image_url||"",
+          role:role,
+          status:e.status||"active",
+          logged_in_at:new Date().toISOString()
+        };
+      }
     }catch(_){}
+
+    /* HR */
+    try{
+      const q=await db.from("hr_members").select("*").limit(1000);
+
+      if(!q.error){
+        const h=(q.data||[]).find(x=>
+          String(x.email||x.gmail||"").trim().toLowerCase()===gmail
+        );
+
+        if(h){
+          return {
+            user_type:"hr",
+            hr_id:h.id||h.hr_id,
+            company_id:h.company_id,
+            company_name:h.company_name||"",
+            branch_id:h.branch_id||"",
+            branch_name:h.branch_name||"",
+            branch_location:h.branch_location||h.location||"",
+            full_name:h.full_name||h.name||"",
+            gmail:h.email||h.gmail||gmail,
+            role:h.role||"HR",
+            status:h.status||"active",
+            logged_in_at:new Date().toISOString()
+          };
+        }
+      }
+    }catch(_){}
+
+    /* Company admin */
+    try{
+      const q=await db.from("companies").select("*").limit(1000);
+
+      if(!q.error){
+        const c=(q.data||[]).find(x=>
+          String(x.gmail||x.email||x.company_email||"").trim().toLowerCase()===gmail
+        );
+
+        if(c){
+          return {
+            user_type:"company_admin",
+            company_id:c.id||c.company_id,
+            company_name:c.company_name||c.name||"",
+            gmail:c.gmail||c.email||c.company_email||gmail,
+            status:c.status||"active",
+            logged_in_at:new Date().toISOString()
+          };
+        }
+      }
+    }catch(_){}
+
+    return null;
   }
 
-  function verify(){
-    const code=boxes().map(i=>i.value).join("");
-    const err=$("notusMobileOtpError");
+  async function sendOtp(){
+    const emailInput=$("notusOtpEmailInput");
+    const err=$("notusOtpEmailError");
+    const gmail=String(emailInput?.value||"").trim().toLowerCase();
 
-    if(code.length!==6){
-      err.textContent="Enter the 6-digit OTP.";
+    if(err) err.textContent="";
+
+    if(!gmail){
+      if(err) err.textContent="Please enter your Gmail address.";
+      emailInput?.focus();
       return;
     }
+
+    if(!validEmail(gmail)){
+      if(err) err.textContent="Please enter a valid Gmail address.";
+      emailInput?.focus();
+      return;
+    }
+
+    const btn=$("notusOtpSendBtn");
+    if(btn){
+      btn.disabled=true;
+      btn.classList.add("loading");
+    }
+
+    try{
+      const session=await resolveSessionByEmail(gmail);
+
+      if(!session?.company_id){
+        if(err) err.textContent="No account found with this Gmail.";
+        return;
+      }
+
+      sessionStorage.removeItem(OTP_ONLY);
+      showVerifyStep(session,gmail);
+
+    }catch(e){
+      if(err) err.textContent=e?.message||"Unable to send OTP.";
+    }finally{
+      if(btn){
+        btn.disabled=false;
+        btn.classList.remove("loading");
+      }
+    }
+  }
+
+  /* Existing normal Gmail + Password login uses this unchanged.
+     After password validation it opens the same Verify OTP step. */
+  function showInlineOtp(session){
+    if(!session?.company_id) return;
+    sessionStorage.removeItem(OTP_ONLY);
+    showVerifyStep(session,String(session.gmail||session.email||"").trim());
+  }
+
+  function backToNormalLogin(){
+    clearInterval(resendTimer);
+
+    sessionStorage.removeItem(GATE);
+    sessionStorage.removeItem(CANDIDATE);
+    sessionStorage.removeItem(OTP_ONLY);
+
+    localStorage.removeItem("notus_company_session");
+    window.notusSession=null;
+
+    setShellVisible(false);
+
+    document.documentElement.classList.remove(
+      "notus-restoring-session",
+      "notus-restoring-otp"
+    );
+
+    if($("notusOtpEmailStep")) $("notusOtpEmailStep").hidden=true;
+    if($("notusOtpVerifyStep")) $("notusOtpVerifyStep").hidden=true;
+
+    document.getElementById("email")?.focus();
+  }
+
+  function verifyOtp(){
+    const input=$("notusInlineOtpInput");
+    const code=String(input?.value||"").replace(/\D/g,"").slice(0,6);
+    const err=$("notusInlineOtpError");
+
+    if(code.length!==6){
+      if(err) err.textContent="Enter the 6-digit OTP.";
+      input?.focus();
+      return;
+    }
+
     if(code!==OTP){
-      err.textContent="Incorrect OTP. Please try again.";
-      boxes().forEach(i=>i.value="");
-      boxes()[0]?.focus();
+      if(err) err.textContent="Incorrect OTP. Please try again.";
+      if(input) input.value="";
+      input?.focus();
       return;
     }
 
     const s=candidate();
+
     if(!s?.company_id){
-      err.textContent="Login session expired. Please login again.";
+      if(err) err.textContent="Login session expired. Please login again.";
       return;
     }
 
     localStorage.setItem("notus_company_session",JSON.stringify(s));
     window.notusSession=s;
+
     sessionStorage.removeItem(GATE);
     sessionStorage.removeItem(CANDIDATE);
+    sessionStorage.removeItem(OTP_ONLY);
+
     clearInterval(resendTimer);
-    close();
+
+    document.documentElement.classList.remove(
+      "notus-restoring-session",
+      "notus-restoring-otp"
+    );
 
     if(typeof showStatus==="function"){
       showStatus("Login successful","success");
     }
 
-    /* Workspace remains paint-locked until the existing showWorkspace finishes. */
-    Promise.resolve(
-      typeof showWorkspace==="function" ? showWorkspace(s) : null
-    ).finally(()=>{
-      requestAnimationFrame(()=>{
-        requestAnimationFrame(()=>{
-          document.documentElement.classList.remove("notus-mobile-login-transition");
-        });
-      });
-    });
+    if(typeof showWorkspace==="function"){
+      showWorkspace(s);
+    }
   }
 
-  window.startNotusMobileOtpGate=show;
+  window.startNotusMobileOtpGate=showInlineOtp;
+
+  window.openNotusLoginWithOtp=function(){
+    const prefill=String(document.getElementById("email")?.value||"").trim();
+    showEmailStep(prefill);
+  };
 
   function init(){
-    const inputs=boxes();
-    inputs.forEach((input,index)=>{
-      input.addEventListener("input",()=>{
-        input.value=input.value.replace(/\D/g,"").slice(-1);
-        if(input.value && index<inputs.length-1) inputs[index+1].focus();
-        if(inputs.every(i=>i.value) && index===inputs.length-1) verify();
-      });
-      input.addEventListener("keydown",e=>{
-        if(e.key==="Backspace" && !input.value && index>0){
-          inputs[index-1].focus();
-        }
-      });
-      input.addEventListener("paste",e=>{
-        const v=(e.clipboardData?.getData("text")||"").replace(/\D/g,"").slice(0,6);
-        if(v.length){
-          e.preventDefault();
-          inputs.forEach((i,n)=>i.value=v[n]||"");
-          inputs[Math.min(v.length,6)-1]?.focus();
-        }
-      });
+    $("notusOtpEmailInput")?.addEventListener("input",()=>{
+      if($("notusOtpEmailError")) $("notusOtpEmailError").textContent="";
     });
 
-    $("notusMobileOtpVerify")?.addEventListener("click",verify);
-    $("notusMobileOtpBack")?.addEventListener("click",cancel);
-    $("notusMobileOtpResend")?.addEventListener("click",()=>{
-      $("notusMobileOtpError").textContent="";
-      boxes().forEach(i=>i.value="");
-      boxes()[0]?.focus();
-      startResend();
-      if(typeof showStatus==="function"){
-        showStatus("OTP resent","info");
+    $("notusOtpEmailInput")?.addEventListener("keydown",e=>{
+      if(e.key==="Enter"){
+        e.preventDefault();
+        sendOtp();
       }
     });
 
-    /* Resume OTP screen after refresh without exposing the workspace. */
+    $("notusOtpSendBtn")?.addEventListener("click",sendOtp);
+    $("notusOtpEmailBack")?.addEventListener("click",backToNormalLogin);
+
+    $("notusInlineOtpInput")?.addEventListener("input",()=>{
+      const input=$("notusInlineOtpInput");
+      if(input) input.value=input.value.replace(/\D/g,"").slice(0,6);
+      if($("notusInlineOtpError")) $("notusInlineOtpError").textContent="";
+    });
+
+    $("notusInlineOtpInput")?.addEventListener("keydown",e=>{
+      if(e.key==="Enter"){
+        e.preventDefault();
+        verifyOtp();
+      }
+    });
+
+    $("notusInlineOtpVerify")?.addEventListener("click",verifyOtp);
+    $("notusInlineOtpBack")?.addEventListener("click",backToNormalLogin);
+
+    $("notusInlineOtpResend")?.addEventListener("click",()=>{
+      if($("notusInlineOtpError")) $("notusInlineOtpError").textContent="";
+      if($("notusInlineOtpInput")) $("notusInlineOtpInput").value="";
+      startResend();
+      $("notusInlineOtpInput")?.focus();
+    });
+
+    if(sessionStorage.getItem(OTP_ONLY)==="1"){
+      showEmailStep(String(document.getElementById("email")?.value||""));
+      requestAnimationFrame(()=>{
+        document.documentElement.classList.remove("notus-restoring-otp");
+      });
+      return;
+    }
+
     if(sessionStorage.getItem(GATE)==="1"){
       const s=candidate();
+
       if(s?.company_id){
         localStorage.removeItem("notus_company_session");
         window.notusSession=null;
-        show(s);
+        showVerifyStep(s,String(s.gmail||s.email||""));
+        requestAnimationFrame(()=>{
+          document.documentElement.classList.remove("notus-restoring-otp");
+        });
       }else{
         sessionStorage.removeItem(GATE);
+        document.documentElement.classList.remove("notus-restoring-otp");
       }
     }
   }
@@ -16548,7 +17339,7 @@ html.notus-mobile-login-transition #workspaceScreen{
   function paintSelection(file){
     if(!file) return clearSelection();
     selectedFile=file;
-    $("chatFilePreviewName").textContent=file.name||"File";
+    $("chatFilePreviewName").textContent=isImage(file)?"Image selected":(file.name||"File");
     $("chatFilePreviewSize").textContent=fileSize(file.size);
     const icon=$("chatFilePreviewIcon");
     if(icon){
