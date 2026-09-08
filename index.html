@@ -4497,6 +4497,309 @@ html.notus-restoring-otp .login-section > .powered{
 }
 </style>
 
+
+<style id="notus-otp-keep-terms-powered-final">
+/* During Login with OTP, keep legal + powered text visible */
+.login-section.notus-otp-active .terms,
+.login-section.notus-otp-active .powered,
+.login-section.notus-otp-mode .terms,
+.login-section.notus-otp-mode .powered{
+  display:block!important;
+  visibility:visible!important;
+}
+
+/* Keep same existing spacing/style */
+.login-section.notus-otp-active .terms,
+.login-section.notus-otp-mode .terms{
+  margin-top:22px!important;
+}
+
+.login-section.notus-otp-active .powered,
+.login-section.notus-otp-mode .powered{
+  margin-top:auto!important;
+  padding-top:24px!important;
+}
+</style>
+
+
+<style id="notus-otp-stage-legal-final">
+/* Gmail + Send OTP step: show legal text + powered by */
+.login-section.notus-otp-active:not(.notus-otp-verifying) .terms,
+.login-section.notus-otp-active:not(.notus-otp-verifying) .powered{
+  display:block!important;
+  visibility:visible!important;
+}
+
+/* Verify OTP step: hide Terms only, keep Powered by */
+.login-section.notus-otp-active.notus-otp-verifying .terms{
+  display:none!important;
+  visibility:hidden!important;
+}
+
+.login-section.notus-otp-active.notus-otp-verifying .powered{
+  display:block!important;
+  visibility:visible!important;
+  margin-top:auto!important;
+  padding-top:24px!important;
+}
+</style>
+
+
+<style id="notus-chat-image-inline-only-final">
+.notus-chat-image-wrap{
+  position:relative;
+  display:block;
+  overflow:hidden;
+  border-radius:9px;
+}
+
+.notus-chat-image{
+  display:block;
+  width:auto;
+  max-width:220px;
+  max-height:260px;
+  object-fit:cover;
+  border-radius:9px;
+  cursor:default!important;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+
+.notus-chat-image-spinner{
+  width:22px;
+  height:22px;
+  margin:28px auto;
+  border:2px solid rgba(15,118,110,.18);
+  border-top-color:#0f766e;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+
+.notus-chat-file-load-error{
+  display:block;
+  padding:20px 12px;
+  min-width:150px;
+  text-align:center;
+  font-size:10px;
+  color:#7d8783;
+}
+
+@media(max-width:420px){
+  .notus-chat-image{
+    max-width:190px;
+    max-height:230px;
+  }
+}
+</style>
+
+
+<style id="notus-auth-no-blink-v2">
+html.notus-auth-checking body{
+  visibility:hidden!important;
+}
+
+html.notus-auth-ready body{
+  visibility:visible!important;
+}
+</style>
+
+<script id="notus-auth-no-blink-v2-script">
+(function(){
+  document.documentElement.classList.add("notus-auth-checking");
+
+  function reveal(){
+    document.documentElement.classList.remove(
+      "notus-auth-checking",
+      "notus-restoring-session",
+      "notus-restoring-otp"
+    );
+    document.documentElement.classList.add("notus-auth-ready");
+  }
+
+  window.notusRevealAuthUI=reveal;
+
+  /* Safety fallback only if another script throws before restore completes. */
+  window.setTimeout(reveal,1200);
+})();
+</script>
+
+
+<style id="notus-chat-image-invalid-key-permanent-css">
+.notus-chat-image-wrap{
+  position:relative!important;
+  min-width:160px;
+  min-height:120px;
+  display:grid!important;
+  place-items:center!important;
+  overflow:hidden!important;
+  border-radius:10px!important;
+  background:#eef2f0!important;
+}
+
+.notus-chat-image-wrap.image-ready{
+  min-width:0;
+  min-height:0;
+  background:transparent!important;
+}
+
+.notus-chat-image-spinner{
+  position:absolute!important;
+  inset:0!important;
+  margin:auto!important;
+  width:22px!important;
+  height:22px!important;
+  border:2px solid rgba(15,118,110,.17)!important;
+  border-top-color:#0f766e!important;
+  border-radius:50%!important;
+  animation:spin .72s linear infinite!important;
+  z-index:2!important;
+}
+
+.notus-chat-image{
+  position:relative!important;
+  z-index:3!important;
+  max-width:220px!important;
+  max-height:280px!important;
+  width:auto!important;
+  height:auto!important;
+  object-fit:cover!important;
+  border-radius:10px!important;
+  display:none!important;
+  cursor:default!important;
+}
+
+.notus-chat-image[data-loaded="1"]{
+  display:block!important;
+}
+
+.notus-chat-file-load-error{
+  min-width:160px;
+  min-height:90px;
+  display:grid!important;
+  place-items:center!important;
+  padding:16px!important;
+  font-size:10px!important;
+  color:#7d8783!important;
+  text-align:center!important;
+}
+
+@media(max-width:420px){
+  .notus-chat-image{
+    max-width:190px!important;
+    max-height:250px!important;
+  }
+}
+</style>
+
+
+<style id="notus-chat-single-green-tick-final">
+.message-time{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:4px!important;
+}
+
+.notus-message-sent-tick{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:#159447;
+  font-size:8px;
+  line-height:1;
+  font-weight:800;
+  transform:translateY(-.2px);
+}
+
+.message-row.in .notus-message-sent-tick{
+  display:none!important;
+}
+</style>
+
+
+<style id="notus-web-style-inline-chat-image-final">
+.notus-chat-image-wrap{
+  position:relative!important;
+  min-width:160px!important;
+  min-height:120px!important;
+  display:grid!important;
+  place-items:center!important;
+  overflow:hidden!important;
+  border-radius:10px!important;
+  background:#eef2f0!important;
+}
+
+.notus-chat-image-wrap.image-ready{
+  min-width:0!important;
+  min-height:0!important;
+  background:transparent!important;
+}
+
+.notus-chat-image-spinner{
+  position:absolute!important;
+  width:21px!important;
+  height:21px!important;
+  border:2px solid rgba(15,118,110,.16)!important;
+  border-top-color:#0f766e!important;
+  border-radius:50%!important;
+  animation:spin .72s linear infinite!important;
+  z-index:2!important;
+}
+
+.notus-chat-image{
+  position:relative!important;
+  z-index:3!important;
+  display:none!important;
+  max-width:220px!important;
+  max-height:280px!important;
+  width:auto!important;
+  height:auto!important;
+  object-fit:cover!important;
+  border-radius:10px!important;
+  cursor:default!important;
+  -webkit-user-drag:none!important;
+}
+
+.notus-chat-image[data-loaded="1"]{
+  display:block!important;
+}
+
+@media(max-width:420px){
+  .notus-chat-image{
+    max-width:190px!important;
+    max-height:250px!important;
+  }
+}
+</style>
+
+
+<style id="notus-chat-image-spinner-stuck-final">
+.notus-chat-image{
+  display:block!important;
+  opacity:0;
+  transition:opacity .16s ease;
+}
+
+.notus-chat-image[data-loaded="1"]{
+  display:block!important;
+  opacity:1!important;
+}
+
+.notus-chat-image-wrap:not(.image-ready){
+  min-width:160px!important;
+  min-height:120px!important;
+}
+
+.notus-chat-image-spinner{
+  display:block!important;
+  pointer-events:none!important;
+}
+
+.notus-chat-image-wrap.image-ready .notus-chat-image-spinner{
+  display:none!important;
+}
+</style>
+
 </head>
 
 <body>
@@ -7089,7 +7392,7 @@ workspaceProfileBtn?.addEventListener("click",e=>{e.stopPropagation();openProfil
   document.getElementById("workspaceScreen")?.classList.remove("show");
 
   const otpSection=document.querySelector(".login-section");
-  otpSection?.classList.remove("notus-otp-active","notus-otp-mode");
+  otpSection?.classList.remove("notus-otp-active","notus-otp-mode","notus-otp-verifying");
 
   const otpWrap=document.getElementById("notusInlineOtp");
   if(otpWrap) otpWrap.hidden=true;
@@ -7109,6 +7412,9 @@ workspaceProfileBtn?.addEventListener("click",e=>{e.stopPropagation();openProfil
   if(email)email.value="";
   if(password)password.value="";
   hideStatus();
+  if(typeof window.notusRevealAuthUI==="function"){
+    window.notusRevealAuthUI();
+  }
   requestAnimationFrame(()=>email?.focus());
 });
 
@@ -7662,7 +7968,35 @@ function renderPeopleList(people, mode="search"){
     if(mode === "recent"){
       const messages = Array.isArray(item.messages) ? item.messages : [];
       const last = messages[messages.length - 1];
-      preview.textContent = last?.text || personRoleLabel(peer);
+      const lastText = String(last?.text || "");
+
+      if(lastText.startsWith("__NOTUS_CHAT_FILE_V1__")){
+        let label="Sent a file";
+        try{
+          const encoded=lastText.slice("__NOTUS_CHAT_FILE_V1__".length);
+          const binary=atob(encoded);
+          const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+          let meta=null;
+          try{
+            meta=JSON.parse(decodeURIComponent(escape(atob(encoded))));
+          }catch(_){
+            meta=JSON.parse(new TextDecoder().decode(bytes));
+          }
+
+          const name=String(meta?.name||meta?.file_name||"");
+          const mime=String(meta?.mime||meta?.mime_type||"").toLowerCase();
+
+          const image=
+            meta?.kind==="image" ||
+            mime.startsWith("image/") ||
+            /\.(jpg|jpeg|png|webp|gif|svg|heic)$/i.test(name);
+
+          label=image ? "Sent an image" : "Sent a file";
+        }catch(_){}
+        preview.textContent=label;
+      }else{
+        preview.textContent = lastText || personRoleLabel(peer);
+      }
     }else{
       preview.textContent = personRoleLabel(peer);
     }
@@ -8345,11 +8679,49 @@ function appendCompanyMessageBubble(message){
 
   function decodeAttachmentMeta(value){
     if(!value || !value.startsWith(ATTACH_TOKEN)) return null;
+
     try{
       const encoded = value.slice(ATTACH_TOKEN.length);
-      const binary = atob(encoded);
-      const bytes = Uint8Array.from(binary, c=>c.charCodeAt(0));
-      return JSON.parse(new TextDecoder().decode(bytes));
+      let parsed=null;
+
+      /* Supports BOTH:
+         - web encoder: btoa(unescape(encodeURIComponent(JSON.stringify(meta))))
+         - mobile encoder: TextEncoder -> btoa(binary)
+      */
+      try{
+        parsed=JSON.parse(
+          decodeURIComponent(
+            escape(atob(encoded))
+          )
+        );
+      }catch(_){
+        const binary=atob(encoded);
+        const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+        parsed=JSON.parse(new TextDecoder().decode(bytes));
+      }
+
+      if(!parsed || typeof parsed!=="object") return null;
+
+      const fileName=String(parsed.name || parsed.file_name || "File");
+      const mime=String(parsed.mime || parsed.mime_type || "");
+      const lowerName=fileName.toLowerCase();
+
+      const imageByExt=/\.(jpg|jpeg|png|webp|gif|svg|heic)$/i.test(lowerName);
+      const isImage=
+        parsed.kind==="image" ||
+        mime.toLowerCase().startsWith("image/") ||
+        imageByExt;
+
+      return {
+        ...parsed,
+        name:fileName,
+        file_name:fileName,
+        mime:mime,
+        mime_type:mime,
+        kind:isImage ? "image" : (parsed.kind || "file"),
+        size:Number(parsed.size)||0,
+        path:String(parsed.path||"")
+      };
     }catch(err){
       console.warn("Chat attachment decode failed:",err);
       return null;
@@ -8364,49 +8736,149 @@ function appendCompanyMessageBubble(message){
   }
 
   async function loadSignedAttachmentUrl(meta, target, isImg){
-    try{
-      if(!meta?.path || typeof db==="undefined") throw new Error("Missing file path");
+    const bucket="notus-chat-files";
+    const objectPath=String(meta?.path||"").trim();
 
-      const {data,error}=await db.storage
-        .from("notus-chat-files")
-        .createSignedUrl(meta.path,120);
-
+    async function blobFallback(){
+      const {data,error}=await db.storage.from(bucket).download(objectPath);
       if(error) throw error;
+      if(!data) throw new Error("Image download returned empty data");
 
-      const url=data?.signedUrl||"";
-      if(!url) throw new Error("Signed URL not created");
+      const oldBlob=target.dataset.blobUrl;
+      if(oldBlob){
+        try{ URL.revokeObjectURL(oldBlob); }catch(_){}
+      }
+
+      const blobUrl=URL.createObjectURL(data);
+      target.dataset.blobUrl=blobUrl;
+      target.loading="eager";
+      target.style.display="block";
+      target.src=blobUrl;
+    }
+
+    function showImageFailure(){
+      if(target.dataset.loadTimer){
+        clearTimeout(Number(target.dataset.loadTimer));
+        delete target.dataset.loadTimer;
+      }
+
+      target.style.display="none";
+      target.style.opacity="0";
+
+      const parent=target.parentNode;
+      if(!parent) return;
+
+      parent.querySelector(".notus-chat-image-spinner")?.remove();
+
+      if(parent.querySelector(".notus-chat-file-load-error")) return;
+
+      const fail=document.createElement("span");
+      fail.className="notus-chat-file-load-error";
+      fail.textContent="Image unavailable";
+      parent.insertBefore(fail,target);
+    }
+
+    try{
+      if(!objectPath || typeof db==="undefined"){
+        throw new Error("Missing file path");
+      }
 
       if(isImg){
+        target.alt="";
+        target.removeAttribute("title");
+        target.style.cursor="default";
+
         target.onload=()=>{
-          target.style.display="block";
           target.dataset.loaded="1";
-        };
-        target.onerror=async ()=>{
-          /* one clean retry */
-          if(target.dataset.retry==="1") return;
-          target.dataset.retry="1";
-          try{
-            const retry=await db.storage
-              .from("notus-chat-files")
-              .createSignedUrl(meta.path,120);
-            if(retry.error) throw retry.error;
-            if(retry.data?.signedUrl) target.src=retry.data.signedUrl;
-          }catch(err){
-            console.warn("Chat image retry failed:",err);
+          target.style.display="block";
+          target.style.opacity="1";
+          target.parentNode?.classList.add("image-ready");
+          target.parentNode?.querySelector(".notus-chat-image-spinner")?.remove();
+          target.parentNode?.querySelector(".notus-chat-file-load-error")?.remove();
+
+          if(target.dataset.loadTimer){
+            clearTimeout(Number(target.dataset.loadTimer));
+            delete target.dataset.loadTimer;
           }
         };
-        target.src=url;
+
+        target.onerror=async ()=>{
+          if(target.dataset.fallbackTried==="1"){
+            showImageFailure();
+            return;
+          }
+
+          target.dataset.fallbackTried="1";
+
+          try{
+            await blobFallback();
+          }catch(err){
+            console.warn("Chat image fallback failed:",err);
+            showImageFailure();
+          }
+        };
+
+        /* Never allow a spinner to stay forever.
+           If signed-image loading does not finish, force Storage download fallback. */
+        const loadTimer=setTimeout(async ()=>{
+          if(target.dataset.loaded==="1") return;
+
+          if(target.dataset.fallbackTried!=="1"){
+            target.dataset.fallbackTried="1";
+            try{
+              await blobFallback();
+            }catch(err){
+              console.warn("Chat image timeout fallback failed:",err);
+              showImageFailure();
+            }
+          }else if(target.dataset.loaded!=="1"){
+            showImageFailure();
+          }
+        },5000);
+
+        target.dataset.loadTimer=String(loadTimer);
+
+        /* Web-style hydrate: create a private signed URL then fill img.src. */
+        try{
+          const {data,error}=await db.storage
+            .from(bucket)
+            .createSignedUrl(objectPath,600);
+
+          if(error) throw error;
+
+          const url=data?.signedUrl||"";
+          if(!url) throw new Error("Signed URL not created");
+
+          target.src=url;
+        }catch(signErr){
+          console.warn("Chat signed URL failed, using download fallback:",signErr);
+
+          target.dataset.fallbackTried="1";
+
+          try{
+            await blobFallback();
+          }catch(downloadErr){
+            console.warn("Chat image download failed:",downloadErr);
+            showImageFailure();
+          }
+        }
       }else{
+        const {data,error}=await db.storage
+          .from(bucket)
+          .createSignedUrl(objectPath,600);
+
+        if(error) throw error;
+
+        const url=data?.signedUrl||"";
+        if(!url) throw new Error("Signed URL not created");
+
         target.href=url;
       }
     }catch(err){
       console.warn("Chat attachment URL failed:",err);
+
       if(isImg){
-        target.style.display="none";
-        const fail=document.createElement("span");
-        fail.className="notus-chat-file-load-error";
-        fail.textContent="Image unavailable";
-        target.parentNode?.insertBefore(fail,target);
+        showImageFailure();
       }else{
         target.removeAttribute("href");
         target.style.pointerEvents="none";
@@ -8421,7 +8893,11 @@ function appendCompanyMessageBubble(message){
   if(meta && meta.path){
     bubble.classList.add("notus-chat-file-card");
 
-    if(meta.kind === "image" || String(meta.mime_type||"").startsWith("image/")){
+    if(
+      meta.kind === "image" ||
+      String(meta.mime_type||meta.mime||"").toLowerCase().startsWith("image/") ||
+      /\.(jpg|jpeg|png|webp|gif|svg|heic)$/i.test(String(meta.file_name||meta.name||""))
+    ){
       const wrap=document.createElement("div");
       wrap.className="notus-chat-image-wrap";
 
@@ -8431,8 +8907,8 @@ function appendCompanyMessageBubble(message){
       const img=document.createElement("img");
       img.className="notus-chat-image";
       img.alt="";
-      img.loading="lazy";
-      img.style.display="none";
+      img.loading="eager";
+      img.style.display="block"; img.style.opacity="0";
 
       img.addEventListener("load",()=>{
         spinner.remove();
@@ -8456,7 +8932,7 @@ function appendCompanyMessageBubble(message){
         </span>
       `;
 
-      link.querySelector("b").textContent = meta.file_name || "File";
+      link.querySelector("b").textContent = meta.file_name || meta.name || "File";
       link.querySelector("small").textContent = prettyFileSize(meta.size);
       bubble.appendChild(link);
 
@@ -8472,7 +8948,7 @@ function appendCompanyMessageBubble(message){
     if(looksLikeAttachment){
       const generic=document.createElement("span");
       generic.className="notus-chat-file-load-error";
-      generic.textContent="Image unavailable";
+      generic.textContent="Sent an image";
       bubble.appendChild(generic);
     }else{
       /* Normal messages remain exactly as before. */
@@ -8484,7 +8960,20 @@ function appendCompanyMessageBubble(message){
 
   const timeNode = document.createElement("span");
   timeNode.className = "message-time";
-  timeNode.textContent = message.time || "";
+
+  const timeText=document.createElement("span");
+  timeText.className="notus-message-time-text";
+  timeText.textContent=message.time || "";
+  timeNode.appendChild(timeText);
+
+  /* Single green sent tick for outgoing text + image/file messages. */
+  if(message.side === "out"){
+    const tick=document.createElement("span");
+    tick.className="notus-message-sent-tick";
+    tick.textContent="✓";
+    tick.setAttribute("aria-label","Sent");
+    timeNode.appendChild(tick);
+  }
 
   bubble.appendChild(timeNode);
   row.appendChild(bubble);
@@ -8918,6 +9407,7 @@ companyChatScreen?.addEventListener("touchcancel", finishEdgeSwipe, {passive:tru
       localStorage.removeItem("notus_company_session");
       window.notusSession=null;
       document.documentElement.classList.remove("notus-restoring-session");
+      /* OTP script will paint the exact OTP stage, then reveal. */
       return;
     }
 
@@ -8929,6 +9419,9 @@ companyChatScreen?.addEventListener("touchcancel", finishEdgeSwipe, {passive:tru
       Promise.resolve(showWorkspace(saved))
         .finally(()=>{
           document.documentElement.classList.remove("notus-restoring-session");
+          if(typeof window.notusRevealAuthUI==="function"){
+            window.notusRevealAuthUI();
+          }
         });
       return;
     }
@@ -8937,6 +9430,9 @@ companyChatScreen?.addEventListener("touchcancel", finishEdgeSwipe, {passive:tru
       "notus-restoring-session",
       "notus-restoring-otp"
     );
+    if(typeof window.notusRevealAuthUI==="function"){
+      window.notusRevealAuthUI();
+    }
   }catch(e){
     document.documentElement.classList.remove(
       "notus-restoring-session",
@@ -16868,6 +17364,7 @@ html.notus-mobile-login-transition #workspaceScreen{
 
   function showEmailStep(prefill=""){
     setShellVisible(true);
+    loginContainer()?.classList.remove("notus-otp-verifying");
 
     if($("notusOtpEmailStep")) $("notusOtpEmailStep").hidden=false;
     if($("notusOtpVerifyStep")) $("notusOtpVerifyStep").hidden=true;
@@ -16925,6 +17422,7 @@ html.notus-mobile-login-transition #workspaceScreen{
     window.notusSession=null;
 
     setShellVisible(true);
+    loginContainer()?.classList.add("notus-otp-verifying");
 
     if($("notusOtpEmailStep")) $("notusOtpEmailStep").hidden=true;
     if($("notusOtpVerifyStep")) $("notusOtpVerifyStep").hidden=false;
@@ -17111,6 +17609,7 @@ html.notus-mobile-login-transition #workspaceScreen{
     window.notusSession=null;
 
     setShellVisible(false);
+    loginContainer()?.classList.remove("notus-otp-verifying");
 
     document.documentElement.classList.remove(
       "notus-restoring-session",
@@ -17220,6 +17719,9 @@ html.notus-mobile-login-transition #workspaceScreen{
       showEmailStep(String(document.getElementById("email")?.value||""));
       requestAnimationFrame(()=>{
         document.documentElement.classList.remove("notus-restoring-otp");
+        if(typeof window.notusRevealAuthUI==="function"){
+          window.notusRevealAuthUI();
+        }
       });
       return;
     }
@@ -17233,10 +17735,20 @@ html.notus-mobile-login-transition #workspaceScreen{
         showVerifyStep(s,String(s.gmail||s.email||""));
         requestAnimationFrame(()=>{
           document.documentElement.classList.remove("notus-restoring-otp");
+          if(typeof window.notusRevealAuthUI==="function"){
+            window.notusRevealAuthUI();
+          }
         });
       }else{
         sessionStorage.removeItem(GATE);
         document.documentElement.classList.remove("notus-restoring-otp");
+        if(typeof window.notusRevealAuthUI==="function"){
+          window.notusRevealAuthUI();
+        }
+      }
+    }else{
+      if(typeof window.notusRevealAuthUI==="function"){
+        window.notusRevealAuthUI();
       }
     }
   }
@@ -17304,6 +17816,22 @@ html.notus-mobile-login-transition #workspaceScreen{
     return s||fallback||"item";
   }
 
+  function cleanName(name){
+    const original=safe(name)||"file";
+    const parts=original.toLowerCase().split(".");
+    const ext=parts.length>1
+      ? String(parts.pop()||"").replace(/[^a-zA-Z0-9]/g,"")
+      : "";
+
+    const base=original
+      .replace(/\.[^.]+$/,"")
+      .replace(/[^a-zA-Z0-9_-]+/g,"-")
+      .replace(/^-+|-+$/g,"")
+      .slice(0,70) || "file";
+
+    return base + (ext ? "."+ext : "");
+  }
+
   function fileSize(n){
     n=Number(n)||0;
     if(n<1024) return `${n} B`;
@@ -17339,7 +17867,7 @@ html.notus-mobile-login-transition #workspaceScreen{
   function paintSelection(file){
     if(!file) return clearSelection();
     selectedFile=file;
-    $("chatFilePreviewName").textContent=isImage(file)?"Image selected":(file.name||"File");
+    $("chatFilePreviewName").textContent=isImage(file)?"Image":(file.name||"File");
     $("chatFilePreviewSize").textContent=fileSize(file.size);
     const icon=$("chatFilePreviewIcon");
     if(icon){
@@ -17351,21 +17879,53 @@ html.notus-mobile-login-transition #workspaceScreen{
   }
 
   function encodeMeta(meta){
-    const json=JSON.stringify(meta);
-    const bytes=new TextEncoder().encode(json);
-    let binary="";
-    bytes.forEach(b=>binary+=String.fromCharCode(b));
-    return TOKEN+btoa(binary);
+    /* Same payload encoding used by laptop/web code. */
+    return TOKEN + btoa(
+      unescape(
+        encodeURIComponent(
+          JSON.stringify(meta)
+        )
+      )
+    );
   }
 
   function decodeMeta(text){
     text=safe(text);
     if(!text.startsWith(TOKEN)) return null;
+
     try{
-      const raw=atob(text.slice(TOKEN.length));
-      const bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
-      return JSON.parse(new TextDecoder().decode(bytes));
-    }catch(_){ return null; }
+      const encoded=text.slice(TOKEN.length);
+      let m=null;
+
+      try{
+        m=JSON.parse(decodeURIComponent(escape(atob(encoded))));
+      }catch(_){
+        const raw=atob(encoded);
+        const bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
+        m=JSON.parse(new TextDecoder().decode(bytes));
+      }
+
+      if(!m || typeof m!=="object") return null;
+
+      const name=String(m.name||m.file_name||"File");
+      const mime=String(m.mime||m.mime_type||"");
+      const image=
+        m.kind==="image" ||
+        mime.toLowerCase().startsWith("image/") ||
+        /\.(jpg|jpeg|png|webp|gif|svg|heic)$/i.test(name);
+
+      return {
+        ...m,
+        name,
+        file_name:name,
+        mime,
+        mime_type:mime,
+        kind:image?"image":(m.kind||"file"),
+        path:String(m.path||"")
+      };
+    }catch(_){
+      return null;
+    }
   }
 
   async function signed(path){
@@ -17376,32 +17936,59 @@ html.notus-mobile-login-transition #workspaceScreen{
     return data?.signedUrl||"";
   }
 
-  async function upload(file){
+  async function upload(file,folderKey){
     const c=client();
     const a=actor();
-    if(!c||!a.companyId||!a.id) throw new Error("Login session not found.");
+
+    if(!c||!a.companyId||!a.id){
+      throw new Error("Login session not found.");
+    }
 
     const original=safe(file.name)||"file";
-    const ext=(original.split(".").pop()||"bin").replace(/[^a-zA-Z0-9]/g,"").toLowerCase()||"bin";
-    const base=original.replace(/\.[^.]+$/,"");
+    const safeCompany=storageSafePart(a.companyId,"company");
+    const safeKind="team";
+    const safeFolder=storageSafePart(folderKey,"conversation");
+    const safeFile=cleanName(original);
+
+    const uuid =
+      (typeof crypto!=="undefined" && typeof crypto.randomUUID==="function")
+        ? crypto.randomUUID()
+        : (Date.now()+"-"+Math.random().toString(16).slice(2));
+
     const path=[
-      storageSafePart(a.companyId,"company"),
-      storageSafePart(a.type,"user"),
-      storageSafePart(a.id,"member"),
-      `${Date.now()}-${Math.random().toString(36).slice(2,8)}-${storageSafePart(base,"file").slice(0,60)}.${ext}`
+      safeCompany,
+      safeKind,
+      safeFolder,
+      storageSafePart(uuid,"file")+"-"+safeFile
     ].join("/");
+
+    /* Same final safety guard as web version. */
+    if(/%|:|\?|#|\\/.test(path)){
+      throw new Error("Unsafe storage path blocked before upload.");
+    }
 
     const {error}=await c.storage.from(BUCKET).upload(path,file,{
       cacheControl:"3600",
       upsert:false,
       contentType:file.type||undefined
     });
+
     if(error) throw error;
 
+    const image=isImage(file);
+    const mime=safe(file.type)||"application/octet-stream";
+    const visibleName=image ? "Image" : original;
+
     return {
-      kind:isImage(file)?"image":"file",
-      file_name:original,
-      mime_type:safe(file.type)||"application/octet-stream",
+      /* Canonical WEB fields */
+      name:visibleName,
+      mime:mime,
+
+      /* Backward-compatible MOBILE aliases */
+      file_name:visibleName,
+      mime_type:mime,
+      kind:image?"image":"file",
+
       size:Number(file.size)||0,
       path
     };
@@ -17461,7 +18048,33 @@ html.notus-mobile-login-transition #workspaceScreen{
       if(attach) attach.disabled=true;
       if(send) send.disabled=true;
 
-      const meta=await upload(file);
+      const peer =
+        (typeof activeDirectPeer!=="undefined" && activeDirectPeer)
+          ? activeDirectPeer
+          : window.activeDirectPeer;
+
+      const s =
+        (typeof directChatSession!=="undefined" && directChatSession)
+          ? directChatSession
+          : (window.notusSession||session()||{});
+
+      const me =
+        (typeof currentChatIdentity==="function")
+          ? currentChatIdentity(s)
+          : null;
+
+      const pair =
+        (typeof canonicalPair==="function" && me && peer)
+          ? canonicalPair(me,peer)
+          : null;
+
+      const conversationKey = pair
+        ? String(pair.user_a_key||"user")+"__"+String(pair.user_b_key||"user")
+        : "conversation";
+
+      const safeConversation=storageSafePart(conversationKey,"conversation");
+
+      const meta=await upload(file,safeConversation);
       await sendEncoded(encodeMeta(meta));
       clearSelection();
     }catch(err){
@@ -17526,6 +18139,17 @@ html.notus-mobile-login-transition #workspaceScreen{
     init();
   }
 })();
+</script>
+
+
+<script id="notus-cross-device-chat-format-final">
+/*
+  NOT US cross-device attachment contract:
+  marker: __NOTUS_CHAT_FILE_V1__
+  canonical metadata: {path,name,mime,size}
+  aliases retained: {file_name,mime_type,kind}
+  This allows laptop/web and mobile renderers to open the same DB message.
+*/
 </script>
 
 </body>
